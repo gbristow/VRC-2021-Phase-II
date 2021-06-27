@@ -142,6 +142,13 @@ python3.8 -m venv $VENV_DIR --prompt "VRC" --upgrade-deps
 bar
 
 
+# echo -e "${CYAN}Installing Docker${NC}"
+# bar
+# curl -fsSL https://get.docker.com -o get-docker.sh
+# sh get-docker.sh
+# bar
+
+
 echo -e "${CYAN}Installing mavp2p${NC}"
 bar
 cd ~
