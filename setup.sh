@@ -19,8 +19,6 @@ NC='\033[0m' # No Color
 VRC_DIR=~/Documents/vrc
 VENV_DIR=~/Documents/vrc/.venv
 
-MAVP2P_DIR=~/Documents/mavp2p
-
 REALSENSE_DIR=~/Documents/librealsense
 LIBREALSENSE_VERSION=v2.31.0 # https://github.com/JetsonHacksNano/installLibrealsense/blob/master/buildLibrealsense.sh#L9
 
