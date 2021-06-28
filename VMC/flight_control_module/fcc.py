@@ -24,7 +24,6 @@ class MAVMQTTBase(object):
         """
         Create and publish state machine event.
         """
-        # TODO - make this the actual state machine proto one, not FCC
         event = StateMachine_pb2.Event(name=name, payload=payload)
         event.timestamp.GetCurrentTime()  # type: ignore
         mqtt.publish_to_topic(self.mqtt_client, "events", event)
