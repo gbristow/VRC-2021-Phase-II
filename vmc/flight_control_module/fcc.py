@@ -6,12 +6,68 @@ import time
 import datetime
 from typing import Any, Callable, List
 
+from loguru import logger
 import mavsdk
 from mavsdk.action import ActionError
 from mavsdk.geofence import Point, Polygon
 from mavsdk.mission_raw import MissionItem, MissionRawError
 from mavsdk.offboard import VelocityBodyYawspeed, VelocityNedYaw
+from paho.mqtt.client import Client as MQTTClient
 from pymavlink import mavutil
+
+# decorators
+
+
+def try_except(reraise: bool = False):
+    """
+    Function decorator that acts as a try/except block around the function.
+
+    Effectively equivalent to:
+
+    ```python
+    try:
+        func()
+    except Exception as e:
+        print(e)
+    ```
+
+    Can optionally reraise the exception.
+    """
+
+    def decorator(func: Callable) -> Callable:
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                logger.exception(f"Unexpected exception in {func.__name__}")
+                if reraise:
+                    raise e
+
+        return wrapper
+
+    return decorator
+
+
+def async_try_except(reraise: bool = False):
+    """
+    Same as `try_except()` function, just for async functions.
+    """
+
+    def decorator(func: Callable) -> Callable:
+        async def wrapper(*args, **kwargs):
+            try:
+                return await func(*args, **kwargs)
+            except Exception as e:
+                logger.exception(f"Unexpected exception in {func.__name__}")
+                if reraise:
+                    raise e
+
+        return wrapper
+
+    return decorator
+
+
+# classes
 
 
 class MAVMQTTBase(object):
@@ -19,14 +75,14 @@ class MAVMQTTBase(object):
         self.drone = drone
         self.mqtt_client = client
 
-    @decorators.try_except()
+    @try_except()
     def _publish_state_machine_event(self, name: str, payload: str = "") -> None:
         """
         Create and publish state machine event.
         """
         event = StateMachine_pb2.Event(name=name, payload=payload)
         event.timestamp.GetCurrentTime()  # type: ignore
-        mqtt.publish_to_topic(self.mqtt_client, "events", event)
+        self.mqtt_client.publish("events", event, retain=False, qos=0)
 
     async def async_queue_proto_action(
         self, queue_: queue.Queue, proto: type, action: Callable, frequency: int = 10
@@ -63,9 +119,7 @@ class MAVMQTTBase(object):
                 # if the queue was empty, just wait
                 await asyncio.sleep(0.01)
             except Exception as e:
-                Logging.exception(
-                    self, e, "Unexpected error in async_queue_proto_action"
-                )
+                logger.exception("Unexpected error in async_queue_proto_action")
 
 
 class FCC(MAVMQTTBase):
@@ -78,6 +132,10 @@ class FCC(MAVMQTTBase):
         offboard_body_queue: queue.Queue,
     ) -> None:
         super().__init__(client, drone)
+
+        # this is solely for type hinting
+        self.drone: mavsdk.System
+
         self.mission_api = MissionAPI(drone, client)
 
         # queues
@@ -121,7 +179,7 @@ class FCC(MAVMQTTBase):
             self.velocity_ned_telemetry(),
         )
 
-    @decorators.async_try_except()
+    @async_try_except()
     async def connected_status_telemetry(self) -> None:
         """
         Runs the connected_status telemetry loop
@@ -130,7 +188,7 @@ class FCC(MAVMQTTBase):
         flip_time = time.time()
         debounce_time = 2
 
-        Logging.normal(self, f"connected_status loop started")
+        logger.debug(f"connected_status loop started")
         async for connection_status in self.drone.core.connection_state():
             connected = connection_status.is_connected
             now = time.time()
@@ -151,40 +209,40 @@ class FCC(MAVMQTTBase):
 
             was_connected = connected
 
-    @decorators.async_try_except()
+    @async_try_except()
     async def battery_telemetry(self) -> None:
         """
         Runs the battery telemetry loop
         """
-        Logging.normal(self, f"battery_telemetry loop started")
+        logger.debug(f"battery_telemetry loop started")
         async for battery in self.drone.telemetry.battery():
-            
+
             update = {}
-            update['voltage'] = battery.voltage_v
-            #TODO see if mavsdk supports battery current
-            #TODO see is mavsdk supports power draw
+            update["voltage"] = battery.voltage_v
+            # TODO see if mavsdk supports battery current
+            # TODO see is mavsdk supports power draw
             update["soc"] = battery.remaining_percent * 100.0
-            update["timestamp"] = datetime.now()
+            update["timestamp"] = datetime.datetime.now()
 
             # publish the proto
-            mqtt.publish_to_topic(self.mqtt_client, "battery", update)
+            self.mqtt_client.publish("battery", update, retain=False, qos=0)
 
-    @decorators.async_try_except()
+    @async_try_except()
     async def in_air_telemetry(self) -> None:
         """
         Runs the in_air telemetry loop
         """
-        Logging.normal(self, f"in_air loop started")
+        logger.debug(f"in_air loop started")
         async for in_air in self.drone.telemetry.in_air():
             self.in_air = in_air
 
-    @decorators.async_try_except()
+    @async_try_except()
     async def is_armed_telemetry(self) -> None:
         """
         Runs the is_armed telemetry loop
         """
         was_armed = False
-        Logging.normal(self, f"is_armed loop started")
+        logger.debug(f"is_armed loop started")
         async for armed in self.drone.telemetry.armed():
 
             # if the arming status is different than last time
@@ -198,13 +256,13 @@ class FCC(MAVMQTTBase):
 
             update = {}
 
-            update['armed'] = armed
-            update['mode'] = self.fcc_mode
-            update['timestamp'] = datetime.now()
+            update["armed"] = armed
+            update["mode"] = self.fcc_mode
+            update["timestamp"] = datetime.datetime.now()
 
-            mqtt.publish_to_topic(self.mqtt_client, "status", update)
+            self.mqtt_client.publish("status", update, retain=False, qos=0)
 
-    @decorators.async_try_except()
+    @async_try_except()
     async def landed_state_telemetry(self) -> None:
         """
         Runs the landed state loop, returns one of:
@@ -218,18 +276,18 @@ class FCC(MAVMQTTBase):
             if mode != previous_state:
                 if mode == "IN_AIR":
                     self._publish_state_machine_event("landed_state_in_air_event")
-                if mode == "LANDING":
+                elif mode == "LANDING":
                     self._publish_state_machine_event("landed_state_landing_event")
-                if mode == "ON_GROUND":
+                elif mode == "ON_GROUND":
                     self._publish_state_machine_event("landed_state_on_ground_event")
-                if mode == "TAKING_OFF":
+                elif mode == "TAKING_OFF":
                     self._publish_state_machine_event("landed_state_taking_off_event")
-                if mode == "UNKNOWN":
+                elif mode == "UNKNOWN":
                     self._publish_state_machine_event("landed_state_unknown_event")
             previous_state = mode
 
-    @decorators.async_try_except()
-    async def flight_mode_telemetry(self) -> None:
+    @async_try_except()
+    async def flight_mode_telemetry(self) -> None:  # sourcery skip
         """
         Runs the flight_mode telemetry loop
         """
@@ -253,17 +311,17 @@ class FCC(MAVMQTTBase):
 
         fcc_mode = "UNKNOWN"
 
-        Logging.normal(self, f"flight_mode_telemetry loop started")
+        logger.debug(f"flight_mode_telemetry loop started")
 
         async for mode in self.drone.telemetry.flight_mode():
 
             update = {}
 
-            update['mode'] = str(mode)
-            update['armed'] = self.is_armed
-            update['timestamp'] = datetime.now()
+            update["mode"] = str(mode)
+            update["armed"] = self.is_armed
+            update["timestamp"] = datetime.datetime.now()
 
-            mqtt.publish_to_topic(self.mqtt_client, "status", update)
+            self.mqtt_client.publish("status", update, retain=False, qos=0)
 
             if status.mode != fcc_mode:  # type: ignore
                 if status.mode in fcc_mode_map.keys():  # type: ignore
@@ -273,12 +331,12 @@ class FCC(MAVMQTTBase):
             fcc_mode = status.mode  # type: ignore
             self.fcc_mode = status.mode  # type: ignore
 
-    @decorators.async_try_except()
+    @async_try_except()
     async def position_ned_telemetry(self) -> None:
         """
         Runs the position_ned telemetry loop
         """
-        Logging.normal(self, f"position_ned telemetry loop started")
+        logger.debug(f"position_ned telemetry loop started")
         async for position in self.drone.telemetry.position_velocity_ned():
 
             n = position.position.north_m
@@ -287,53 +345,53 @@ class FCC(MAVMQTTBase):
 
             update = {}
 
-            update['dX'] = n
-            update['dY'] = e 
-            update['dZ'] = d
-            update['timestamp'] = datetime.now()
+            update["dX"] = n
+            update["dY"] = e
+            update["dZ"] = d
+            update["timestamp"] = datetime.datetime.now()
 
-            mqtt.publish_to_topic(self.mqtt_client, "location/local", update)
+            self.mqtt_client.publish("location/local", update, retain=False, qos=0)
 
-    @decorators.async_try_except()
+    @async_try_except()
     async def position_lla_telemetry(self) -> None:
         """
         Runs the position_lla telemetry loop
         """
-        Logging.normal(self, f"position_lla telemetry loop started")
+        logger.debug(f"position_lla telemetry loop started")
         async for position in self.drone.telemetry.position():
             update = {}
-            update['lat'] = position.latitude_deg # type: ignore
-            update['lon'] = position.longitude_deg  # type: ignore
-            update['alt'] = position.relative_altitude_m  # type: ignore
-            update['hdg'] = self.heading # type: ignore
-            update['timestamp'] = datetime.now()
+            update["lat"] = position.latitude_deg  # type: ignore
+            update["lon"] = position.longitude_deg  # type: ignore
+            update["alt"] = position.relative_altitude_m  # type: ignore
+            update["hdg"] = self.heading  # type: ignore
+            update["timestamp"] = datetime.datetime.now()
 
-            mqtt.publish_to_topic(self.mqtt_client, "location/global", update)
+            self.mqtt_client.publish("location/global", update, retain=False, qos=0)
 
-    @decorators.async_try_except()
+    @async_try_except()
     async def home_lla_telemetry(self) -> None:
         """
         Runs the home_lla telemetry loop
         """
-        Logging.normal(self, f"home_lla telemetry loop started")
+        logger.debug(f"home_lla telemetry loop started")
         async for home_position in self.drone.telemetry.home():
             update = {}
-            update['lat'] = home_position.latitude_deg  # type: ignore
-            update['lon'] = home_position.longitude_deg  # type: ignore
-            update['alt'] = home_position.relative_altitude_m  # type: ignore # agl
-            update['timestamp'] = datetime.now()
-            
-            mqtt.publish_to_topic(self.mqtt_client, "location/home", update)
+            update["lat"] = home_position.latitude_deg  # type: ignore
+            update["lon"] = home_position.longitude_deg  # type: ignore
+            update["alt"] = home_position.relative_altitude_m  # type: ignore # agl
+            update["timestamp"] = datetime.datetime.now()
 
-    @decorators.async_try_except()
+            self.mqtt_client.publish("location/home", update, retain=False, qos=0)
+
+    @async_try_except()
     async def attitude_euler_telemetry(self) -> None:
         """
         Runs the attitude_euler telemetry loop
         """
 
-        Logging.normal(self, f"attitude_euler telemetry loop started")
+        logger.debug(f"attitude_euler telemetry loop started")
         async for attitude in self.drone.telemetry.attitude_euler():
-            # Logging.normal(self, str(attitude))
+            # logger.debug( str(attitude))
 
             psi = attitude.roll_deg
             theta = attitude.pitch_deg
@@ -344,10 +402,10 @@ class FCC(MAVMQTTBase):
             # do any necessary wrapping here
             update = {}
 
-            update['euler']['roll'] = psi  # type: ignore
-            update['euler']['pitch'] = theta  # type: ignore
-            update['euler']['yaw'] = phi  # type: ignore
-            update['timestamp'] = datetime.now()
+            update["euler"]["roll"] = psi  # type: ignore
+            update["euler"]["pitch"] = theta  # type: ignore
+            update["euler"]["yaw"] = phi  # type: ignore
+            update["timestamp"] = datetime.datetime.now()
 
             if phi < 0:
                 heading = (2 * math.pi) + phi
@@ -359,30 +417,30 @@ class FCC(MAVMQTTBase):
             self.heading = heading
 
             # publish the attitude
-            mqtt.publish_to_topic(self.mqtt_client, "attitude/euler", update)
+            self.mqtt_client.publish("attitude/euler", update, retain=False, qos=0)
 
-    @decorators.async_try_except()
+    @async_try_except()
     async def velocity_ned_telemetry(self) -> None:
         """
         Runs the velocity_ned telemetry loop
         """
 
-        Logging.normal(self, f"velocity_ned telemetry loop started")
+        logger.debug(f"velocity_ned telemetry loop started")
         async for velocity in self.drone.telemetry.velocity_ned():
             update = {}
 
-            update['vX'] = velocity.north_m_s  # type: ignore
-            update['vY'] = velocity.east_m_s  # type: ignore
-            update['vZ'] = velocity.down_m_s  # type: ignore
-            update['timestamp'] = datetime.now()
+            update["vX"] = velocity.north_m_s  # type: ignore
+            update["vY"] = velocity.east_m_s  # type: ignore
+            update["vZ"] = velocity.down_m_s  # type: ignore
+            update["timestamp"] = datetime.datetime.now()
 
-            mqtt.publish_to_topic(self.mqtt_client, "velocity", update)
+            self.mqtt_client.publish("velocity", update, retain=False, qos=0)
 
     # endregion ###############################################################
 
     # region ################## D I S P A T C H E R  ##########################
 
-    @decorators.async_try_except()
+    @async_try_except()
     async def action_dispatcher(self) -> None:
 
         prefix = "FCC CMD Dispatcher"
@@ -404,7 +462,7 @@ class FCC(MAVMQTTBase):
                 Schedule a task (async func) to be run by the dispatcher with the
                 given payload. Task name is also required for printing.
                 """
-                Logging.normal(prefix, f"Scheduling a task for '{name}'")
+                logger.debug(f"Scheduling a task for '{name}'")
                 # if the dispatcher is ok to take on a new task
                 if self.currently_running_task is None:
                     await self.create_task(task, payload, name)
@@ -430,21 +488,23 @@ class FCC(MAVMQTTBase):
                 """
                 try:
                     await asyncio.wait_for(task(**payload), timeout=self.timeout)
-                    self._publish_state_machine_event("request_" + name + "_completed_event")
+                    self._publish_state_machine_event(
+                        "request_" + name + "_completed_event"
+                    )
                     # Logging.normal(prefix, f"Task '{name}' returned")
                     self.currently_running_task = None
 
                 except asyncio.TimeoutError:
                     try:
-                        Logging.red(prefix, f"Task '{name}' timed out!")
+                        logger.warning(f"Task '{name}' timed out!")
                         self._publish_state_machine_event("action_timeout_event", name)
                         self.currently_running_task = None
                     except Exception as e:
-                        Logging.exception(prefix, e, "ERROR IN TIMEOUT HANDLER")
+                        logger.exception("ERROR IN TIMEOUT HANDLER")
                 except Exception as e:
-                    Logging.exception(prefix, e, "ERROR IN TASK WAITER")
+                    logger.exception("ERROR IN TASK WAITER")
 
-        Logging.normal(self, f"action_dispatcher started")
+        logger.debug(f"action_dispatcher started")
 
         action_map = {
             "break": self.set_intentional_timeout,
@@ -467,7 +527,7 @@ class FCC(MAVMQTTBase):
 
         while True:
             try:
-                #TODO - Casey, 6/27 start here and make action into a dict instead of proto 
+                # TODO - Casey, 6/27 start here and make action into a dict instead of proto
                 action = self.action_queue.get_nowait()
 
                 if action.payload == "":  # type: ignore
@@ -480,12 +540,12 @@ class FCC(MAVMQTTBase):
                         action_map[action.name], payload, action.name  # type: ignore
                     )
             except DispatcherBusy:
-                Logging.info(prefix, "I'm busy running another task, try again later")
-                self._publish_state_machine_event("fcc_busy_event",payload=action.name)
+                logger.info("I'm busy running another task, try again later")
+                self._publish_state_machine_event("fcc_busy_event", payload=action.name)
             except queue.Empty:
                 await asyncio.sleep(0.1)
             except Exception as e:
-                Logging.exception(prefix, e, "ERROR IN MAIN LOOP")
+                logger.exception("ERROR IN MAIN LOOP")
 
     async def simple_action_executor(
         self,
@@ -499,11 +559,11 @@ class FCC(MAVMQTTBase):
         try:
             await action_fn()
             full_success_str = action_text + "_success_event"
-            Logging.info(self, f"Sending {full_success_str}")
+            logger.info(f"Sending {full_success_str}")
             self._publish_state_machine_event(full_success_str)
         except ActionError as e:
             full_fail_str = action_text + "_failed_event"
-            Logging.info(self, f"Sending {full_fail_str}")
+            logger.info(f"Sending {full_fail_str}")
             self._publish_state_machine_event(full_fail_str)
             if e._result.result_str == "CONNECTION_ERROR":
                 asyncio.create_task(self.connect())
@@ -513,7 +573,7 @@ class FCC(MAVMQTTBase):
 
     # region #####################  A C T I O N S #############################
 
-    @decorators.async_try_except()
+    @async_try_except()
     async def set_intentional_timeout(self, **kwargs) -> None:
         """
         Sets a 20 second timeout.
@@ -523,95 +583,95 @@ class FCC(MAVMQTTBase):
         except asyncio.CancelledError:
             pass
 
-    @decorators.async_try_except(reraise=True)
+    @async_try_except(reraise=True)
     async def set_arm(self, **kwargs) -> None:
         """
         Sets the drone to an armed state.
         """
-        Logging.info(self, "Sending arm command")
+        logger.info("Sending arm command")
         await self.simple_action_executor(self.drone.action.arm, "arm")
 
-    @decorators.async_try_except(reraise=True)
+    @async_try_except(reraise=True)
     async def set_disarm(self, **kwargs) -> None:
         """
         Sets the drone to a disarmed state.
         """
-        Logging.info(self, "Sending disarm command")
+        logger.info("Sending disarm command")
         await self.simple_action_executor(self.drone.action.disarm, "disarm")
 
-    @decorators.async_try_except(reraise=True)
+    @async_try_except(reraise=True)
     async def set_kill(self, **kwargs) -> None:
         """
         Sets the drone to a kill state. This will forcefully shut off the drone
         regardless of being in the air or not.
         """
-        Logging.warn(self, "Sending kill command")
+        logger.warning("Sending kill command")
         await self.simple_action_executor(self.drone.action.kill, "kill")
 
-    @decorators.async_try_except(reraise=True)
+    @async_try_except(reraise=True)
     async def set_land(self, **kwargs) -> None:
         """
         Commands the drone to land at the current position.
         """
-        Logging.info(self, "Sending land command")
+        logger.info("Sending land command")
         await self.simple_action_executor(self.drone.action.land, "land_cmd")
 
-    @decorators.async_try_except(reraise=True)
+    @async_try_except(reraise=True)
     async def set_reboot(self, **kwargs) -> None:
         """
         Commands the drone computer to reboot.
         """
-        Logging.warn(self, "Sending reboot command")
+        logger.warning("Sending reboot command")
         await self.simple_action_executor(self.drone.action.reboot, "reboot")
 
-    @decorators.async_try_except(reraise=True)
+    @async_try_except(reraise=True)
     async def set_takeoff(self, takeoff_alt: float, **kwargs) -> None:
         """
         Commands the drone to takeoff to the given altitude.
         Will arm the drone if it is not already.
         """
-        Logging.info(self, f"Setting takeoff altitude to {takeoff_alt}")
+        logger.info(f"Setting takeoff altitude to {takeoff_alt}")
         await self.drone.action.set_takeoff_altitude(takeoff_alt)
         await self.set_arm()
-        Logging.info(self, "Sending takeoff command")
+        logger.info("Sending takeoff command")
         await self.simple_action_executor(self.drone.action.takeoff, "takeoff")
 
-    @decorators.async_try_except(reraise=True)
+    @async_try_except(reraise=True)
     async def upload_mission(self, waypoints: List[dict], **kwargs) -> None:
         """
         Calls the mission api to upload a mission to the fcc.
         """
-        Logging.info(self, "Starting mission upload process")
+        logger.info("Starting mission upload process")
         await self.mission_api.build_and_upload(waypoints)
 
-    @decorators.async_try_except(reraise=True)
+    @async_try_except(reraise=True)
     async def begin_mission(self, **kwargs) -> None:
         """
         Arms the drone and calls the mission api to start a mission.
         """
-        Logging.info(self, "Arming the drone")
+        logger.info("Arming the drone")
         await self.set_arm()
         # we shouldn't have to check the armed status because
         # the arm fn should raise an exception if it is unsuccessful
-        Logging.info(self, "Starting the mission")
+        logger.info("Starting the mission")
         await self.mission_api.start()
         if self.in_air:
             self._publish_state_machine_event("mission_starting_from_air_event")
 
-    @decorators.async_try_except(reraise=True)
+    @async_try_except(reraise=True)
     async def pause_mission(self, **kwargs) -> None:
         """
         Calls the mission api to pasue a mission to the fcc.
         """
-        Logging.info(self, "Starting mission upload process")
+        logger.info("Starting mission upload process")
         await self.mission_api.pause()
 
-    @decorators.async_try_except(reraise=True)
+    @async_try_except(reraise=True)
     async def resume_mission(self, **kwargs) -> None:
         """
         Calls the mission api to pasue a mission to the fcc.
         """
-        Logging.info(self, "Resuming Mission")
+        logger.info("Resuming Mission")
         await self.mission_api.resume()
 
     # endregion ###############################################################
@@ -628,7 +688,7 @@ class FCC(MAVMQTTBase):
         """
         Starts offboard mode on the drone. Use with caution!
         """
-        Logging.info(self, "Starting offboard mode")
+        logger.info("Starting offboard mode")
         await self.drone.offboard.start()
         self.offboard_enabled = True
 
@@ -636,7 +696,7 @@ class FCC(MAVMQTTBase):
         """
         Stops offboard mode on the drone.
         """
-        Logging.info(self, "Stopping offboard mode")
+        logger.info("Stopping offboard mode")
         self.offboard_enabled = False
         await self.drone.offboard.stop()
 
@@ -644,9 +704,9 @@ class FCC(MAVMQTTBase):
         """
         Feeds offboard NED data to the drone.
         """
-        Logging.normal(self, f"offboard_ned loop started")
+        logger.debug(f"offboard_ned loop started")
 
-        @decorators.async_try_except()
+        @async_try_except()
         async def process_offboard_ned(
             proto_object: FlightControlModule_pb2.Offboard_NED,
         ) -> None:
@@ -673,9 +733,9 @@ class FCC(MAVMQTTBase):
         """
         Feeds offboard body data to the drone.
         """
-        Logging.normal(self, f"offboard_body loop started")
+        logger.debug(f"offboard_body loop started")
 
-        @decorators.async_try_except()
+        @async_try_except()
         async def process_offboard_body(
             proto_object: FlightControlModule_pb2.Offboard_Body,
         ) -> None:
@@ -705,16 +765,18 @@ class MissionAPI(MAVMQTTBase):
     def __init__(self, drone: mavsdk.System, client: MQTTClient) -> None:
         super().__init__(client, drone)
 
-    @decorators.async_try_except(reraise=True)
+        # this is solely for type hinting
+        self.drone: mavsdk.System
+
+    @async_try_except(reraise=True)
     async def set_geofence(
         self, min_lat: float, min_lon: float, max_lat: float, max_lon: float
     ) -> None:
         """
         Creates and uploads an inclusive geofence given min/max lat/lon.
         """
-        Logging.info(
-            self,
-            f"Uploading geofence of ({min_lat}, {min_lon}), ({max_lat}, {max_lon})",
+        logger.info(
+            f"Uploading geofence of ({min_lat}, {min_lon}), ({max_lat}, {max_lon})"
         )
 
         # need to create a rectangle, PX4 isn't quite smart enough
@@ -731,7 +793,7 @@ class MissionAPI(MAVMQTTBase):
         ]
         await self.drone.geofence.upload_geofence(fence)
 
-    @decorators.async_try_except(reraise=True)
+    @async_try_except(reraise=True)
     async def build(self, waypoints: List[dict]) -> List[MissionItem]:
         """
         Convert a list of waypoints (dict) to a list of MissionItems.
@@ -749,7 +811,6 @@ class MissionAPI(MAVMQTTBase):
         if "lat" not in waypoints[0] or "lon" not in waypoints[0]:
             # get the next update from the raw gps and use that
             # .position() only updates on new positions
-            # TODO, verify this is correct
             position = await self.drone.telemetry.raw_gps().__anext__()
             waypoint_0["lat"] = position.latitude_deg
             waypoint_0["lon"] = position.longitude_deg
@@ -821,26 +882,24 @@ class MissionAPI(MAVMQTTBase):
 
         return mission_items
 
-    @decorators.async_try_except(reraise=True)
+    @async_try_except(reraise=True)
     async def upload(self, mission_items: List[MissionItem]) -> None:
         """
         Upload a given list of MissionItems to the drone.
         """
         try:
-            Logging.info(self, "Clearing existing mission on the drone")
+            logger.info("Clearing existing mission on the drone")
             await self.drone.mission_raw.clear_mission()
-            Logging.info(self, "Uploading mission items to drone")
+            logger.info("Uploading mission items to drone")
             await self.drone.mission_raw.upload_mission(mission_items)
             self._publish_state_machine_event("mission_upload_success_event")
         except MissionRawError as e:
-            Logging.red(
-                self, f"Mission upload failed because: {str(e._result.result_str)}"
-            )
+            logger.warning(f"Mission upload failed because: {str(e._result.result_str)}")
             self._publish_state_machine_event(
                 "mission_upload_failed_event", str(e._result.result_str)
             )
 
-    @decorators.async_try_except(reraise=True)
+    @async_try_except(reraise=True)
     async def build_and_upload(self, waypoints: List[dict]) -> None:
         """
         Upload a list of waypoints (dict) to the done.
@@ -848,15 +907,15 @@ class MissionAPI(MAVMQTTBase):
         mission_plan = await self.build(waypoints)
         await self.upload(mission_plan)
 
-    @decorators.async_try_except(reraise=True)
+    @async_try_except(reraise=True)
     async def download(self) -> List[MissionItem]:
         """
         Download the current mission from the drone as a list of MissionItems.
         """
-        Logging.info(self, "Downloading mission plan from drone")
+        logger.info("Downloading mission plan from drone")
         return await self.download()
 
-    @decorators.async_try_except(reraise=True)
+    @async_try_except(reraise=True)
     async def wait_for_finish(self) -> None:
         """
         Async blocking function that waits for the current mission to be finished.
@@ -875,38 +934,38 @@ class MissionAPI(MAVMQTTBase):
             if mission_progress.current == 0:
                 return
 
-    @decorators.async_try_except(reraise=True)
+    @async_try_except(reraise=True)
     async def start(self) -> None:
         """
         Commands the drone to start the current mission.
         Drone must already be armed.
         Will raise an exception if the active mission violates a geofence.
         """
-        Logging.info(self, "Sending start mission command")
+        logger.info("Sending start mission command")
         await self.drone.mission_raw.start_mission()
 
-    @decorators.async_try_except(reraise=True)
+    @async_try_except(reraise=True)
     async def hold(self) -> None:
         """
         Commands the drone to hold the current mission.
         """
-        Logging.info(self, "Sending pause mission command")
+        logger.info("Sending pause mission command")
         await self.drone.mission_raw.pause_mission()
 
-    @decorators.async_try_except(reraise=True)
+    @async_try_except(reraise=True)
     async def pause(self) -> None:
         """
         Commands the drone to pause the current mission.
         """
-        Logging.info(self, "Sending pause mission command")
+        logger.info("Sending pause mission command")
         await self.hold()
 
-    @decorators.async_try_except(reraise=True)
+    @async_try_except(reraise=True)
     async def resume(self) -> None:
         """
         Commands the drone to resume the paused mission.
         """
-        Logging.info(self, "Sending resume mission command")
+        logger.info("Sending resume mission command")
         await self.start()
 
 
@@ -915,7 +974,7 @@ class PyMAVLinkAgent(MAVMQTTBase):
         super().__init__(client)
         self.mocap_queue = mocap_queue
 
-    @decorators.async_try_except()
+    @async_try_except()
     async def run(self) -> None:
         """
         Set up a mavlink connection and kick off any tasks
@@ -930,21 +989,22 @@ class PyMAVLinkAgent(MAVMQTTBase):
         await loop.run_in_executor(None, self.wait_for_heartbeat)
         asyncio.gather(self.set_hil_gps())
 
-        await iot.async_spinner()
+        while True:
+            await asyncio.sleep(3)
 
     def wait_for_heartbeat(self) -> Any:
         """
         Wait for a MAVLINK heartbeat message.
         """
         try:
-            Logging.normal(self, "Waiting for mavlink heartbeat")
+            logger.debug("Waiting for mavlink heartbeat")
             m = self.master.recv_match(type="HEARTBEAT", blocking=True)
-            Logging.normal(self, "C O N N E C T E D")
+            logger.debug("C O N N E C T E D")
             return m
         except Exception as e:
-            Logging.exception(self, e, "")
+            logger.exception("Issue while waiting for connection heartbeat")
 
-    @decorators.async_try_except()
+    @async_try_except()
     async def set_hil_gps(self) -> None:
         """
         Sends GPS position / velocity / heading to PX4,
@@ -962,7 +1022,7 @@ class PyMAVLinkAgent(MAVMQTTBase):
             the last time statistics were printed.
             """
             if time.time() - last_print_time > 1:
-                Logging.normal(self, f"Number of mocap messages {num_mocaps}")
+                logger.debug(f"Number of mocap messages {num_mocaps}")
                 return time.time()
             return last_print_time
 
@@ -1015,7 +1075,7 @@ class PyMAVLinkAgent(MAVMQTTBase):
                 )
                 self.master.mav.send(msg)  # type: ignore
             except Exception as e:
-                Logging.exception(self, e, "Issue send HIL GPS")
+                logger.exception("Issue send HIL GPS")
 
         HIL_FREQ = 15
 
@@ -1045,4 +1105,4 @@ class PyMAVLinkAgent(MAVMQTTBase):
             except queue.Empty:
                 await asyncio.sleep(0.01)
             except Exception as e:
-                Logging.exception(self, e, "Issue sending HIL GPS")
+                logger.exception("Issue sending HIL GPS")

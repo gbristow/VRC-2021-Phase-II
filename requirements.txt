@@ -1,2 +1,7 @@
 opencv-python 
 pupil-apriltags
+
+loguru
+mavsdk
+pymavlink
+paho-mqtt
