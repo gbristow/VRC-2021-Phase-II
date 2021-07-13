@@ -10,16 +10,16 @@ class PCCModule(object):
 
         self.pcc = VRC_Peripheral(serial_port)
 
-        self.topic_prefix = "drone"
+        self.topic_prefix = "vrc/pcc"
 
         self.topic_map = {
-            f"{self.topic_prefix}/pcc/set_base_color": self.set_base_color,
-            f"{self.topic_prefix}/pcc/set_temp_color": self.set_temp_color,
-            f"{self.topic_prefix}/pcc/set_servo_open_close": self.set_servo_open_close,
-            f"{self.topic_prefix}/pcc/set_servo_min": self.set_servo_min,
-            f"{self.topic_prefix}/pcc/set_servo_max": self.set_servo_max,
-            f"{self.topic_prefix}/pcc/set_servo_pct": self.set_servo_pct,
-            f"{self.topic_prefix}/pcc/reset": self.reset,
+            f"{self.topic_prefix}/set_base_color": self.set_base_color,
+            f"{self.topic_prefix}/set_temp_color": self.set_temp_color,
+            f"{self.topic_prefix}/set_servo_open_close": self.set_servo_open_close,
+            f"{self.topic_prefix}/set_servo_min": self.set_servo_min,
+            f"{self.topic_prefix}/set_servo_max": self.set_servo_max,
+            f"{self.topic_prefix}/set_servo_pct": self.set_servo_pct,
+            f"{self.topic_prefix}/reset": self.reset,
         }
 
     def run(self):
