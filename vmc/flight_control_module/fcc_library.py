@@ -19,13 +19,16 @@ class MAVMQTTBase(object):
         self.drone = drone
         self.mqtt_client = client
 
-    @decorators.try_except()
     def _publish_state_machine_event(self, name: str, payload: str = "") -> None:
         """
         Create and publish state machine event.
         """
-        event = StateMachine_pb2.Event(name=name, payload=payload)
-        event.timestamp.GetCurrentTime()  # type: ignore
+        event = {}
+
+        event["name"] = name
+        event["payload"] = payload
+        event["timestamp"] = datetime.now()
+
         mqtt.publish_to_topic(self.mqtt_client, "events", event)
 
     async def async_queue_proto_action(
@@ -54,6 +57,7 @@ class MAVMQTTBase(object):
                 # than the frequency, run
                 if frequency == 0 or time.time() - last_time > (1 / frequency):
                     # convert to protobuf object
+                    # TODO get rid of protobuf
                     proto_obj = protobuf.from_bytes(data, proto)
                     # call function
                     await action(proto_obj)
