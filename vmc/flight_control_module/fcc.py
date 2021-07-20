@@ -88,8 +88,8 @@ class MAVMQTTBase(object):
 
         self.mqtt_client.publish("events", event, retain=False, qos=0)
 
-    async def async_queue_proto_action(
-        self, queue_: queue.Queue, proto: type, action: Callable, frequency: int = 10
+    async def async_queue_action(
+        self, queue_: queue.Queue, action: Callable, frequency: int = 10
     ) -> None:
         """
         Creates a while loop that continously tries to pull a protobuf from a queue
@@ -113,18 +113,15 @@ class MAVMQTTBase(object):
                 # if the frequency is 0, or the time since our last run is greater
                 # than the frequency, run
                 if frequency == 0 or time.time() - last_time > (1 / frequency):
-                    # convert to protobuf object
-                    # TODO get rid of protobuf
-                    proto_obj = protobuf.from_bytes(data, proto)
                     # call function
-                    await action(proto_obj)
+                    await action(data)
                     # reset timer
                     last_time = time.time()
             except queue.Empty:
                 # if the queue was empty, just wait
                 await asyncio.sleep(0.01)
             except Exception as e:
-                logger.exception("Unexpected error in async_queue_proto_action")
+                logger.exception("Unexpected error in async_queue_action")
 
 
 class FCC(MAVMQTTBase):
@@ -712,24 +709,21 @@ class FCC(MAVMQTTBase):
         logger.debug(f"offboard_ned loop started")
 
         @async_try_except()
-        async def process_offboard_ned(
-            proto_object: FlightControlModule_pb2.Offboard_NED,
-        ) -> None:
+        async def process_offboard_ned(msg: dict) -> None:
             # if not currently in offboard mode, skip
             if not self.offboard_enabled:
                 return
 
-            north = proto_object.north  # type: ignore
-            east = proto_object.east  # type: ignore
-            down = proto_object.down  # type: ignore
-            yaw = proto_object.yaw  # type: ignore
+            north = msg["north"]  # type: ignore # TODO - type cast these maybe? 
+            east = msg["east"]  # type: ignore
+            down = msg["down"]  # type: ignore
+            yaw = msg["yaw"]  # type: ignore
             await self.drone.offboard.set_velocity_ned(
                 VelocityNedYaw(north, east, down, yaw)
             )
 
-        await self.async_queue_proto_action(
+        await self.async_queue_action(
             self.offboard_ned_queue,
-            FlightControlModule_pb2.Offboard_NED,
             process_offboard_ned,
             frequency=20,
         )
@@ -742,23 +736,22 @@ class FCC(MAVMQTTBase):
 
         @async_try_except()
         async def process_offboard_body(
-            proto_object: FlightControlModule_pb2.Offboard_Body,
+            msg: dict,
         ) -> None:
             # if not currently in offboard mode, skip
             if not self.offboard_enabled:
                 return
 
-            forward = proto_object.forward  # type: ignore
-            right = proto_object.right  # type: ignore
-            down = proto_object.down  # type: ignore
-            yaw = proto_object.yaw  # type: ignore
+            forward = msg["forward"]  # type: ignore # TODO - type casting? 
+            right = msg["right"]  # type: ignore
+            down = msg["down"]  # type: ignore
+            yaw = msg["yaw"]  # type: ignore
             await self.drone.offboard.set_velocity_ned(
                 VelocityBodyYawspeed(forward, right, down, yaw)
             )
 
-        await self.async_queue_proto_action(
+        await self.async_queue_action(
             self.offboard_body_queue,
-            FlightControlModule_pb2.Offboard_Body,
             process_offboard_body,
             frequency=20,
         )
