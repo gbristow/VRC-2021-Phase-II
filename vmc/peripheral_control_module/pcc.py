@@ -1,14 +1,21 @@
 import paho.mqtt.client as mqtt
+import json
 from pcc_library import VRC_Peripheral
+from typing import List
 
 class PCCModule(object):
     def __init__(self, serial_port):
         self.mqtt_host = "localhost"
-        self.mqtt_port = "1883"
+        self.mqtt_port = 1883
+
+        self.mqtt_user = "user"
+        self.mqtt_pass = "password"
 
         self.mqtt_client = mqtt.Client()
+        self.mqtt_client.on_connect = self.on_connect
+        self.mqtt_client.on_message = self.on_message
 
-        self.pcc = VRC_Peripheral(serial_port)
+        self.pcc = VRC_Peripheral(serial_port, use_serial=False)
 
         self.topic_prefix = "vrc/pcc"
 
@@ -27,48 +34,62 @@ class PCCModule(object):
         self.mqtt_client.loop_forever()
 
     def on_message(self, client, userdata, msg):
-        print(msg.topic+" "+str(msg.payload))
+        try:
+            print(msg.topic+" "+str(msg.payload))
 
-        if msg.topic in self.topic_map.keys():
-            self.topic_map[msg.topic](msg.payload)
+            if msg.topic in self.topic_map.keys():
+                self.topic_map[msg.topic](msg.payload)
+        except Exception as e:
+            print(f"Error handling message on {msg.topic}")
 
-    def on_connect(self, client, userdata, rc):
+    def on_connect(self, client, userdata, rc, properties=None):
         print("Connected with result code "+str(rc))
         for topic in self.topic_map.keys():
             print(f"PCCModule: Subscribed to: {topic}")
             client.subscribe(topic)
 
     def set_base_color(self, payload):
-        wrgb = payload["wrgb"]
+        payload = json.loads(payload)
+        wrgb: List = payload["wrgb"]
         self.pcc.set_base_color(wrgb=wrgb)
 
     def set_temp_color(self, payload):
-        wrgb = payload["wrgb"]
+        payload = json.loads(payload)
+        wrgb: List = payload["wrgb"]
         if "time" in payload.keys():
-            time = payload["time"]
+            time: float = payload["time"]
         else:
-            time = 0.5
+            time: float = 0.5
         self.pcc.set_temp_color(wrgb=wrgb, time=time)
 
     def set_servo_open_close(self, payload):
-        servo = payload["servo"]
-        action = payload["action"]
+        payload = json.loads(payload)
+        servo: int = payload["servo"]
+        action: str = payload["action"]
         self.pcc.set_servo_open_close(servo, action)
 
     def set_servo_min(self, payload):
-        servo = payload["servo"]
-        pulse = payload["min_pulse"]
+        payload = json.loads(payload)
+        servo: int = payload["servo"]
+        pulse: int = payload["min_pulse"]
         self.pcc.set_servo_min(servo, pulse)
 
     def set_servo_max(self, payload):
-        servo = payload["servo"]
-        pulse = payload["max_pulse"]
+        payload = json.loads(payload)
+        servo: int = payload["servo"]
+        pulse: int = payload["max_pulse"]
         self.pcc.set_servo_max(servo, pulse)
 
     def set_servo_pct(self, payload):
-        servo = payload["servo"]
-        percent = payload["percent"]
+        payload = json.loads(payload)
+        servo: int = payload["servo"]
+        percent: int  = payload["percent"]
         self.pcc.set_servo_pct(servo, percent)
 
     def reset(self, payload):
+        payload = json.loads(payload)
         self.pcc.reset_vrc_peripheral()
+
+if __name__ == "__main__":
+    pcc = PCCModule("na")
+    pcc.run()
