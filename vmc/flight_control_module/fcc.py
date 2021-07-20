@@ -1031,52 +1031,52 @@ class PyMAVLinkAgent(MAVMQTTBase):
                 return time.time()
             return last_print_time
 
-        def mocap_proto_to_offboard_proto(
-            mocap_proto: mocap_pb2.Mocap,
-        ) -> FlightControlModule_pb2.Offboard_GPS:
+        def mocap_msg_to_offboard_msg(
+            mocap_msg: dict,
+        ) -> dict:
             """
-            Function to convert the proto coming over the wire to the hil proto
+            Function to convert the msg coming over the wire to the hil msg
             needed for the hil_gps message
             """
-            hilgps_proto = FlightControlModule_pb2.Offboard_GPS()
+            hilgps = {}
 
-            hilgps_proto.time_usec = int(mocap_proto.timestamp.ToMicroseconds())  # type: ignore
-            hilgps_proto.fix_type = int(3)  # type: ignore  # this will always be "3" for a 3D fix
-            hilgps_proto.lat = int(mocap_proto.current_position.latitude * 1e7)  # type: ignore
-            hilgps_proto.lon = int(mocap_proto.current_position.longitude * 1e7)  # type: ignore
-            hilgps_proto.alt = int(mocap_proto.current_position.altitude * 1000)  # type: ignore  # m to mm
-            hilgps_proto.eph = int(10)  # type: ignore  # horizontal dilution of precision in ?
-            hilgps_proto.epv = int(10)  # type: ignore  # vertical duilution of precision in ?
-            hilgps_proto.vel = int(mocap_proto.groundspeed * 100)  # type: ignore  # m to cm
-            hilgps_proto.v_north = int(mocap_proto.local_vel.x * 100)  # type: ignore  # m to cm
-            hilgps_proto.v_east = int(mocap_proto.local_vel.y * 100)  # type: ignore  # m to cm
-            hilgps_proto.v_down = int(mocap_proto.local_vel.z * 100)  # type: ignore  # m to cm
-            hilgps_proto.cog = int(mocap_proto.course * 100)  # type: ignore  # deg to cdeg
-            hilgps_proto.sats_visible = int(13)  # type: ignore
-            hilgps_proto.heading = int(mocap_proto.heading * 100)  # type: ignore  # deg to cdeg
+            hilgps["time_usec"] = int(mocap_proto.timestamp.ToMicroseconds())  # type: ignore
+            hilgps["fix_type"] = int(3)  # type: ignore  # this will always be "3" for a 3D fix
+            hilgps["lat"] = int(mocap_proto.current_position.latitude * 1e7)  # type: ignore
+            hilgps["lon"] = int(mocap_proto.current_position.longitude * 1e7)  # type: ignore
+            hilgps["alt"] = int(mocap_proto.current_position.altitude * 1000)  # type: ignore  # m to mm
+            hilgps["eph"] = int(10)  # type: ignore  # horizontal dilution of precision in ?
+            hilgps["epv"] = int(10)  # type: ignore  # vertical duilution of precision in ?
+            hilgps["vel"] = int(mocap_proto.groundspeed * 100)  # type: ignore  # m to cm
+            hilgps["v_north"] = int(mocap_proto.local_vel.x * 100)  # type: ignore  # m to cm
+            hilgps["v_east"] = int(mocap_proto.local_vel.y * 100)  # type: ignore  # m to cm
+            hilgps["v_down"] = int(mocap_proto.local_vel.z * 100)  # type: ignore  # m to cm
+            hilgps["cog"] = int(mocap_proto.course * 100)  # type: ignore  # deg to cdeg
+            hilgps["sats_visible"] = int(13)  # type: ignore
+            hilgps["heading"] = int(mocap_proto.heading * 100)  # type: ignore  # deg to cdeg
 
-            return hilgps_proto
+            return hilgps
 
-        def send_hil_gps(gps_data: FlightControlModule_pb2.Offboard_GPS) -> None:
+        def send_hil_gps(gps_data: dict) -> None:
             """
             Sends the HIL GPS message.
             """
             try:
                 msg = self.master.mav.hil_gps_heading_encode(  # type: ignore
-                    gps_data.time_usec,  # type: ignore
-                    gps_data.fix_type,  # type: ignore
-                    gps_data.lat,  # type: ignore
-                    gps_data.lon,  # type: ignore
-                    gps_data.alt,  # type: ignore
-                    gps_data.eph,  # type: ignore
-                    gps_data.epv,  # type: ignore
-                    gps_data.vel,  # type: ignore
-                    gps_data.v_north,  # type: ignore
-                    gps_data.v_east,  # type: ignore
-                    gps_data.v_down,  # type: ignore
-                    gps_data.cog,  # type: ignore
-                    gps_data.sats_visible,  # type: ignore
-                    gps_data.heading,  # type: ignore
+                    gps_data["time_usec"],  # type: ignore
+                    gps_data["fix_type"],  # type: ignore
+                    gps_data["lat"],  # type: ignore
+                    gps_data["lon"],  # type: ignore
+                    gps_data["alt"],  # type: ignore
+                    gps_data["eph"],  # type: ignore
+                    gps_data["epv"],  # type: ignore
+                    gps_data["vel"],  # type: ignore
+                    gps_data["v_north"],  # type: ignore
+                    gps_data["v_east"],  # type: ignore
+                    gps_data["v_down"],  # type: ignore
+                    gps_data["cog"],  # type: ignore
+                    gps_data["sats_visible"],  # type: ignore
+                    gps_data["heading"],  # type: ignore
                 )
                 self.master.mav.send(msg)  # type: ignore
             except Exception as e:
@@ -1101,9 +1101,7 @@ class PyMAVLinkAgent(MAVMQTTBase):
                 # if time to send a new item, do so
                 if now - last_send_time > (1 / HIL_FREQ):
                     # prepare hil data
-                    hil_data = mocap_proto_to_offboard_proto(
-                        protobuf.from_bytes(data, mocap_pb2.Mocap)
-                    )
+                    hil_data = mocap_msg_to_offboard_msg(data)
                     # send it
                     send_hil_gps(hil_data)
                     last_send_time = time.time()
