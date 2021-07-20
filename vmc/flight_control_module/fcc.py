@@ -14,6 +14,7 @@ class FCCModule(object):
         self.mqtt_pass = "password"
 
         self.mqtt_client = mqtt.Client()
+        self.mqtt_client.username_pw_set(username=self.mqtt_user,password=self.mqtt_pass)
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_message = self.on_message
 
