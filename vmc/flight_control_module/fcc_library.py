@@ -84,9 +84,9 @@ class MAVMQTTBase(object):
 
         event["name"] = name
         event["payload"] = payload
-        event["timestamp"] = datetime.now()
+        event["timestamp"] = datetime.datetime.now()
 
-        self.mqtt_client.publish("events", event, retain=False, qos=0)
+        self.mqtt_client.publish("vrc/events", event, retain=False, qos=0)
 
     async def async_queue_action(
         self, queue_: queue.Queue, action: Callable, frequency: int = 10
@@ -227,7 +227,7 @@ class FCC(MAVMQTTBase):
             update["timestamp"] = datetime.datetime.now()
 
             # publish the proto
-            self.mqtt_client.publish("battery", update, retain=False, qos=0)
+            self.mqtt_client.publish("vrc/battery", update, retain=False, qos=0)
 
     @async_try_except()
     async def in_air_telemetry(self) -> None:
@@ -262,7 +262,7 @@ class FCC(MAVMQTTBase):
             update["mode"] = self.fcc_mode
             update["timestamp"] = datetime.datetime.now()
 
-            self.mqtt_client.publish("status", update, retain=False, qos=0)
+            self.mqtt_client.publish("vrc/status", update, retain=False, qos=0)
 
     @async_try_except()
     async def landed_state_telemetry(self) -> None:
@@ -323,7 +323,7 @@ class FCC(MAVMQTTBase):
             update["armed"] = self.is_armed
             update["timestamp"] = datetime.datetime.now()
 
-            self.mqtt_client.publish("status", update, retain=False, qos=0)
+            self.mqtt_client.publish("vrc/status", update, retain=False, qos=0)
 
             if status.mode != fcc_mode:  # type: ignore
                 if status.mode in fcc_mode_map.keys():  # type: ignore
@@ -352,7 +352,7 @@ class FCC(MAVMQTTBase):
             update["dZ"] = d
             update["timestamp"] = datetime.datetime.now()
 
-            self.mqtt_client.publish("location/local", update, retain=False, qos=0)
+            self.mqtt_client.publish("vrc/location/local", update, retain=False, qos=0)
 
     @async_try_except()
     async def position_lla_telemetry(self) -> None:
@@ -368,7 +368,7 @@ class FCC(MAVMQTTBase):
             update["hdg"] = self.heading  # type: ignore
             update["timestamp"] = datetime.datetime.now()
 
-            self.mqtt_client.publish("location/global", update, retain=False, qos=0)
+            self.mqtt_client.publish("vrc/location/global", update, retain=False, qos=0)
 
     @async_try_except()
     async def home_lla_telemetry(self) -> None:
@@ -383,7 +383,7 @@ class FCC(MAVMQTTBase):
             update["alt"] = home_position.relative_altitude_m  # type: ignore # agl
             update["timestamp"] = datetime.datetime.now()
 
-            self.mqtt_client.publish("location/home", update, retain=False, qos=0)
+            self.mqtt_client.publish("vrc/location/home", update, retain=False, qos=0)
 
     @async_try_except()
     async def attitude_euler_telemetry(self) -> None:
@@ -419,7 +419,7 @@ class FCC(MAVMQTTBase):
             self.heading = heading
 
             # publish the attitude
-            self.mqtt_client.publish("attitude/euler", update, retain=False, qos=0)
+            self.mqtt_client.publish("vrc/attitude/euler", update, retain=False, qos=0)
 
     @async_try_except()
     async def velocity_ned_telemetry(self) -> None:
@@ -436,7 +436,7 @@ class FCC(MAVMQTTBase):
             update["vZ"] = velocity.down_m_s  # type: ignore
             update["timestamp"] = datetime.datetime.now()
 
-            self.mqtt_client.publish("velocity", update, retain=False, qos=0)
+            self.mqtt_client.publish("vrc/velocity", update, retain=False, qos=0)
 
     # endregion ###############################################################
 
@@ -714,7 +714,7 @@ class FCC(MAVMQTTBase):
             if not self.offboard_enabled:
                 return
 
-            north = msg["north"]  # type: ignore # TODO - type cast these maybe? 
+            north = msg["north"]  # type: ignore # TODO - type cast these maybe?
             east = msg["east"]  # type: ignore
             down = msg["down"]  # type: ignore
             yaw = msg["yaw"]  # type: ignore
@@ -742,7 +742,7 @@ class FCC(MAVMQTTBase):
             if not self.offboard_enabled:
                 return
 
-            forward = msg["forward"]  # type: ignore # TODO - type casting? 
+            forward = msg["forward"]  # type: ignore # TODO - type casting?
             right = msg["right"]  # type: ignore
             down = msg["down"]  # type: ignore
             yaw = msg["yaw"]  # type: ignore

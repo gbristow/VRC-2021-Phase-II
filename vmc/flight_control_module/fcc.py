@@ -14,7 +14,9 @@ class FCCModule(object):
         self.mqtt_pass = "password"
 
         self.mqtt_client = mqtt.Client()
-        self.mqtt_client.username_pw_set(username=self.mqtt_user,password=self.mqtt_pass)
+        self.mqtt_client.username_pw_set(
+            username=self.mqtt_user, password=self.mqtt_pass
+        )
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_message = self.on_message
 
@@ -26,7 +28,7 @@ class FCCModule(object):
 
     def on_message(self, client, userdata, msg):
         try:
-            print(msg.topic+" "+str(msg.payload))
+            print(msg.topic + " " + str(msg.payload))
             if msg.topic in self.mqtt_topics.keys():
                 data = json.loads(msg.payload)
                 self.mqtt_topics[msg.topic].put(data)
@@ -34,10 +36,11 @@ class FCCModule(object):
             print(f"Error handling message on {msg.topic}")
 
     def on_connect(self, client, userdata, rc, properties=None):
-        print("Connected with result code "+str(rc))
+        print("Connected with result code " + str(rc))
         for topic in self.mqtt_topics.keys():
             print(f"FCCModule: Subscribed to: {topic}")
             client.subscribe(topic)
+
 
 if __name__ == "__main__":
     fcc = FCCModule()
