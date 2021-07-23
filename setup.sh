@@ -5,7 +5,7 @@ set -e
 
 bar () {
     # prints a bar equal to the current terminal width
-    printf '=%.0s' $(seq 1 $(tput cols))
+    printf '=%.0s' $(seq 1 "$(tput cols)")
 }
 
 # colors
