@@ -1,13 +1,13 @@
 import asyncio
-import math
+import datetime
 import json
+import math
 import queue
 import time
-import datetime
 from typing import Any, Callable, List
 
-from loguru import logger
 import mavsdk
+from loguru import logger
 from mavsdk.action import ActionError
 from mavsdk.geofence import Point, Polygon
 from mavsdk.mission_raw import MissionItem, MissionRawError
@@ -325,13 +325,13 @@ class FCC(MAVMQTTBase):
 
             self.mqtt_client.publish("vrc/status", update, retain=False, qos=0)
 
-            if status.mode != fcc_mode:  # type: ignore
-                if status.mode in fcc_mode_map.keys():  # type: ignore
-                    self._publish_state_machine_event(fcc_mode_map[str(mode)])  # type: ignore
+            if status.mode != fcc_mode:
+                if status.mode in fcc_mode_map.keys():
+                    self._publish_state_machine_event(fcc_mode_map[str(mode)])
                 else:
                     self._publish_state_machine_event("fcc_mode_error_event")
-            fcc_mode = status.mode  # type: ignore
-            self.fcc_mode = status.mode  # type: ignore
+            fcc_mode = status.mode
+            self.fcc_mode = status.mode
 
     @async_try_except()
     async def position_ned_telemetry(self) -> None:
@@ -362,10 +362,10 @@ class FCC(MAVMQTTBase):
         logger.debug(f"position_lla telemetry loop started")
         async for position in self.drone.telemetry.position():
             update = {}
-            update["lat"] = position.latitude_deg  # type: ignore
-            update["lon"] = position.longitude_deg  # type: ignore
-            update["alt"] = position.relative_altitude_m  # type: ignore
-            update["hdg"] = self.heading  # type: ignore
+            update["lat"] = position.latitude_deg
+            update["lon"] = position.longitude_deg
+            update["alt"] = position.relative_altitude_m
+            update["hdg"] = self.heading
             update["timestamp"] = datetime.datetime.now()
 
             self.mqtt_client.publish("vrc/location/global", update, retain=False, qos=0)
@@ -378,9 +378,9 @@ class FCC(MAVMQTTBase):
         logger.debug(f"home_lla telemetry loop started")
         async for home_position in self.drone.telemetry.home():
             update = {}
-            update["lat"] = home_position.latitude_deg  # type: ignore
-            update["lon"] = home_position.longitude_deg  # type: ignore
-            update["alt"] = home_position.relative_altitude_m  # type: ignore # agl
+            update["lat"] = home_position.latitude_deg
+            update["lon"] = home_position.longitude_deg
+            update["alt"] = home_position.relative_altitude_m  # agl
             update["timestamp"] = datetime.datetime.now()
 
             self.mqtt_client.publish("vrc/location/home", update, retain=False, qos=0)
@@ -404,9 +404,9 @@ class FCC(MAVMQTTBase):
             # do any necessary wrapping here
             update = {}
 
-            update["euler"]["roll"] = psi  # type: ignore
-            update["euler"]["pitch"] = theta  # type: ignore
-            update["euler"]["yaw"] = phi  # type: ignore
+            update["euler"]["roll"] = psi
+            update["euler"]["pitch"] = theta
+            update["euler"]["yaw"] = phi
             update["timestamp"] = datetime.datetime.now()
 
             if phi < 0:
@@ -431,9 +431,9 @@ class FCC(MAVMQTTBase):
         async for velocity in self.drone.telemetry.velocity_ned():
             update = {}
 
-            update["vX"] = velocity.north_m_s  # type: ignore
-            update["vY"] = velocity.east_m_s  # type: ignore
-            update["vZ"] = velocity.down_m_s  # type: ignore
+            update["vX"] = velocity.north_m_s
+            update["vY"] = velocity.east_m_s
+            update["vZ"] = velocity.down_m_s
             update["timestamp"] = datetime.datetime.now()
 
             self.mqtt_client.publish("vrc/velocity", update, retain=False, qos=0)
@@ -444,9 +444,6 @@ class FCC(MAVMQTTBase):
 
     @async_try_except()
     async def action_dispatcher(self) -> None:
-
-        prefix = "FCC CMD Dispatcher"
-
         class DispatcherBusy(Exception):
             """
             Exception for when the action dispatcher is currently busy
@@ -532,14 +529,14 @@ class FCC(MAVMQTTBase):
                 # TODO - Casey, 6/27 start here and make action into a dict instead of proto
                 action = self.action_queue.get_nowait()
 
-                if action.payload == "":  # type: ignore
+                if action.payload == "":
                     # Logging.normal(prefix,"Creating empty JSON string because payload was empty")
-                    action.payload = "{}"  # type: ignore
+                    action.payload = "{}"
 
-                if action.name in action_map:  # type: ignore
-                    payload = json.loads(action.payload)  # type: ignore
+                if action.name in action_map:
+                    payload = json.loads(action.payload)
                     await dispatch.schedule_task(
-                        action_map[action.name], payload, action.name  # type: ignore
+                        action_map[action.name], payload, action.name
                     )
             except DispatcherBusy:
                 logger.info("I'm busy running another task, try again later")
@@ -714,10 +711,10 @@ class FCC(MAVMQTTBase):
             if not self.offboard_enabled:
                 return
 
-            north = msg["north"]  # type: ignore # TODO - type cast these maybe?
-            east = msg["east"]  # type: ignore
-            down = msg["down"]  # type: ignore
-            yaw = msg["yaw"]  # type: ignore
+            north = msg["north"]  # TODO - type cast these maybe?
+            east = msg["east"]
+            down = msg["down"]
+            yaw = msg["yaw"]
             await self.drone.offboard.set_velocity_ned(
                 VelocityNedYaw(north, east, down, yaw)
             )
@@ -742,10 +739,10 @@ class FCC(MAVMQTTBase):
             if not self.offboard_enabled:
                 return
 
-            forward = msg["forward"]  # type: ignore # TODO - type casting?
-            right = msg["right"]  # type: ignore
-            down = msg["down"]  # type: ignore
-            yaw = msg["yaw"]  # type: ignore
+            forward = msg["forward"]  # TODO - type casting?
+            right = msg["right"]
+            down = msg["down"]
+            yaw = msg["yaw"]
             await self.drone.offboard.set_velocity_ned(
                 VelocityBodyYawspeed(forward, right, down, yaw)
             )
@@ -892,7 +889,9 @@ class MissionAPI(MAVMQTTBase):
             await self.drone.mission_raw.upload_mission(mission_items)
             self._publish_state_machine_event("mission_upload_success_event")
         except MissionRawError as e:
-            logger.warning(f"Mission upload failed because: {str(e._result.result_str)}")
+            logger.warning(
+                f"Mission upload failed because: {str(e._result.result_str)}"
+            )
             self._publish_state_machine_event(
                 "mission_upload_failed_event", str(e._result.result_str)
             )
@@ -1033,20 +1032,20 @@ class PyMAVLinkAgent(MAVMQTTBase):
             """
             hilgps = {}
 
-            hilgps["time_usec"] = int(mocap_proto.timestamp.ToMicroseconds())  # type: ignore
-            hilgps["fix_type"] = int(3)  # type: ignore  # this will always be "3" for a 3D fix
-            hilgps["lat"] = int(mocap_proto.current_position.latitude * 1e7)  # type: ignore
-            hilgps["lon"] = int(mocap_proto.current_position.longitude * 1e7)  # type: ignore
-            hilgps["alt"] = int(mocap_proto.current_position.altitude * 1000)  # type: ignore  # m to mm
-            hilgps["eph"] = int(10)  # type: ignore  # horizontal dilution of precision in ?
-            hilgps["epv"] = int(10)  # type: ignore  # vertical duilution of precision in ?
-            hilgps["vel"] = int(mocap_proto.groundspeed * 100)  # type: ignore  # m to cm
-            hilgps["v_north"] = int(mocap_proto.local_vel.x * 100)  # type: ignore  # m to cm
-            hilgps["v_east"] = int(mocap_proto.local_vel.y * 100)  # type: ignore  # m to cm
-            hilgps["v_down"] = int(mocap_proto.local_vel.z * 100)  # type: ignore  # m to cm
-            hilgps["cog"] = int(mocap_proto.course * 100)  # type: ignore  # deg to cdeg
-            hilgps["sats_visible"] = int(13)  # type: ignore
-            hilgps["heading"] = int(mocap_proto.heading * 100)  # type: ignore  # deg to cdeg
+            hilgps["time_usec"] = int(mocap_msg["timestamp"])  # microseconds
+            hilgps["fix_type"] = int(3)  # this will always be "3" for a 3D fix
+            hilgps["lat"] = int(mocap_msg["latitude"] * 1e7)
+            hilgps["lon"] = int(mocap_msg["longitude"] * 1e7)
+            hilgps["alt"] = int(mocap_msg["altitude"] * 1000)  # m to mm
+            hilgps["eph"] = int(10)  # horizontal dilution of precision in ?
+            hilgps["epv"] = int(10)  # vertical duilution of precision in ?
+            hilgps["vel"] = int(mocap_msg["groundspeed"] * 100)  # m to cm
+            hilgps["v_north"] = int(mocap_msg["vX"] * 100)  # m to cm
+            hilgps["v_east"] = int(mocap_msg["vY"] * 100)  # m to cm
+            hilgps["v_down"] = int(mocap_msg["vZ"] * 100)  # m to cm
+            hilgps["cog"] = int(mocap_msg["course"] * 100)  # deg to cdeg
+            hilgps["sats_visible"] = int(13)
+            hilgps["heading"] = int(mocap_msg["heading"] * 100)  # deg to cdeg
 
             return hilgps
 
@@ -1056,20 +1055,20 @@ class PyMAVLinkAgent(MAVMQTTBase):
             """
             try:
                 msg = self.master.mav.hil_gps_heading_encode(  # type: ignore
-                    gps_data["time_usec"],  # type: ignore
-                    gps_data["fix_type"],  # type: ignore
-                    gps_data["lat"],  # type: ignore
-                    gps_data["lon"],  # type: ignore
-                    gps_data["alt"],  # type: ignore
-                    gps_data["eph"],  # type: ignore
-                    gps_data["epv"],  # type: ignore
-                    gps_data["vel"],  # type: ignore
-                    gps_data["v_north"],  # type: ignore
-                    gps_data["v_east"],  # type: ignore
-                    gps_data["v_down"],  # type: ignore
-                    gps_data["cog"],  # type: ignore
-                    gps_data["sats_visible"],  # type: ignore
-                    gps_data["heading"],  # type: ignore
+                    gps_data["time_usec"],
+                    gps_data["fix_type"],
+                    gps_data["lat"],
+                    gps_data["lon"],
+                    gps_data["alt"],
+                    gps_data["eph"],
+                    gps_data["epv"],
+                    gps_data["vel"],
+                    gps_data["v_north"],
+                    gps_data["v_east"],
+                    gps_data["v_down"],
+                    gps_data["cog"],
+                    gps_data["sats_visible"],
+                    gps_data["heading"],
                 )
                 self.master.mav.send(msg)  # type: ignore
             except Exception as e:

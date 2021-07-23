@@ -1,7 +1,6 @@
-import paho.mqtt.client as mqtt
 import json
-import queue
-from fcc_library import FCC
+
+import paho.mqtt.client as mqtt
 
 
 class FCCModule(object):

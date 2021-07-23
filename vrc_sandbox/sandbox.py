@@ -1,3 +1,7 @@
+# This imports the "json" module from the Python standard library
+# https://docs.python.org/3/library/json.html
+import json
+
 # This imports the "time" module from the Python standard library
 # https://docs.python.org/3/library/time.html
 import time
@@ -10,6 +14,7 @@ from typing import Any, Callable, Dict
 # other running processes
 # https://github.com/eclipse/paho.mqtt.python
 import paho.mqtt.client as mqtt
+
 
 # This creates a new class that will contain multiple functions called "methods"
 class Sandbox(object):
@@ -104,9 +109,13 @@ class Sandbox(object):
         # First, check if the topic of the message we've recieved is inside the topic
         # map we've created.
         if msg.topic in self.topic_map:
-            # If so, lookup the method for the topic, and execute it
+            # We can't send JSON (dictionary) data over MQTT, so we send it as an
+            # encoded string. Here, we convert that encoded string back to
+            # JSON information for convience.
+            payload = json.loads(msg.payload)
+            # Lookup the method for the topic, and execute it
             # (with the parentheses) and pass it the payload of the message.
-            self.topic_map[msg.topic](msg.payload)
+            self.topic_map[msg.topic](payload)
 
     # ================================================================================
     # Now the training wheels come off! Write your custom message handlers here.
