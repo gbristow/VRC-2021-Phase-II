@@ -404,9 +404,9 @@ class FCC(MAVMQTTBase):
             # do any necessary wrapping here
             update = {}
 
-            update["euler"]["roll"] = psi
-            update["euler"]["pitch"] = theta
-            update["euler"]["yaw"] = phi
+            update["roll"] = psi
+            update["pitch"] = theta
+            update["yaw"] = phi
             update["timestamp"] = datetime.datetime.now()
 
             if phi < 0:
