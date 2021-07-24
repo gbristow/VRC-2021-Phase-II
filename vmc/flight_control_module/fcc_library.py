@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import functools
 import json
 import math
 import queue
@@ -35,6 +36,7 @@ def try_except(reraise: bool = False):
     """
 
     def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
         def wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
@@ -54,6 +56,7 @@ def async_try_except(reraise: bool = False):
     """
 
     def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
         async def wrapper(*args, **kwargs):
             try:
                 return await func(*args, **kwargs)
@@ -289,7 +292,7 @@ class FCC(MAVMQTTBase):
             previous_state = mode
 
     @async_try_except()
-    async def flight_mode_telemetry(self) -> None:  # sourcery skip
+    async def flight_mode_telemetry(self) -> None:
         """
         Runs the flight_mode telemetry loop
         """
@@ -325,13 +328,13 @@ class FCC(MAVMQTTBase):
 
             self.mqtt_client.publish("vrc/status", update, retain=False, qos=0)
 
-            if status.mode != fcc_mode:
-                if status.mode in fcc_mode_map.keys():
+            if mode != fcc_mode:
+                if mode in fcc_mode_map.keys():
                     self._publish_state_machine_event(fcc_mode_map[str(mode)])
                 else:
                     self._publish_state_machine_event("fcc_mode_error_event")
-            fcc_mode = status.mode
-            self.fcc_mode = status.mode
+            fcc_mode = mode
+            self.fcc_mode = mode
 
     @async_try_except()
     async def position_ned_telemetry(self) -> None:
