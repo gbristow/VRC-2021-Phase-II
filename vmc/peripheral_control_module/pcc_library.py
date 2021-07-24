@@ -53,9 +53,9 @@ class VRC_Peripheral(object):
         # wrgb + code = 5
         if len(wrgb) != 4:
             wrgb = [0, 0, 0, 0]
-
+            
         for i, color in enumerate(wrgb):
-            if color > 255 or color < 0:
+            if not isinstance(color, int) or color > 255 or color < 0:
                 wrgb[i] = 0
 
         command = self.commands["SET_BASE_COLOR"]
@@ -73,7 +73,7 @@ class VRC_Peripheral(object):
             wrgb = [0, 0, 0, 0]
 
         for i, color in enumerate(wrgb):
-            if color > 255 or color < 0:
+            if not isinstance(color, int) or color > 255 or color < 0:
                 wrgb[i] = 0
 
         command = self.commands["SET_TEMP_COLOR"]
@@ -118,7 +118,7 @@ class VRC_Peripheral(object):
         length = 3  # command + servo + min pwm
         data = []
 
-        if minimum < 1000 and minimum > 0:
+        if isinstance(minimum, (float, int)) and minimum < 1000 and minimum > 0:
             valid_command = True
             data = [servo, minimum]
 
@@ -136,7 +136,7 @@ class VRC_Peripheral(object):
         length = 3  # command + servo + min pwm
         data = []
 
-        if maximum < 1000 and maximum > 0:
+        if isinstance(maximum, (float, int)) and maximum < 1000 and maximum > 0:
             valid_command = True
             data = [servo, maximum]
 
@@ -154,7 +154,7 @@ class VRC_Peripheral(object):
         length = 3  # command + servo + percent
         data = []
 
-        if pct < 100 and pct > 0:
+        if isinstance(pct, (float, int)) and pct < 100 and pct > 0:
             valid_command = True
             data = [servo, int(pct)]
 
@@ -166,7 +166,6 @@ class VRC_Peripheral(object):
                 print(data)
 
     def reset_vrc_peripheral(self) -> None:
-
         command = self.commands["RESET_VRC_PERIPH"]
         length = 1  # just the reset command
 
