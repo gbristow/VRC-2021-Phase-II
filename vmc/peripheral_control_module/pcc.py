@@ -2,7 +2,7 @@ import json
 from typing import Any, List
 
 import paho.mqtt.client as mqtt
-from pcc_library import VRC_Peripheral
+from .pcc_library import VRC_Peripheral
 
 
 class PCCModule(object):
@@ -10,13 +10,13 @@ class PCCModule(object):
         self.mqtt_host = "localhost"
         self.mqtt_port = 1883
 
-        self.mqtt_user = "user"
-        self.mqtt_pass = "password"
+        # self.mqtt_user = "user"
+        # self.mqtt_pass = "password"
 
         self.mqtt_client = mqtt.Client()
-        self.mqtt_client.username_pw_set(
-            username=self.mqtt_user, password=self.mqtt_pass
-        )
+        # self.mqtt_client.username_pw_set(
+        #     username=self.mqtt_user, password=self.mqtt_pass
+        # )
 
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_message = self.on_message
@@ -36,25 +36,25 @@ class PCCModule(object):
         }
 
     def run(self):
-        self.mqtt_client.connect(self.mqtt_host, self.mqtt_port, 60)
+        self.mqtt_client.connect(host=self.mqtt_host, port=self.mqtt_port, keepalive=60)
         self.mqtt_client.loop_forever()
 
     def on_message(
         self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage
     ) -> None:
         try:
-            print(msg.topic + " " + str(msg.payload))
+            print(f"{msg.topic}: {str(msg.payload)}")
 
             if msg.topic in self.topic_map:
                 payload = json.loads(msg.payload)
                 self.topic_map[msg.topic](payload)
         except Exception as e:
-            print(f"Error handling message on {msg.topic}")
+            print(f"Error handling message on {msg.topic}: {e}")
 
     def on_connect(
-        self, client: mqtt.Client, userdata: Any, rc: int, properties=None
+        self, client: mqtt.Client, userdata: Any, rc: int, properties: mqtt.Properties=None
     ) -> None:
-        print("Connected with result code " + str(rc))
+        print(f"Connected with result code {str(rc)}")
         for topic in self.topic_map.keys():
             print(f"PCCModule: Subscribed to: {topic}")
             client.subscribe(topic)
@@ -65,7 +65,7 @@ class PCCModule(object):
 
     def set_temp_color(self, payload: dict) -> None:
         wrgb: List = payload["wrgb"]
-        if "time" in payload.keys():
+        if "time" in payload:
             time: float = payload["time"]
         else:
             time: float = 0.5

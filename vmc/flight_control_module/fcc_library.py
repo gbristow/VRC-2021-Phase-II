@@ -73,10 +73,15 @@ def async_try_except(reraise: bool = False):
 # classes
 
 
-class MAVMQTTBase(object):
+class MAVMQTTBase:
     def __init__(self, client: MQTTClient, drone: mavsdk.System = None) -> None:
         self.drone = drone
         self.mqtt_client = client
+
+        self.topic_prefix = "vrc"
+
+    def _timestamp(self) -> str:
+        return datetime.datetime.now().isoformat()
 
     @try_except()
     def _publish_state_machine_event(self, name: str, payload: str = "") -> None:
@@ -87,9 +92,11 @@ class MAVMQTTBase(object):
 
         event["name"] = name
         event["payload"] = payload
-        event["timestamp"] = datetime.datetime.now()
+        event["timestamp"] = self._timestamp()
 
-        self.mqtt_client.publish("vrc/events", event, retain=False, qos=0)
+        self.mqtt_client.publish(
+            f"{self.topic_prefix}/events", json.dumps(event), retain=False, qos=0
+        )
 
     async def async_queue_action(
         self, queue_: queue.Queue, action: Callable, frequency: int = 10
@@ -227,10 +234,12 @@ class FCC(MAVMQTTBase):
             # TODO see if mavsdk supports battery current
             # TODO see is mavsdk supports power draw
             update["soc"] = battery.remaining_percent * 100.0
-            update["timestamp"] = datetime.datetime.now()
+            update["timestamp"] = self._timestamp()
 
             # publish the proto
-            self.mqtt_client.publish("vrc/battery", update, retain=False, qos=0)
+            self.mqtt_client.publish(
+                f"{self.topic_prefix}/battery", json.dumps(update), retain=False, qos=0
+            )
 
     @async_try_except()
     async def in_air_telemetry(self) -> None:
@@ -263,9 +272,11 @@ class FCC(MAVMQTTBase):
 
             update["armed"] = armed
             update["mode"] = self.fcc_mode
-            update["timestamp"] = datetime.datetime.now()
+            update["timestamp"] = self._timestamp()
 
-            self.mqtt_client.publish("vrc/status", update, retain=False, qos=0)
+            self.mqtt_client.publish(
+                f"{self.topic_prefix}/status", json.dumps(update), retain=False, qos=0
+            )
 
     @async_try_except()
     async def landed_state_telemetry(self) -> None:
@@ -324,9 +335,11 @@ class FCC(MAVMQTTBase):
 
             update["mode"] = str(mode)
             update["armed"] = self.is_armed
-            update["timestamp"] = datetime.datetime.now()
+            update["timestamp"] = self._timestamp()
 
-            self.mqtt_client.publish("vrc/status", update, retain=False, qos=0)
+            self.mqtt_client.publish(
+                f"{self.topic_prefix}/status", json.dumps(update), retain=False, qos=0
+            )
 
             if mode != fcc_mode:
                 if mode in fcc_mode_map.keys():
@@ -353,9 +366,14 @@ class FCC(MAVMQTTBase):
             update["dX"] = n
             update["dY"] = e
             update["dZ"] = d
-            update["timestamp"] = datetime.datetime.now()
+            update["timestamp"] = self._timestamp()
 
-            self.mqtt_client.publish("vrc/location/local", update, retain=False, qos=0)
+            self.mqtt_client.publish(
+                f"{self.topic_prefix}/location/local",
+                json.dumps(update),
+                retain=False,
+                qos=0,
+            )
 
     @async_try_except()
     async def position_lla_telemetry(self) -> None:
@@ -369,9 +387,14 @@ class FCC(MAVMQTTBase):
             update["lon"] = position.longitude_deg
             update["alt"] = position.relative_altitude_m
             update["hdg"] = self.heading
-            update["timestamp"] = datetime.datetime.now()
+            update["timestamp"] = self._timestamp()
 
-            self.mqtt_client.publish("vrc/location/global", update, retain=False, qos=0)
+            self.mqtt_client.publish(
+                f"{self.topic_prefix}/location/global",
+                json.dumps(update),
+                retain=False,
+                qos=0,
+            )
 
     @async_try_except()
     async def home_lla_telemetry(self) -> None:
@@ -384,9 +407,14 @@ class FCC(MAVMQTTBase):
             update["lat"] = home_position.latitude_deg
             update["lon"] = home_position.longitude_deg
             update["alt"] = home_position.relative_altitude_m  # agl
-            update["timestamp"] = datetime.datetime.now()
+            update["timestamp"] = self._timestamp()
 
-            self.mqtt_client.publish("vrc/location/home", update, retain=False, qos=0)
+            self.mqtt_client.publish(
+                f"{self.topic_prefix}/location/home",
+                json.dumps(update),
+                retain=False,
+                qos=0,
+            )
 
     @async_try_except()
     async def attitude_euler_telemetry(self) -> None:
@@ -410,7 +438,7 @@ class FCC(MAVMQTTBase):
             update["roll"] = psi
             update["pitch"] = theta
             update["yaw"] = phi
-            update["timestamp"] = datetime.datetime.now()
+            update["timestamp"] = self._timestamp()
 
             if phi < 0:
                 heading = (2 * math.pi) + phi
@@ -422,7 +450,12 @@ class FCC(MAVMQTTBase):
             self.heading = heading
 
             # publish the attitude
-            self.mqtt_client.publish("vrc/attitude/euler", update, retain=False, qos=0)
+            self.mqtt_client.publish(
+                f"{self.topic_prefix}/attitude/euler",
+                json.dumps(update),
+                retain=False,
+                qos=0,
+            )
 
     @async_try_except()
     async def velocity_ned_telemetry(self) -> None:
@@ -437,9 +470,11 @@ class FCC(MAVMQTTBase):
             update["vX"] = velocity.north_m_s
             update["vY"] = velocity.east_m_s
             update["vZ"] = velocity.down_m_s
-            update["timestamp"] = datetime.datetime.now()
+            update["timestamp"] = self._timestamp()
 
-            self.mqtt_client.publish("vrc/velocity", update, retain=False, qos=0)
+            self.mqtt_client.publish(
+                f"{self.topic_prefix}/velocity", json.dumps(update), retain=False, qos=0
+            )
 
     # endregion ###############################################################
 

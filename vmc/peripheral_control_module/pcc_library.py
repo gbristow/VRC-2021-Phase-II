@@ -8,7 +8,7 @@ import serial
 
 
 class VRC_Peripheral(object):
-    def __init__(self, port: int, use_serial=True):
+    def __init__(self, port: int, use_serial: bool = True) -> None:
         self.port = port
 
         self.PREAMBLE = (0x24, 0x50)
@@ -29,9 +29,8 @@ class VRC_Peripheral(object):
 
         self.use_serial = use_serial
 
-        if self.use_serial is True:
-
-            print("opening serial port")
+        if self.use_serial:
+            print("Opening serial port")
             self.ser = serial.Serial()
             self.ser.baudrate = 115200
             self.ser.port = self.port
@@ -40,13 +39,14 @@ class VRC_Peripheral(object):
         else:
             print("VRC_Peripheral: Serial Transmission is OFF")
 
-        self.shutdown = False
+        self.shutdown: bool = False
 
     def run(self) -> None:
-        while self.shutdown is False:
-            if self.use_serial is True:
+        while not self.shutdown:
+            if self.use_serial:
                 while self.ser.in_waiting > 0:
                     print(self.ser.read(1), end="")
+
             time.sleep(0.01)
 
     def set_base_color(self, wrgb: List[int]) -> None:
@@ -170,7 +170,7 @@ class VRC_Peripheral(object):
         command = self.commands["RESET_VRC_PERIPH"]
         length = 1  # just the reset command
 
-        if self.use_serial is True:
+        if self.use_serial:
 
             self.ser.write(self._construct_payload(command, length))
             self.ser.close()
@@ -183,26 +183,24 @@ class VRC_Peripheral(object):
             print("VRC_Peripheral reset triggered (NO SERIAL)")
 
     def check_servo_controller(self) -> None:
-        command = self.commands["CHECK_SERVO_CONTROLLER"]
-        length = 1
-        if self.use_serial is True:
+        if self.use_serial:
+            command = self.commands["CHECK_SERVO_CONTROLLER"]
+            length = 1
             self.ser.write(self._construct_payload(command, length))
 
     def _construct_payload(self, code: int, size: int = 0, data: list = []):
         # [$][P][>][LENGTH-HI][LENGTH-LOW][DATA][CRC]
         payload = bytes()
 
-        data = (
+        new_data = (
             ("<3b", self.HEADER_OUTGOING),
             (">H", [size]),
             ("<B", [code]),
             ("<%dB" % len(data), data),
         )
 
-        for section in data:
+        for section in new_data:
             payload += pack(section[0], *section[1])
-
-        data = payload[3:]
 
         crc = self.calc_crc(payload, len(payload))
 
@@ -213,12 +211,7 @@ class VRC_Peripheral(object):
     def list_pack(self, bit_format: Union[str, bytes], value: Any) -> List[int]:
         bytez = pack(bit_format, value)
 
-        ret_list = []
-
-        for byte in bytez:
-            ret_list.append(byte)
-
-        return ret_list
+        return [byte for byte in bytez]
 
     def crc8_dvb_s2(self, crc, a):
         # https://stackoverflow.com/a/52997726
@@ -230,8 +223,8 @@ class VRC_Peripheral(object):
                 crc = (crc << 1) % 256
         return crc
 
-    def calc_crc(self, string: str, length: int):
+    def calc_crc(self, string: Union[str, bytes], length: int):
         crc = 0
-        for i in range(0, length):
+        for i in range(length):
             crc = self.crc8_dvb_s2(crc, string[i])
         return crc
