@@ -27,14 +27,14 @@ class Sandbox():
     def __init__(self) -> None:
         # Create a string attribute to hold the hostname/ip address of the MQTT server
         # we're going to connect to (an attribute is just a variable in a class).
-        # In this case, the MQTT server will be running
-        # on the same computer as this code, so we can use the special name
-        # "localhost". https://en.wikipedia.org/wiki/Localhost
-        self.mqtt_host = "localhost"
+        # Because we're running this code within a Docker Compose network,
+        # using the container name of "mqtt" will work.
+        self.mqtt_host = "mqtt"
         # Create an integer attribute to hold the port number of the MQTT server
-        # we're going to connect to. MQTT uses a default of port 1883, which we will
-        # also use.
-        self.mqtt_port = 1883
+        # we're going to connect to. MQTT uses a default of port 1883, but we'll
+        # add a zero, so as to not require administrator priviledges from the host
+        # operating system by using a low port number.
+        self.mqtt_port = 18830
         # Create an attribute to hold an instance of the Paho MQTT client class
         self.mqtt_client = mqtt.Client()
 

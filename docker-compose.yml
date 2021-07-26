@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  mqtt:
+    image: docker.io/library/eclipse-mosquitto:2.0.11
+    restart: unless-stopped
+    volumes:
+      - ./vmc/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  fcc:
+    depends_on: 
+      - mqtt
+    build: vmc/flight_control_module
+    restart: unless-stopped
+
+  pcc:
+    depends_on: 
+      - mqtt
+    build: vmc/peripheral_control_module
+    restart: unless-stopped
+
+  # sandbox:
+  #   depends_on: 
+  #     - mqtt
+  #   build: vrc_sandbox
+  #   restart: unless-stopped

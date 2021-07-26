@@ -4,6 +4,7 @@ import time
 from struct import pack
 from typing import Any, List, Literal, Union
 
+from loguru import logger
 import serial
 
 
@@ -30,14 +31,14 @@ class VRC_Peripheral(object):
         self.use_serial = use_serial
 
         if self.use_serial:
-            print("Opening serial port")
+            logger.debug("Opening serial port")
             self.ser = serial.Serial()
             self.ser.baudrate = 115200
             self.ser.port = self.port
             self.ser.open()
 
         else:
-            print("VRC_Peripheral: Serial Transmission is OFF")
+            logger.debug("VRC_Peripheral: Serial Transmission is OFF")
 
         self.shutdown: bool = False
 
@@ -64,8 +65,8 @@ class VRC_Peripheral(object):
         if self.use_serial is True:
             self.ser.write(data)
         else:
-            print("VRC_Peripheral serial data: ")
-            print(data)
+            logger.debug("VRC_Peripheral serial data: ")
+            logger.debug(data)
 
     def set_temp_color(self, wrgb: List[int], time: float = 0.5) -> None:
         # wrgb + code = 5
@@ -85,8 +86,8 @@ class VRC_Peripheral(object):
         if self.use_serial is True:
             self.ser.write(data)
         else:
-            print("VRC_Peripheral serial data: ")
-            print(data)
+            logger.debug("VRC_Peripheral serial data: ")
+            logger.debug(data)
 
     def set_servo_open_close(self, servo: int, action: Literal["open", "close"]) -> None:
         valid_command = False
@@ -108,8 +109,8 @@ class VRC_Peripheral(object):
             if self.use_serial is True:
                 self.ser.write(self._construct_payload(command, length, data))
             else:
-                print("VRC_Peripheral serial data: ")
-                print(data)
+                logger.debug("VRC_Peripheral serial data: ")
+                logger.debug(data)
 
     def set_servo_min(self, servo: int, minimum: float) -> None:
         valid_command = False
@@ -126,8 +127,8 @@ class VRC_Peripheral(object):
             if self.use_serial is True:
                 self.ser.write(self._construct_payload(command, length, data))
             else:
-                print("VRC_Peripheral serial data: ")
-                print(data)
+                logger.debug("VRC_Peripheral serial data: ")
+                logger.debug(data)
 
     def set_servo_max(self, servo: int, maximum: float) -> None:
         valid_command = False
@@ -144,8 +145,8 @@ class VRC_Peripheral(object):
             if self.use_serial is True:
                 self.ser.write(self._construct_payload(command, length, data))
             else:
-                print("VRC_Peripheral serial data: ")
-                print(data)
+                logger.debug("VRC_Peripheral serial data: ")
+                logger.debug(data)
 
     def set_servo_pct(self, servo: int, pct: float) -> None:
         valid_command = False
@@ -162,8 +163,8 @@ class VRC_Peripheral(object):
             if self.use_serial is True:
                 self.ser.write(self._construct_payload(command, length, data))
             else:
-                print("VRC_Peripheral serial data: ")
-                print(data)
+                logger.debug("VRC_Peripheral serial data: ")
+                logger.debug(data)
 
     def reset_vrc_peripheral(self) -> None:
         command = self.commands["RESET_VRC_PERIPH"]
@@ -179,7 +180,7 @@ class VRC_Peripheral(object):
             # try to reconnect
             self.ser.open()
         else:
-            print("VRC_Peripheral reset triggered (NO SERIAL)")
+            logger.debug("VRC_Peripheral reset triggered (NO SERIAL)")
 
     def check_servo_controller(self) -> None:
         if self.use_serial:

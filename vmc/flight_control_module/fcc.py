@@ -1,14 +1,19 @@
 import json
 from typing import Any, Callable, Dict
 
+from loguru import logger
 import paho.mqtt.client as mqtt
 
+try:
+    from fcc_library import FCC # type: ignore
+except ImportError:
+    from .fcc_library import FCC
 
 class FCCModule(object):
     def __init__(self):
 
-        self.mqtt_host = "localhost"
-        self.mqtt_port = 1883
+        self.mqtt_host = "mqtt"
+        self.mqtt_port = 18830
 
         # self.mqtt_user = "user"
         # self.mqtt_pass = "password"
@@ -34,12 +39,12 @@ class FCCModule(object):
 
     def on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
         try:
-            print(f"{msg.topic}: {str(msg.payload)}")
+            logger.debug(f"{msg.topic}: {str(msg.payload)}")
             if msg.topic in self.mqtt_topics.keys():
                 data = json.loads(msg.payload)
                 self.mqtt_topics[msg.topic].put(data)
         except Exception as e:
-            print(f"Error handling message on {msg.topic}: {e}")
+            logger.exception(f"Error handling message on {msg.topic}")
 
     def on_connect(
         self,
@@ -48,9 +53,9 @@ class FCCModule(object):
         rc: int,
         properties: mqtt.Properties = None,
     ) -> None:
-        print(f"Connected with result code {str(rc)}")
+        logger.debug(f"Connected with result code {str(rc)}")
         for topic in self.mqtt_topics.keys():
-            print(f"FCCModule: Subscribed to: {topic}")
+            logger.debug(f"FCCModule: Subscribed to: {topic}")
             client.subscribe(topic)
 
 

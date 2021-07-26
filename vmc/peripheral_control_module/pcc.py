@@ -1,14 +1,18 @@
 import json
 from typing import Any, List
 
+from loguru import logger
 import paho.mqtt.client as mqtt
-from .pcc_library import VRC_Peripheral
 
+try:
+    from pcc_library import VRC_Peripheral # type: ignore
+except ImportError:
+    from .pcc_library import VRC_Peripheral
 
 class PCCModule(object):
     def __init__(self, serial_port):
-        self.mqtt_host = "localhost"
-        self.mqtt_port = 1883
+        self.mqtt_host = "mqtt"
+        self.mqtt_port = 18830
 
         # self.mqtt_user = "user"
         # self.mqtt_pass = "password"
@@ -43,20 +47,20 @@ class PCCModule(object):
         self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage
     ) -> None:
         try:
-            print(f"{msg.topic}: {str(msg.payload)}")
+            logger.debug(f"{msg.topic}: {str(msg.payload)}")
 
             if msg.topic in self.topic_map:
                 payload = json.loads(msg.payload)
                 self.topic_map[msg.topic](payload)
         except Exception as e:
-            print(f"Error handling message on {msg.topic}: {e}")
+            logger.exception(f"Error handling message on {msg.topic}")
 
     def on_connect(
         self, client: mqtt.Client, userdata: Any, rc: int, properties: mqtt.Properties=None
     ) -> None:
-        print(f"Connected with result code {str(rc)}")
+        logger.debug(f"Connected with result code {str(rc)}")
         for topic in self.topic_map.keys():
-            print(f"PCCModule: Subscribed to: {topic}")
+            logger.debug(f"PCCModule: Subscribed to: {topic}")
             client.subscribe(topic)
 
     def set_base_color(self, payload: dict) -> None:
