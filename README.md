@@ -65,16 +65,16 @@ This is a list of topics you can send data to, to make things happen on the dron
   - "wrgb": A list of 4 `int`s between 0 and 255 to set a temporary color of the LEDs. Example: `[0, 128, 255]`.
   - "time": Optional `float` for the number of seconds the color should be set for. Default is `0.5`.
 - vrc/pcc/set_servo_open_close
-  - "servo": Name of the servo to open or close as a `str`. // TODO: check this
+  - "servo": ID of the servo to open or close as a `int`.
   - "action": Either the literal string `"open"` or `"close"`.
 - vrc/pcc/set_servo_min
-  - "servo": Name of the servo to set the minimum pulse width of as a `str`. // TODO: check this
+  - "servo": ID of the servo to set the minimum pulse width of as a `int`.
   - "min_pulse": A `float` between 0 and 1000.
 - vrc/pcc/set_servo_max
-  - "servo": Name of the servo to set the maximum pulse width of as a `str`. // TODO: check this
+  - "servo": ID of the servo to set the maximum pulse width of as a `int`.
   - "max_pulse": A `float` between 0 and 1000.
 - vrc/pcc/set_servo_pct
-  - "servo": Name of the servo to set the percent of as a `str`. // TODO: check this
+  - "servo": ID of the servo to set the percent of as a `int`.
   - "percent": A `float` between 0 and 100.
 - vrc/pcc/reset
   - There is no payload required for this topic. This will reset all of the peripheals.

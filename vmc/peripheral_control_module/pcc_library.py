@@ -88,7 +88,7 @@ class VRC_Peripheral(object):
             print("VRC_Peripheral serial data: ")
             print(data)
 
-    def set_servo_open_close(self, servo, action: Literal["open", "close"]) -> None:
+    def set_servo_open_close(self, servo: int, action: Literal["open", "close"]) -> None:
         valid_command = False
 
         command = self.commands["SET_SERVO_OPEN_CLOSE"]
@@ -111,7 +111,7 @@ class VRC_Peripheral(object):
                 print("VRC_Peripheral serial data: ")
                 print(data)
 
-    def set_servo_min(self, servo, minimum: float) -> None:
+    def set_servo_min(self, servo: int, minimum: float) -> None:
         valid_command = False
 
         command = self.commands["SET_SERVO_MIN"]
@@ -129,7 +129,7 @@ class VRC_Peripheral(object):
                 print("VRC_Peripheral serial data: ")
                 print(data)
 
-    def set_servo_max(self, servo, maximum: float) -> None:
+    def set_servo_max(self, servo: int, maximum: float) -> None:
         valid_command = False
 
         command = self.commands["SET_SERVO_MAX"]
@@ -147,7 +147,7 @@ class VRC_Peripheral(object):
                 print("VRC_Peripheral serial data: ")
                 print(data)
 
-    def set_servo_pct(self, servo, pct: float) -> None:
+    def set_servo_pct(self, servo: int, pct: float) -> None:
         valid_command = False
 
         command = self.commands["SET_SERVO_PCT"]
