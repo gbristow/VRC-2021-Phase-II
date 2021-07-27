@@ -8,19 +8,22 @@ services:
       - ./vmc/mosquitto.conf:/mosquitto/config/mosquitto.conf
 
   fcc:
-    depends_on: 
+    depends_on:
       - mqtt
     build: vmc/flight_control_module
+    # https://stackoverflow.com/a/43541732
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
 
   pcc:
-    depends_on: 
+    depends_on:
       - mqtt
     build: vmc/peripheral_control_module
     restart: unless-stopped
 
   # sandbox:
-  #   depends_on: 
+  #   depends_on:
   #     - mqtt
   #   build: vrc_sandbox
   #   restart: unless-stopped
