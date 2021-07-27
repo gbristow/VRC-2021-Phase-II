@@ -1,3 +1,4 @@
+import queue
 import json
 from typing import Any, Callable, Dict
 
@@ -28,7 +29,7 @@ class FCCModule(object):
 
         self.topic_prefix = "vrc"
 
-        # todo ?
+        self.mocap_queue = queue.Queue()
         self.mqtt_topics: Dict[str, Callable[[dict], None]] = {
             f"{self.topic_prefix}/vision/position": self.mocap_queue,
         }
