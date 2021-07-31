@@ -567,18 +567,18 @@ class FCC(MAVMQTTBase):
                 # TODO - Casey, 6/27 start here and make action into a dict instead of proto
                 action = self.action_queue.get_nowait()
 
-                if action.payload == "":
+                if action["payload"] == "":
                     # Logging.normal(prefix,"Creating empty JSON string because payload was empty")
-                    action.payload = "{}"
+                    action["payload"] = "{}"
 
-                if action.name in action_map:
-                    payload = json.loads(action.payload)
+                if action["name"] in action_map:
+                    payload = json.loads(action["payload"])
                     await dispatch.schedule_task(
-                        action_map[action.name], payload, action.name
+                        action_map[action["name"]], payload, action["name"]
                     )
             except DispatcherBusy:
                 logger.info("I'm busy running another task, try again later")
-                self._publish_state_machine_event("fcc_busy_event", payload=action.name)
+                self._publish_state_machine_event("fcc_busy_event", payload=action["name"])
             except queue.Empty:
                 await asyncio.sleep(0.1)
             except Exception as e:
