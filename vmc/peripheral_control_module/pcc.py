@@ -78,7 +78,7 @@ class PCCModule(object):
     def set_servo_open_close(self, payload: dict) -> None:
         servo: int = payload["servo"]
         action: str = payload["action"]
-        self.pcc.set_servo_open_close(servo, action)
+        self.pcc.set_servo_open_close(servo, action) #type: ignore #TODO - nathan, why is this mad?
 
     def set_servo_min(self, payload: dict) -> None:
         servo: int = payload["servo"]
