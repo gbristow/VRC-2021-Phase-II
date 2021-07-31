@@ -1,0 +1,7 @@
+cython
+loguru==0.5.3
+paho-mqtt==1.5.1
+transforms3d
+numpy
+colored
+pyrealsense
