@@ -1,11 +1,16 @@
 version: '3'
 
 services:
+  mavp2p:
+    build: vmc/mavp2p
+    command: tcps:0.0.0.0:5790 udpc:127.0.0.1:14541 --print-errors
+    restart: unless-stopped
+
   mqtt:
     image: docker.io/library/eclipse-mosquitto:2.0.11
     restart: unless-stopped
     volumes:
-      - ./vmc/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./vmc/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
 
   fcc:
     depends_on:
@@ -20,6 +25,12 @@ services:
     depends_on:
       - mqtt
     build: vmc/peripheral_control_module
+    restart: unless-stopped
+
+  vio:
+    depends_on:
+      - mqtt
+    build: vmc/vio_module
     restart: unless-stopped
 
   # sandbox:
