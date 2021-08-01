@@ -144,7 +144,7 @@ class AprilTagVPS(object):
         Pulls images off the image queue, hands them to the apriltag detector, and then places the results in the tags queue
         """
         setproctitle("AprilTagVPS_perception")
-        logger.debug(f"{fore.GREEN}AT: Perception Loop Started!{style.RESET}")
+        logger.debug(f"{fore.GREEN}AT: Perception Loop Started!{style.RESET}") #type: ignore
         try:
             while True:
                 if not self.img_queue.empty():
@@ -154,7 +154,7 @@ class AprilTagVPS(object):
                 else:
                     time.sleep(0.01)
         except Exception as e:
-            logger.exception(f"{fore.RED}AT: Perception Loop Error: {e}{style.RESET}")
+            logger.exception(f"{fore.RED}AT: Perception Loop Error: {e}{style.RESET}") #type: ignore
             raise e
 
 
