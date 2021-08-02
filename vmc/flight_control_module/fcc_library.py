@@ -78,7 +78,7 @@ class MAVMQTTBase:
         self.drone = drone
         self.mqtt_client = client
 
-        self.topic_prefix = "vrc"
+        self.topic_prefix = "vrc/fcc"
 
     def _timestamp(self) -> str:
         return datetime.datetime.now().isoformat()

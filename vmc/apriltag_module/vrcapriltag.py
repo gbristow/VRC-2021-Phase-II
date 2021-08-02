@@ -6,6 +6,7 @@ from math import pi, cos, sin
 import json
 import socket
 import warnings
+from mavsdk.generated.telemetry_pb2 import Position
 
 # pip installed packages
 import numpy as np
@@ -17,7 +18,9 @@ from colored import fore, back, style
 from apriltag_library import AprilTagVPS
 
 from loguru import logger
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Any
+
+import paho.mqtt.client as mqtt
 
 # find the file path to this file
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -26,7 +29,7 @@ warnings.simplefilter("ignore", np.RankWarning)
 
 
 class VRCAprilTag(object):
-    def __init__(self, broker, config):
+    def __init__(self):
         self.default_config: dict = {
             "camera_params": {
                 "HD": [584.3866, 583.3444, 661.2944, 320.7182],
@@ -57,7 +60,58 @@ class VRCAprilTag(object):
         self.at: Union[AprilTagVPS, None] = None  # AprilTag object
         self.tm = dict()
 
-        rmat = t3d.euler.euler2mat(self.default_config["cam"]["rpy"][0], self.default_config["cam"]["rpy"][1], self.default_config["cam"]["rpy"][2], axes="rxyz")  # type: ignore
+        self.setup_transforms()
+
+        self.pos_array = {"n": [], "e": [], "d": [], "heading": [], "time": []}
+
+        self.mqtt_host = "mqtt"
+        self.mqtt_port = 18830
+
+        # self.mqtt_user = "user"
+        # self.mqtt_pass = "password"
+
+        self.mqtt_client = mqtt.Client()
+        # self.mqtt_client.username_pw_set(
+        #     username=self.mqtt_user, password=self.mqtt_pass
+        # )
+
+        self.mqtt_client.on_connect = self.on_connect
+        self.mqtt_client.on_message = self.on_message
+
+        self.topic_prefix = "vrc/apriltag"
+        self.topic_map = {}
+
+    def on_message(
+        self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage
+    ) -> None:
+        try:
+            logger.debug(f"{msg.topic}: {str(msg.payload)}")
+
+            if msg.topic in self.topic_map:
+                payload = json.loads(msg.payload)
+                self.topic_map[msg.topic](payload)
+        except Exception as e:
+            logger.exception(f"Error handling message on {msg.topic}")
+
+    def on_connect(
+        self,
+        client: mqtt.Client,
+        userdata: Any,
+        rc: int,
+        properties: mqtt.Properties = None,
+    ) -> None:
+        logger.debug(f"Connected with result code {str(rc)}")
+        for topic in self.topic_map.keys():
+            logger.debug(f"Apriltag Module: Subscribed to: {topic}")
+            client.subscribe(topic)
+
+    def setup_transforms(self):
+        rmat = t3d.euler.euler2mat(
+            self.default_config["cam"]["rpy"][0],
+            self.default_config["cam"]["rpy"][1],
+            self.default_config["cam"]["rpy"][2],
+            axes="rxyz",
+        )  # type: ignore
         H_cam_aeroBody = t3d.affines.compose(self.default_config["cam"]["pos"], rmat, [1, 1, 1])  # type: ignore
 
         H_aeroBody_cam = np.linalg.inv(H_cam_aeroBody)
@@ -73,8 +127,6 @@ class VRCAprilTag(object):
             self.tm[H_to_from] = tag_tf
             H_to_from = "H_" + name + "_cam"
             self.tm[H_to_from] = np.eye(4)
-
-        self.pos_array = {"n": [], "e": [], "d": [], "heading": [], "time": []}
 
     def dist_to_tag(self, tag):
         """
@@ -128,16 +180,30 @@ class VRCAprilTag(object):
         else:
             return tag_id, error, distance, None, None
 
+    def publish_dict(self, topic, data):
+        self.mqtt_client.publish(
+            topic, json.dumps(data), retain=False, qos=0,
+        )
+
     def publish_updates(
-        self,
-        visible_tag_ids,
-        distance_to_closest_tag,
-        best_error,
-        best_position,
-        best_heading,
-        best_tag_id,
+        self, visible_tag_ids, best_error, best_position, best_heading, best_tag_id,
     ):
-        pass
+
+        # visible_tags
+        tags = {"ids": visible_tag_ids}
+        self.publish_dict(f"{self.topic_prefix}/visible_tags", tags)
+
+        # selected positon
+        position = {"n": best_position[0], "e": best_position[1], "d": best_position[2]}
+        self.publish_dict(f"{self.topic_prefix}/selected/position/ned", position)
+
+        # selected heading
+        heading = {"degrees": best_heading}
+        self.publish_dict(f"{self.topic_prefix}/selected/heading", heading)
+
+        # selected id & error
+        update = {"id": best_tag_id, "error": best_error}
+        self.publish_dict(f"{self.topic_prefix}/selected", update)
 
     def loop(self):
         """
@@ -195,15 +261,11 @@ class VRCAprilTag(object):
 
                 self.publish_updates(
                     visible_tag_ids,
-                    distance_to_closest_tag,
                     best_error,
                     best_position,
                     best_heading,
                     best_tag_id,
                 )
-
-            if vmc_updates:
-                self.topics["vrc.aprilTag"].pub(vmc_updates)
 
             prev_timestamp = current_timestamp
             time.sleep(1 / self.default_config["AT_UPDATE_FREQ"])
