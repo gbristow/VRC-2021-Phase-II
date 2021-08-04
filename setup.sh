@@ -136,7 +136,7 @@ echo -e "${CYAN}Creating Python virtual environment${NC}"
 bar
 cd $VENV_DIR
 # this doesn't overwrite it if it already exists
-python3.8 -m venv $VENV_DIR --prompt "VRC" --upgrade-deps
+python3.8 -m venv $VENV_DIR --prompt "VRC" --upgrade
 bar
 
 
