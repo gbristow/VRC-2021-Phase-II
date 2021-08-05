@@ -1,7 +1,8 @@
 import cv2
+from typing import List
 
 class CaptureDevice(object):
-    def __init__(self, protocol, video_device, res, framerate=None):
+    def __init__(self, protocol: str, video_device: str, res: List[int], framerate=None):
         self.protocol = protocol
         self.dev = video_device
         self.res = res
@@ -77,7 +78,7 @@ class CaptureDevice(object):
 
 if __name__ == "__main__":
     import time
-    
+
     cam = CaptureDevice(
         protocol="argus",
         video_device="/dev/video0",
