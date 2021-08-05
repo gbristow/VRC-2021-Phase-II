@@ -134,6 +134,7 @@ class AprilTagVPS(object):
         logger.debug(f"{fore.GREEN}AT: Capture Loop Started!{style.RESET}") #type: ignore
         while True:
             ret, img = capture.read_gray()
+            logger.debug(f"{fore.GREEN}AT: ret: {ret}{style.RESET}") #type: ignore
             #if theres room in the queue and we have a valid image
             if (self.img_queue.qsize() < max_depth) and (ret is True):
                 #put the image in the queue
@@ -162,8 +163,8 @@ class AprilTagVPS(object):
 
 if __name__ == "__main__":
     at = AprilTagVPS(
-        protocol="v4l2",
-        video_device="/dev/video1",
+        protocol="argus",
+        video_device="/dev/video0",
         res=[1280, 720],
         camera_params=[584.3866, 583.3444, 661.2944, 320.7182],
         tag_size=0.174,  # full size tag

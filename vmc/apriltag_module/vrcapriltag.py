@@ -292,13 +292,13 @@ class VRCAprilTag(object):
         threads.append(at_thread)
 
         transform_thread = threading.Thread(
-            target=self.loop, args=(), daemon=True, name="apriltag_transform_thread"
+            target=self.loop, args=(), daemon=True, name="apriltag_transform_and_publish_thread"
         )
         threads.append(transform_thread)
 
         for thread in threads:
             thread.start()
-            print("AT: starting thread: {}".format(thread.name))
+            logger.debug(f"{fore.GREEN}AT: starting thread: {thread.name}{style.RESET}") #type: ignore
 
         while True:
             time.sleep(0.25)
