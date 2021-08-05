@@ -111,6 +111,8 @@ bar
 
 echo -e "${CYAN}Installing Docker${NC}"
 bar
+
+# remove old docker installation
 $s apt remove -y docker || true
 $s apt remove -y docker-engine|| true
 $s apt remove -y docker.io || true
@@ -129,12 +131,15 @@ $s apt update
 $s apt install -y docker-ce:arm64 docker-ce-cli:arm64 containerd.io:arm64 docker-compose:arm64
 
 # set up group rights for docker
-$s groupadd docker || true
-$s usermod -aG docker "$USER"
-newgrp docker 
+# had issues with the script suddenly exiting
+# set +e
+# $s groupadd docker
+# $s usermod -aG docker "$USER"
+# newgrp docker 
+# set -e
 
 cd $VRC_DIR
-$s docker-compose pull
+$s docker-compose build
 bar
 
 
