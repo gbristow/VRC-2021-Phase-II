@@ -97,7 +97,8 @@ bar
 echo -e "${CYAN}Installing prerequisites${NC}"
 bar
 # install some useful prereqs
-$s apt install git apt-transport-https ca-certificates apt-utils software-properties-common gnupg lsb-release unzip curl htop -y
+$s apt install -y git apt-transport-https ca-certificates apt-utils software-properties-common gnupg lsb-release unzip curl htop nano python3 python3-wheel python3-pip
+$s -H python3 -m pip install -U jetson-stats
 cd $VRC_DIR
 # cache the git credentials (mainly during development)
 git config --global credential.helper cache
@@ -128,7 +129,7 @@ $s apt update
 $s apt install -y docker-ce:arm64 docker-ce-cli:arm64 containerd.io:arm64 docker-compose:arm64
 
 # set up group rights for docker
-$s groupadd docker
+$s groupadd docker || true
 $s usermod -aG docker "$USER"
 newgrp docker 
 
