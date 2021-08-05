@@ -79,6 +79,8 @@ class CaptureDevice(object):
 if __name__ == "__main__":
     import time
 
+    print(cv2.getBuildInformation())
+
     cam = CaptureDevice(
         protocol="argus",
         video_device="/dev/video0",
