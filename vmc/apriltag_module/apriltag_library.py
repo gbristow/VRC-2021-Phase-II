@@ -138,6 +138,7 @@ class AprilTagVPS(object):
             if (self.img_queue.qsize() < max_depth) and (ret is True):
                 #put the image in the queue
                 self.img_queue.put(img)
+                logger.debug(f"{fore.GREEN}AT: Placed an image!{style.RESET}") #type: ignore
             time.sleep(0.01)
 
     def perception_loop(self):
