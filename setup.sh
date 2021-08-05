@@ -91,8 +91,6 @@ bar
 export DEBIAN_FRONTEND=noninteractive
 # upgrade existing packages
 $s apt upgrade -y
-# autoremove a bunch
-$s apt autoremove -y
 bar
 
 
@@ -112,11 +110,11 @@ bar
 
 echo -e "${CYAN}Installing Docker${NC}"
 bar
-$s apt remove docker || true
-$s apt remove docker-engine|| true
-$s apt remove docker.io || true
-$s apt remove containerd || true
-$s apt remove runc || true
+$s apt remove -y docker || true
+$s apt remove -y docker-engine|| true
+$s apt remove -y docker.io || true
+$s apt remove -y containerd || true
+$s apt remove -y runc || true
 
 # add docker GPG key
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | $s gpg --batch --yes --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
@@ -127,7 +125,7 @@ echo \
 
 # install docker
 $s apt update
-$s apt install -y docker-ce docker-ce-cli containerd.io docker-compose
+$s apt install -y docker-ce:arm64 docker-ce-cli:arm64 containerd.io:arm64 docker-compose:arm64
 
 # set up group rights for docker
 $s groupadd docker
@@ -136,6 +134,12 @@ newgrp docker
 
 cd $VRC_DIR
 $s docker-compose pull
+bar
+
+
+echo -e "${CYAN}Cleaning up${NC}"
+bar
+$s apt autoremove -y
 bar
 
 
