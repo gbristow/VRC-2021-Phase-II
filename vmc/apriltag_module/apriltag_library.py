@@ -115,7 +115,7 @@ class AprilTagVPS(object):
                 tdelta = now - last_loop
                 delta_buckets[i % 10] = tdelta #type: ignore
                 avg = 1 / (sum(delta_buckets) / 10)
-                # print("FPS: {:04.1f} \t Tags: {}".format(avg, len(tags)))
+                print("FPS: {:04.1f} \t Tags: {}".format(avg, len(tags)))
                 last_loop = now
                 i = i + 1
             else:
@@ -131,6 +131,7 @@ class AprilTagVPS(object):
         capture = CaptureDevice(
             self.protocol, self.video_device, self.res, self.framerate
         )
+        logger.debug(f"{fore.GREEN}AT: Capture Loop Started!{style.RESET}") #type: ignore
         while True:
             ret, img = capture.read_gray()
             #if theres room in the queue and we have a valid image
