@@ -7,6 +7,7 @@ class CaptureDevice(object):
         self.res = res
 
         # "gst-launch-1.0 nvarguscamerasrc ! 'video/x-raw(memory:NVMM),width=1920,height=1080,framerate=30/1,format=NV12' ! nvv4l2h265enc bitrate=10000000 iframeinterval=40 ! video/x-h265, stream-format=byte-stream ! rndbuffersize min=1500 max=1500 ! tee name=t ! queue ! udpsink host=192.168.1.140 port=5000 t. ! queue ! udpsink host=192.168.1.112 port=5000"
+        #"gst-launch-1.0 nvarguscamerasrc ! 'video/x-raw(memory:NVMM),width=1920,height=1080,framerate=30/1,format=NV12' ! videoconvert ! nvoverlaysink"
 
         if self.protocol == "v4l2":
             # if the framerate argument is supplied, we will modify the connection string to provide a rate limiter to the incoming string at virtually no performance penalty
@@ -73,3 +74,18 @@ class CaptureDevice(object):
         if ret:
             img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         return ret, img
+
+if __name__ == "__main__":
+    import time
+    
+    cam = CaptureDevice(
+        protocol="argus",
+        video_device="/dev/video0",
+        res=[1280,720],
+        framerate=30
+    )
+
+    while True:
+        ret, img = cam.read()
+        print(ret)
+        time.sleep(.01)
