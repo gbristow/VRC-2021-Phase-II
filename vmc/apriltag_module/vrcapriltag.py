@@ -6,7 +6,6 @@ from math import pi, cos, sin
 import json
 import socket
 import warnings
-from mavsdk.generated.telemetry_pb2 import Position
 
 # pip installed packages
 import numpy as np
