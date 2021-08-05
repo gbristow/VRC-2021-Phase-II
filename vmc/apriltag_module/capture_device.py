@@ -80,7 +80,7 @@ if __name__ == "__main__":
     import time
 
     cam = CaptureDevice(
-        protocol="argus",
+        protocol="v4l2",
         video_device="/dev/video0",
         res=[1280,720],
         framerate=30
