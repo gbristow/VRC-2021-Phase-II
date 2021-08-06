@@ -1,6 +1,6 @@
 FROM mdegans/tegra-opencv:latest
 
-RUN apt-get source ca-certificates
+RUN update-ca-certificates
 
 RUN apt-get update -f && apt-get install -y --no-install-recommends ca-certificates
 
