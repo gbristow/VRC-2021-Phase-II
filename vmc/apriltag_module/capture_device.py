@@ -79,12 +79,16 @@ class CaptureDevice(object):
 if __name__ == "__main__":
     import time
 
+    print("creating capture device")
+
     cam = CaptureDevice(
         protocol="argus",
         video_device="/dev/video0",
         res=[1280,720],
         framerate=30
     )
+
+    print("starting loop")
 
     while True:
         ret, img = cam.read()
