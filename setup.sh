@@ -90,7 +90,7 @@ echo -e "${CYAN}Updating system packages${NC}"
 bar
 export DEBIAN_FRONTEND=noninteractive
 # upgrade existing packages
-$s apt upgrade -y
+$s DEBIAN_FRONTEND=noninteractive apt upgrade -y
 bar
 
 

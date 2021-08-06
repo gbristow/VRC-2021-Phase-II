@@ -13,6 +13,31 @@ chmod +x setup.sh # Make the setup script executable
 ./setup.sh # Run the setup script
 ```
 
+## Usage
+
+To start the VRC software, just run:
+
+```bash
+# Start the Docker Compose stack
+sudo docker-compose up -d
+```
+
+To stop the VRC software, run:
+
+```bash
+# Stop the Docker Compose stack
+sudo docker-compose down 
+```
+
+If you ever need to update the VRC software, run:
+
+```bash
+# Update the git repo
+git pull
+# Re-run the setup script
+./setup.sh
+```
+
 ## MQTT Topics
 
 For each topic in the list, the sublist are the keys available in the dictionary
