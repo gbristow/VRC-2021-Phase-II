@@ -2,6 +2,10 @@ FROM mdegans/tegra-opencv:latest
 
 RUN cat /etc/apt/sources.list
 
+RUN apt update
+
+RUN apt install ca-certificates
+
 RUN apt-get install -y python3-pip
 
 # Change the working directory to /app
