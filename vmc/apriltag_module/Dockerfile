@@ -1,10 +1,9 @@
 FROM mdegans/tegra-opencv:latest
 
-RUN cat /etc/apt/sources.list
-
-RUN apt update
-
-RUN apt install ca-certificates
+ADD --chown=root:root https://repo.download.nvidia.com/jetson/jetson-ota-public.asc /etc/apt/trusted.gpg.d/jetson-ota-public.asc
+RUN chmod 644 /etc/apt/trusted.gpg.d/jetson-ota-public.asc \
+    && apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates
 
 RUN apt-get install -y python3-pip
 
