@@ -22,7 +22,7 @@ RUN add-apt-repository -y ppa:deadsnakes/ppa \
  && apt install -y \
     python3.8 \
     python3.8-dev \
-    python3.8-pip 
+    python3-pip 
 
 RUN git clone https://github.com/IntelRealSense/librealsense --recurse-submodules \
  && cd librealsense \
