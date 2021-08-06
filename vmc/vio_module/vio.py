@@ -12,6 +12,7 @@ except ImportError:
 
 class VIOModule(object):
     def __init__(self):
+        self.vio = VIO(self.mqtt_client)
 
         self.mqtt_host = "mqtt"
         self.mqtt_port = 18830
@@ -32,8 +33,6 @@ class VIOModule(object):
         self.mqtt_topics: Dict[str, Callable[[dict], None]] = {
             f"{self.topic_prefix}/vio/resync": self.vio.handle_resync
         }
-
-        self.vio = VIO(self.mqtt_client)
 
         self.mqtt_finished_init = False
 
