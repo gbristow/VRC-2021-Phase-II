@@ -1,7 +1,5 @@
 FROM mdegans/tegra-opencv:latest
 
-RUN update-ca-certificates
-
 RUN apt-get update -f && apt-get install -y --no-install-recommends ca-certificates
 
 RUN apt-get install -y python3-pip
