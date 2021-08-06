@@ -6,8 +6,8 @@ WORKDIR /app
 # Copy the file requirements.txt from the host into the container
 COPY requirements.txt requirements.txt
 
-RUN python -m pip install pip wheel --upgrade && \
-    python -m pip install -r requirements.txt
+RUN python3 -m pip3 install pip wheel --upgrade && \
+    python3 -m pip3 install -r requirements.txt
 
 # Now, copy everything else in this folder into the container.
 COPY . .
