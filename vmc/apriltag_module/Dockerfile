@@ -1,10 +1,8 @@
-FROM nvcr.io/nvidia/l4t-base:r32.6.1
+FROM mdegans/tegra-opencv:latest
 
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
+RUN cat /etc/apt/sources.list
 
 RUN apt-get install -y python3-pip
-
-FROM mdegans/tegra-opencv:latest
 
 # Change the working directory to /app
 WORKDIR /app
