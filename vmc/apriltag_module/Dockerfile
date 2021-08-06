@@ -1,6 +1,6 @@
 FROM nvcr.io/nvidia/l4t-base:r32.6.1
 
-RUN apt-get update && apt-get install -y python-pip
+RUN apt-get update && apt-get install -y python3-pip
 
 # Change the working directory to /app
 WORKDIR /app
