@@ -5,4 +5,3 @@ transforms3d
 setproctitle
 colored
 pupil-apriltags
-#opencv-python
