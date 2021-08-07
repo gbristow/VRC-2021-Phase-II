@@ -43,9 +43,9 @@ RUN mkdir -p build \
  && make -j$(($(nproc) - 1)) \
  && make install
 
-RUN cp /usr/local/lib/pyrealsense2.cpython-38-aarch64-linux-gnu.so /usr/local/lib/python3.8/dist-packages/pyrealsense2.cpython-38-aarch64-linux-gnu.so \
- && cp /usr/local/lib/pybackend2.cpython-38-aarch64-linux-gnu.so /usr/local/lib/python3.8/dist-packages/pybackend2.cpython-38-aarch64-linux-gnu.so \
- && cp /usr/local/lib/librealsense2-gl.so /usr/local/lib/python3.8/dist-packages/librealsense2-gl.so 
+RUN cp /usr/local/lib/pyrealsense2* /usr/local/lib/python3.8/dist-packages/ \
+ && cp /usr/local/lib/pybackend2* /usr/local/lib/python3.8/dist-packages/ \
+ && cp /usr/local/lib/librealsense2* /usr/local/lib/python3.8/dist-packages/
 
 WORKDIR /app
 
