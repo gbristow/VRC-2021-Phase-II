@@ -115,7 +115,7 @@ class AprilTagVPS(object):
                 tdelta = now - last_loop
                 delta_buckets[i % 10] = tdelta #type: ignore
                 avg = 1 / (sum(delta_buckets) / 10)
-                print("FPS: {:04.1f} \t Tags: {}".format(avg, len(tags)))
+                logger.debug(f"{fore.GREEN}AT: FPS {avg:04.1f} \t Tags: {len(tags)}")
                 last_loop = now
                 i = i + 1
             else:
@@ -134,12 +134,12 @@ class AprilTagVPS(object):
         logger.debug(f"{fore.GREEN}AT: Capture Loop Started!{style.RESET}") #type: ignore
         while True:
             ret, img = capture.read_gray()
-            logger.debug(f"{fore.GREEN}AT: ret: {ret}{style.RESET}") #type: ignore
+            #logger.debug(f"{fore.GREEN}AT: ret: {ret}{style.RESET}") #type: ignore
             #if theres room in the queue and we have a valid image
             if (self.img_queue.qsize() < max_depth) and (ret is True):
                 #put the image in the queue
                 self.img_queue.put(img)
-                logger.debug(f"{fore.GREEN}AT: Placed an image!{style.RESET}") #type: ignore
+                #logger.debug(f"{fore.GREEN}AT: Placed an image!{style.RESET}") #type: ignore
             time.sleep(0.01)
 
     def perception_loop(self):
@@ -165,7 +165,7 @@ if __name__ == "__main__":
     at = AprilTagVPS(
         protocol="argus",
         video_device="/dev/video0",
-        res=[1280, 720],
+        res=[640, 360],
         camera_params=[584.3866, 583.3444, 661.2944, 320.7182],
         tag_size=0.174,  # full size tag
         framerate=None,
