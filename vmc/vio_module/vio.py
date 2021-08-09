@@ -12,8 +12,6 @@ except ImportError:
 
 class VIOModule(object):
     def __init__(self):
-        self.vio = VIO(self.mqtt_client)
-
         self.mqtt_host = "mqtt"
         self.mqtt_port = 18830
 
@@ -27,6 +25,8 @@ class VIOModule(object):
 
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_message = self.on_message
+
+        self.vio = VIO(self.mqtt_client)
 
         self.topic_prefix = "vrc"
 
