@@ -18,4 +18,6 @@ RUN python3 -m pip install pip wheel --upgrade && \
 COPY . .
 
 # Finally, start the container running our code.
-CMD ["python3", "capture_device.py"]
+CMD ["python3", "vrc_apriltag.py"]
+
+#sudo docker run -it --entrypoint /bin/bash --privileged --runtime nvidia  -v /tmp/argus_socket:/tmp/argus_socket 55c0c0712954
