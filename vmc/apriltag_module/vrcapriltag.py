@@ -181,11 +181,19 @@ class VRCAprilTag(object):
 
     def publish_dict(self, topic, data):
         self.mqtt_client.publish(
-            topic, json.dumps(data), retain=False, qos=0,
+            topic,
+            json.dumps(data),
+            retain=False,
+            qos=0,
         )
 
     def publish_updates(
-        self, visible_tag_ids, best_error, best_position, best_heading, best_tag_id,
+        self,
+        visible_tag_ids,
+        best_error,
+        best_position,
+        best_heading,
+        best_tag_id,
     ):
 
         # visible_tags
@@ -227,7 +235,9 @@ class VRCAprilTag(object):
             current_timestamp = self.at.tags_timestamp
 
             # if we have new tag data
-            if current_timestamp - prev_timestamp > (1 / self.default_config["AT_UPDATE_FREQ"]):
+            if current_timestamp - prev_timestamp > (
+                1 / self.default_config["AT_UPDATE_FREQ"]
+            ):
                 if current_tags and (current_timestamp != prev_timestamp):
 
                     # handle the data
@@ -241,7 +251,9 @@ class VRCAprilTag(object):
 
                     for tag in current_tags:
                         # get the details about the tag as well as convert to NED
-                        tag_id, error, distance, position, heading = self.handle_tag(tag)
+                        tag_id, error, distance, position, heading = self.handle_tag(
+                            tag
+                        )
 
                         # update the visible list
                         visible_tag_ids.append(tag_id)
@@ -258,7 +270,7 @@ class VRCAprilTag(object):
                                 best_position = position
                                 best_heading = heading
                                 best_error = error
-                    
+
                     self.publish_updates(
                         visible_tag_ids,
                         best_error,
@@ -268,7 +280,7 @@ class VRCAprilTag(object):
                     )
 
             prev_timestamp = current_timestamp
-            time.sleep(.01)
+            time.sleep(0.01)
 
     def main(self):
         # tells the os what to name this process, for debugging
@@ -293,16 +305,20 @@ class VRCAprilTag(object):
         threads.append(at_thread)
 
         transform_thread = threading.Thread(
-            target=self.loop, args=(), daemon=True, name="apriltag_transform_and_publish_thread"
+            target=self.loop,
+            args=(),
+            daemon=True,
+            name="apriltag_transform_and_publish_thread",
         )
         threads.append(transform_thread)
 
         for thread in threads:
             thread.start()
-            logger.debug(f"{fore.GREEN}AT: starting thread: {thread.name}{style.RESET}") #type: ignore
+            logger.debug(f"{fore.GREEN}AT: starting thread: {thread.name}{style.RESET}")  # type: ignore
 
         while True:
             time.sleep(0.25)
+
 
 if __name__ == "__main__":
     atag = VRCAprilTag()
