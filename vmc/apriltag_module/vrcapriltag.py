@@ -257,17 +257,17 @@ class VRCAprilTag(object):
                             best_position = position
                             best_heading = heading
                             best_error = error
-
-                self.publish_updates(
-                    visible_tag_ids,
-                    best_error,
-                    best_position,
-                    best_heading,
-                    best_tag_id,
-                )
+                if current_timestamp - prev_timestamp > (1 / self.default_config["AT_UPDATE_FREQ"]):
+                    self.publish_updates(
+                        visible_tag_ids,
+                        best_error,
+                        best_position,
+                        best_heading,
+                        best_tag_id,
+                    )
 
             prev_timestamp = current_timestamp
-            time.sleep(1 / self.default_config["AT_UPDATE_FREQ"])
+            time.sleep(.01)
 
     def main(self):
         # tells the os what to name this process, for debugging
