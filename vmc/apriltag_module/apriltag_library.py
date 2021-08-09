@@ -31,19 +31,6 @@ class AprilTagWrapper(object):
             decode_sharpening=0.25,
             debug=0,
         )
-
-    # def convert_and_process_image(self, frame):
-    #     """
-    #     Takes an image as input and returns the detected apriltags in list format
-    #     """
-    #     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    #     tags = self.detector.detect(
-    #         gray,
-    #         estimate_tag_pose=True,
-    #         camera_params=self.camera_params,
-    #         tag_size=self.tag_size,
-    #     )
-    #     return tags
     
     def process_image(self, frame):
         """
@@ -115,7 +102,7 @@ class AprilTagVPS(object):
                 tdelta = now - last_loop
                 delta_buckets[i % 10] = tdelta #type: ignore
                 avg = 1 / (sum(delta_buckets) / 10)
-                logger.debug(f"{fore.GREEN}AT: FPS {avg:04.1f} \t Tags: {len(tags)}")
+                logger.debug(f"{fore.GREEN}AT: FPS {avg:04.1f} \t Tags: {len(tags)}") #type: ignore
                 last_loop = now
                 i = i + 1
             else:
