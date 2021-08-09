@@ -152,7 +152,7 @@ if __name__ == "__main__":
     at = AprilTagVPS(
         protocol="argus",
         video_device="/dev/video0",
-        res=[640, 360],
+        res=[1280, 720],
         camera_params=[584.3866, 583.3444, 661.2944, 320.7182],
         tag_size=0.174,  # full size tag
         framerate=None,
