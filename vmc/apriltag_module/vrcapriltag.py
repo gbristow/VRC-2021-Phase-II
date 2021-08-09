@@ -227,37 +227,38 @@ class VRCAprilTag(object):
             current_timestamp = self.at.tags_timestamp
 
             # if we have new tag data
-            if current_tags and (current_timestamp != prev_timestamp):
+            if current_timestamp - prev_timestamp > (1 / self.default_config["AT_UPDATE_FREQ"]):
+                if current_tags and (current_timestamp != prev_timestamp):
 
-                # handle the data
-                visible_tag_ids = []
-                closest_tag_id = -1
-                distance_to_closest_tag = 10000000
-                best_error = 10000000
-                best_position = None
-                best_heading = None
-                best_tag_id = -1
+                    # handle the data
+                    visible_tag_ids = []
+                    closest_tag_id = -1
+                    distance_to_closest_tag = 10000000
+                    best_error = 10000000
+                    best_position = None
+                    best_heading = None
+                    best_tag_id = -1
 
-                for tag in current_tags:
-                    # get the details about the tag as well as convert to NED
-                    tag_id, error, distance, position, heading = self.handle_tag(tag)
+                    for tag in current_tags:
+                        # get the details about the tag as well as convert to NED
+                        tag_id, error, distance, position, heading = self.handle_tag(tag)
 
-                    # update the visible list
-                    visible_tag_ids.append(tag_id)
+                        # update the visible list
+                        visible_tag_ids.append(tag_id)
 
-                    # update the closest tag
-                    if distance < distance_to_closest_tag:
-                        closest_tag_id = tag_id
-                        distance_to_closest_tag = distance
+                        # update the closest tag
+                        if distance < distance_to_closest_tag:
+                            closest_tag_id = tag_id
+                            distance_to_closest_tag = distance
 
-                    # update the best tag (has to be one we have a mapping for)
-                    if position is not None:
-                        if error < best_error:
-                            best_tag_id = tag_id
-                            best_position = position
-                            best_heading = heading
-                            best_error = error
-                if current_timestamp - prev_timestamp > (1 / self.default_config["AT_UPDATE_FREQ"]):
+                        # update the best tag (has to be one we have a mapping for)
+                        if position is not None:
+                            if error < best_error:
+                                best_tag_id = tag_id
+                                best_position = position
+                                best_heading = heading
+                                best_error = error
+                    
                     self.publish_updates(
                         visible_tag_ids,
                         best_error,
