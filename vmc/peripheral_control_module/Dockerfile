@@ -1,4 +1,4 @@
-FROM python:3.9-buster
+FROM docker.io/library/python:3.9-buster
 
 WORKDIR /app
 

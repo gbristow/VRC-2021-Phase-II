@@ -1,0 +1,53 @@
+FROM docker.io/nvidia/cuda:11.4.0-devel-ubuntu20.04
+
+ENV LIBREALSENSE_VERSION=v2.31.0 
+ENV DEBIAN_FRONTEND=noninteractive
+
+WORKDIR /
+
+RUN apt update -y
+RUN apt install -y \
+    git \
+    libssl-dev \
+    libusb-1.0-0-dev \
+    pkg-config \
+    build-essential \
+    cmake \
+    libgtk-3-dev \
+    libglfw3-dev \
+    libgl1-mesa-dev \
+    libglu1-mesa-dev \
+    software-properties-common 
+RUN add-apt-repository -y ppa:deadsnakes/ppa \
+ && apt install -y \
+    python3.8 \
+    python3.8-dev
+
+RUN git clone https://github.com/IntelRealSense/librealsense --recurse-submodules \
+ && cd librealsense \
+ && git pull origin $LIBREALSENSE_VERSION \
+ && git submodule update --init --recursive \
+ && git checkout $LIBREALSENSE_VERSION
+
+RUN mkdir -p build \
+ && cd build \
+ && cmake /librealsense \
+    -DFORCE_RSUSB_BACKEND=ON \
+    -DBUILD_EXAMPLES=true \
+    -DFORCE_LIBUVC=true \
+    -DBUILD_WITH_CUDA=bool:true \
+    -DCMAKE_BUILD_TYPE=release \
+    -DBUILD_PYTHON_BINDINGS=bool:true \
+    -DPYTHON_EXECUTABLE=/usr/bin/python3.8 \
+ && make -j$(($(nproc) - 1)) \
+ && make install
+
+WORKDIR /app
+
+COPY requirements.txt requirements.txt
+RUN python -m pip install pip wheel --upgrade && \
+    python -m pip install -r requirements.txt
+
+COPY . .
+
+CMD ["python", "vio.py"]

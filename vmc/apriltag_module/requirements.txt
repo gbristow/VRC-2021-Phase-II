@@ -1,0 +1,7 @@
+loguru==0.5.3
+paho-mqtt==1.5.1
+numpy
+transforms3d
+setproctitle
+colored
+pupil-apriltags
