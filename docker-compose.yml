@@ -8,6 +8,8 @@ services:
 
   mqtt:
     image: docker.io/library/eclipse-mosquitto:2.0.11
+    ports:
+      - "18830:18830"
     restart: unless-stopped
     volumes:
       - ./vmc/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf

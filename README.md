@@ -1,5 +1,43 @@
 # VRC-2021-Phase-II
 
+## Setup
+
+Run the following commands:
+
+```bash
+sudo apt update # Update the apt sources
+sudo apt install git -y # Install git
+git clone https://github.com/bellflight/VRC-2021-Phase-II ~/Documents/VRC-2021-Phase-II # Clone the repo
+cd ~/Documents/VRC-2021-Phase-II # Change to the directory the repo was cloned to
+chmod +x setup.sh # Make the setup script executable
+./setup.sh # Run the setup script
+```
+
+## Usage
+
+To start the VRC software, just run:
+
+```bash
+# Start the Docker Compose stack
+sudo docker-compose up -d
+```
+
+To stop the VRC software, run:
+
+```bash
+# Stop the Docker Compose stack
+sudo docker-compose down 
+```
+
+If you ever need to update the VRC software, run:
+
+```bash
+# Update the git repo
+git pull
+# Re-run the setup script
+./setup.sh
+```
+
 ## MQTT Topics
 
 For each topic in the list, the sublist are the keys available in the dictionary
