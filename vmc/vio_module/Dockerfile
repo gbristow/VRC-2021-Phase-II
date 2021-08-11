@@ -46,6 +46,10 @@ RUN cp /usr/local/lib/pyrealsense2* /usr/local/lib/python3.8/dist-packages/ \
  && cp /usr/local/lib/pybackend2* /usr/local/lib/python3.8/dist-packages/ \
  && cp /usr/local/lib/librealsense2* /usr/local/lib/python3.8/dist-packages/
 
+RUN rm -rf build \
+ && apt purge -y cmake \
+ && apt autoremove -y
+
 WORKDIR /app
 
 COPY requirements.txt requirements.txt
