@@ -45,9 +45,9 @@ jobs:
         username: ${{ secrets.GITHUBCR_USERNAME }}
         password: ${{ secrets.GITHUBCR_PASSWORD }}
 
-    - name: Build Docker Images
+    - name: Build Docker Image
       run: docker build --cache-from "type=local,src=/tmp/.buildx-cache" --cache-to "type=local,dest=/tmp/.buildx-cache" -t ghcr.io/bellflight/vrc_${{ matrix.image }}:latest vmc/${{ matrix.image }}
   
-    - name: Push Docker Images
+    - name: Push Docker Image
       run: docker push ghcr.io/bellflight/vrc_${{ matrix.image }}:latest
 
