@@ -4,4 +4,3 @@ paho-mqtt==1.5.1
 transforms3d
 numpy
 colored
-pyrealsense

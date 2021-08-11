@@ -33,6 +33,7 @@ services:
     depends_on:
       - mqtt
     build: vmc/vio_module
+    privileged: true
     restart: unless-stopped
 
   # sandbox:

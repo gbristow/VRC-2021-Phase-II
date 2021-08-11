@@ -21,7 +21,8 @@ RUN apt install -y \
 RUN add-apt-repository -y ppa:deadsnakes/ppa \
  && apt install -y \
     python3.8 \
-    python3.8-dev
+    python3.8-dev \
+    python3-pip 
 
 RUN git clone https://github.com/IntelRealSense/librealsense --recurse-submodules \
  && cd librealsense \
@@ -42,12 +43,16 @@ RUN mkdir -p build \
  && make -j$(($(nproc) - 1)) \
  && make install
 
+RUN cp /usr/local/lib/pyrealsense2* /usr/local/lib/python3.8/dist-packages/ \
+ && cp /usr/local/lib/pybackend2* /usr/local/lib/python3.8/dist-packages/ \
+ && cp /usr/local/lib/librealsense2* /usr/local/lib/python3.8/dist-packages/
+
 WORKDIR /app
 
 COPY requirements.txt requirements.txt
-RUN python -m pip install pip wheel --upgrade && \
-    python -m pip install -r requirements.txt
+RUN python3 -m pip install pip wheel --upgrade && \
+    python3 -m pip install -r requirements.txt
 
 COPY . .
 
-CMD ["python", "vio.py"]
+CMD ["python3", "vio.py"]

@@ -9,8 +9,10 @@ import transforms3d as t3d
 from colored import fore, back, style
 from loguru import logger
 
-from t265_library import T265
-
+try:
+    from t265_library import T265 # type: ignore
+except ImportError:
+    from .t265_library import T265
 
 class T265CoordinateTransformation(object):
     """
