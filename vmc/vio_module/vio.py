@@ -1,6 +1,7 @@
 import json
 from typing import Any, Callable, Dict
 import threading 
+import time
 
 from loguru import logger
 import paho.mqtt.client as mqtt
@@ -47,6 +48,9 @@ class VIOModule(object):
 
         #service the mqtt connection
         self.mqtt_client.loop_forever()
+
+        while True:
+            time.sleep(0.1)
 
     def on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
         try:

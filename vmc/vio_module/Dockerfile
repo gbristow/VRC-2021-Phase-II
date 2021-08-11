@@ -1,4 +1,4 @@
-FROM docker.io/nvidia/cuda:11.4.0-devel-ubuntu20.04
+FROM nvcr.io/nvidia/l4t-base:r32.6.1
 
 ENV LIBREALSENSE_VERSION=v2.31.0 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -35,7 +35,6 @@ RUN mkdir -p build \
  && cmake /librealsense \
     -DFORCE_RSUSB_BACKEND=ON \
     -DBUILD_EXAMPLES=true \
-    -DFORCE_LIBUVC=true \
     -DBUILD_WITH_CUDA=bool:true \
     -DCMAKE_BUILD_TYPE=release \
     -DBUILD_PYTHON_BINDINGS=bool:true \
