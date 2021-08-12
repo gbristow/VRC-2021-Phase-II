@@ -98,7 +98,10 @@ echo -e "${CYAN}Installing prerequisites${NC}"
 bar
 # install some useful prereqs
 $s apt install -y git apt-transport-https ca-certificates apt-utils software-properties-common gnupg lsb-release unzip curl htop nano python3 python3-wheel python3-pip
-$s -H python3 -m pip install -U jetson-stats
+$s -H python3 -m pip install -U jetson-stats --upgrade
+# set to high-power 10W mode. 1 is 5W mode
+$s nvpmodel -m 0
+
 cd $VRC_DIR
 # cache the git credentials (mainly during development)
 git config --global credential.helper cache
@@ -130,6 +133,23 @@ echo \
 $s apt update
 $s apt install -y docker-ce:arm64 docker-ce-cli:arm64 containerd.io:arm64 docker-compose:arm64
 
+# install nvidia-docker
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
+   && curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | $s apt-key add - \
+   && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | $s tee /etc/apt/sources.list.d/nvidia-docker.list
+$s apt update
+$s apt install -y nvidia-docker2
+
+# https://lukeyeager.github.io/2018/01/22/setting-the-default-docker-runtime-to-nvidia.html
+pushd $(mktemp -d)
+($s cat /etc/docker/daemon.json 2>/dev/null || echo '{}') | \
+    jq '. + {"default-runtime": "nvidia"}' | \
+    tee tmp.json
+$s mv tmp.json /etc/docker/daemon.json
+popd
+
+$s systemctl restart docker
+
 # set up group rights for docker
 # had issues with the script suddenly exiting
 # set +e
@@ -139,6 +159,7 @@ $s apt install -y docker-ce:arm64 docker-ce-cli:arm64 containerd.io:arm64 docker
 # set -e
 
 cd $VRC_DIR
+$s docker-compose pull
 $s docker-compose build
 bar
 
