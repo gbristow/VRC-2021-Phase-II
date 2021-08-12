@@ -59,9 +59,8 @@ RUN mkdir -p build \
  && make -j$(($(nproc) - 1)) \
  && make install
 
-RUN cp /usr/local/lib/pyrealsense2* /usr/local/lib/python3.8/dist-packages/ \
- && cp /usr/local/lib/pybackend2* /usr/local/lib/python3.8/dist-packages/ \
- && cp /usr/local/lib/librealsense2* /usr/local/lib/python3.8/dist-packages/
+RUN cd /librealsense \
+ && cp config/99-realsense-libusb.rules /etc/udev/rules.d/
 
 RUN rm -rf build \
  && apt purge -y cmake \
