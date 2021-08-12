@@ -1,15 +1,16 @@
-FROM nvcr.io/nvidia/l4t-base:r32.6.1
+FROM nvcr.io/nvidia/l4t-ml:r32.6.1-py3
 
-ENV LIBREALSENSE_VERSION=v2.31.0 
+ENV APRILTAG_VERSION=v3.1.4
+ENV LIBREALSENSE_VERSION=v2.31.0
 ENV DEBIAN_FRONTEND=noninteractive
-
-WORKDIR /
 
 RUN apt update -y
 RUN apt install -y \
     git \
     libssl-dev \
     libusb-1.0-0-dev \
+    libusb-dev \
+    usbutils \
     pkg-config \
     build-essential \
     cmake \
@@ -22,7 +23,22 @@ RUN add-apt-repository -y ppa:deadsnakes/ppa \
  && apt install -y \
     python3.8 \
     python3.8-dev \
+    python3-setuptools \
     python3-pip 
+
+WORKDIR /
+
+RUN git clone https://github.com/AprilRobotics/apriltag --recurse-submodules \
+ && cd apriltag \
+ && git pull origin $APRILTAG_VERSION \
+ && git submodule update --init --recursive \
+ && git checkout $APRILTAG_VERSION
+
+RUN cd /apriltag \
+ && cmake . \
+ && make install
+
+WORKDIR /
 
 RUN git clone https://github.com/IntelRealSense/librealsense --recurse-submodules \
  && cd librealsense \
@@ -33,11 +49,12 @@ RUN git clone https://github.com/IntelRealSense/librealsense --recurse-submodule
 RUN mkdir -p build \
  && cd build \
  && cmake /librealsense \
-    -DFORCE_RSUSB_BACKEND=ON \
+    -DBUILD_GRAPHICAL_EXAMPLES=false \
+    -DFORCE_RSUSB_BACKEND=false \
     -DBUILD_EXAMPLES=true \
-    -DBUILD_WITH_CUDA=bool:true \
+    -DBUILD_WITH_CUDA=true \
     -DCMAKE_BUILD_TYPE=release \
-    -DBUILD_PYTHON_BINDINGS=bool:true \
+    -DBUILD_PYTHON_BINDINGS=true \
     -DPYTHON_EXECUTABLE=/usr/bin/python3.8 \
  && make -j$(($(nproc) - 1)) \
  && make install
@@ -53,9 +70,9 @@ RUN rm -rf build \
 WORKDIR /app
 
 COPY requirements.txt requirements.txt
-RUN python3 -m pip install pip wheel --upgrade && \
-    python3 -m pip install -r requirements.txt
+RUN python3.8 -m pip install pip wheel --upgrade && \
+    python3.8 -m pip install -r requirements.txt
 
 COPY . .
 
-CMD ["python3", "vio.py"]
+CMD ["python3.8", "vio.py"]
