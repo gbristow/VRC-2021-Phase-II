@@ -28,18 +28,6 @@ RUN add-apt-repository -y ppa:deadsnakes/ppa \
 
 WORKDIR /
 
-RUN git clone https://github.com/AprilRobotics/apriltag --recurse-submodules \
- && cd apriltag \
- && git pull origin $APRILTAG_VERSION \
- && git submodule update --init --recursive \
- && git checkout $APRILTAG_VERSION
-
-RUN cd /apriltag \
- && cmake . \
- && make install
-
-WORKDIR /
-
 RUN git clone https://github.com/IntelRealSense/librealsense --recurse-submodules \
  && cd librealsense \
  && git pull origin $LIBREALSENSE_VERSION \
@@ -59,8 +47,7 @@ RUN mkdir -p build \
  && make -j$(($(nproc) - 1)) \
  && make install
 
-RUN cd /librealsense \
- && cp config/99-realsense-libusb.rules /etc/udev/rules.d/
+RUN cp /librealsense/config/99-realsense-libusb.rules /etc/udev/rules.d/
 
 RUN rm -rf build \
  && apt purge -y cmake \
