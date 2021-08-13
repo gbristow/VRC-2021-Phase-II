@@ -40,10 +40,10 @@ services:
     depends_on:
       - mqtt
     build: vmc/apriltag_module
-    runtime: nvidia
     restart: unless-stopped
     volumes: 
       - /tmp/argus_socket:/tmp/argus_socket
+    runtime: nvidia
 
   # sandbox:
   #   depends_on:
