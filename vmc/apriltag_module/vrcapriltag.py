@@ -104,6 +104,10 @@ class VRCAprilTag(object):
             logger.debug(f"Apriltag Module: Subscribed to: {topic}")
             client.subscribe(topic)
 
+    def run_mqtt(self):
+        self.mqtt_client.connect(host=self.mqtt_host, port=self.mqtt_port, keepalive=60)
+        self.mqtt_client.loop_forever()
+
     def setup_transforms(self):
         rmat = t3d.euler.euler2mat(
             self.default_config["cam"]["rpy"][0],
@@ -311,6 +315,11 @@ class VRCAprilTag(object):
             name="apriltag_transform_and_publish_thread",
         )
         threads.append(transform_thread)
+
+        mqtt_thread = threading.Thread(
+            target=self.run_mqtt, args=(), daemon=True, name="apriltag_mqtt_thread"
+        )
+        threads.append(mqtt_thread)
 
         for thread in threads:
             thread.start()
