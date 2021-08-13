@@ -29,23 +29,20 @@ services:
     build: vmc/peripheral_control_module
     restart: unless-stopped
 
-  vio:
-    depends_on:
-      - mqtt
-    build: vmc/vio_module
-    privileged: true
-    restart: unless-stopped
-
-  # apriltag:
+  # vio:
   #   depends_on:
   #     - mqtt
-  #   devices:
-  #     - /dev/video0:/dev/video0
-  #   build: vmc/apriltag_module
+  #   build: vmc/vio_module
   #   privileged: true
   #   restart: unless-stopped
-  #   volumes: 
-  #     - /tmp/argus_socket:/tmp/argus_socket
+
+  apriltag:
+    depends_on:
+      - mqtt
+    build: vmc/apriltag_module
+    restart: unless-stopped
+    volumes: 
+      - /tmp/argus_socket:/tmp/argus_socket
 
   # sandbox:
   #   depends_on:
