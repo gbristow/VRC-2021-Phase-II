@@ -119,7 +119,7 @@ bar
 # this is (possibly) needed to setup the udev rules on the host
 $s apt-key adv --keyserver keys.gnupg.net --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE
 $s add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo bionic main" -u
-$s apt install -y librealsense2-udev-rules # librealsense2-utils librealsense2-dev
+$s apt install -y librealsense2-udev-rules librealsense2-utils librealsense2-dev
 
 bar
 
