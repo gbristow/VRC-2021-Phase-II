@@ -173,7 +173,8 @@ $s service docker stop
 $s service docker start
 
 # ensure the container runtime works
-$s docker run --rm --gpus all --env NVIDIA_DISABLE_REQUIRE=1 nvcr.io/nvidia/cuda:11.4.1-base-ubuntu18.04 whoami
+echo "Testing Nvidia container runtime..."
+$s docker run --rm --gpus all --env NVIDIA_DISABLE_REQUIRE=1 nvcr.io/nvidia/cuda:11.4.1-base-ubuntu18.04 echo "Sucess"
 
 # set up group rights for docker
 # had issues with the script suddenly exiting, commented out
@@ -182,7 +183,11 @@ $s docker run --rm --gpus all --env NVIDIA_DISABLE_REQUIRE=1 nvcr.io/nvidia/cuda
 # $s usermod -aG docker "$USER"
 # newgrp docker 
 # set -e
+bar
 
+
+echo -e "${CYAN}Preparing VRC software${NC}"
+bar
 cd $VRC_DIR
 $s docker-compose pull
 $s docker-compose build
