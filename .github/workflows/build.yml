@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        image: [apriltag_module, flight_control_module, mavp2p, peripheral_control_module, vio_control_module]
+        image: [apriltag_module, flight_control_module, mavp2p, peripheral_control_module, vio_module]
 
     steps:
     - name: Checkout Code
@@ -48,8 +48,4 @@ jobs:
         password: ${{ secrets.GITHUBCR_PASSWORD }}
 
     - name: Build Docker Image
-      run: docker build --cache-from "type=local,src=/tmp/.buildx-cache" --cache-to "type=local,dest=/tmp/.buildx-cache" -t ghcr.io/bellflight/vrc_${{ matrix.image }}:latest vmc/${{ matrix.image }}
-  
-    - name: Push Docker Image
-      run: docker push ghcr.io/bellflight/vrc_${{ matrix.image }}:latest
-
+      run: docker build --cache-from "type=local,src=/tmp/.buildx-cache" --cache-to "type=local,dest=/tmp/.buildx-cache" -t ghcr.io/bellflight/vrc_${{ matrix.image }}:latest vmc/${{ matrix.image }} --push
