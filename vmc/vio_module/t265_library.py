@@ -44,8 +44,8 @@ class T265(object):
             self.pipe.start(t265_config)
 
         except Exception as e:
-                logger.exception(f"{fore.RED}T265: Error connecting to Realsense Camera: {e}{style.RESET}")
-                raise e
+            logger.exception(f"{fore.RED}T265: Error connecting to Realsense Camera: {e}{style.RESET}")
+            raise e
 
     def get_pipe_data(self) -> rs.pose:
         # Wait for the next set of frames from the camera
