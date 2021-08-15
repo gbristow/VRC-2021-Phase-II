@@ -9,6 +9,7 @@ connect to the following domains. Some schools or networks may block these:
 # used for linux system packages
 https://repo.download.nvidia.com
 http://ports.ubuntu.com
+http://ppa.launchpad.net
 https://librealsense.intel.com
 http://keyserver.ubuntu.com or http://keys.gnupg.net
 # used for python packages

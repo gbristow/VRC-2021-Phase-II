@@ -2,6 +2,8 @@ FROM nvcr.io/nvidia/l4t-ml:r32.6.1-py3
 
 ENV LIBREALSENSE_VERSION=v2.49.0
 ENV DEBIAN_FRONTEND=noninteractive
+# https://stackoverflow.com/a/66057286
+ENV OPENBLAS_CORETYPE=ARMV8
 
 RUN apt update -y
 RUN apt install -y \
@@ -33,9 +35,9 @@ RUN git clone https://github.com/IntelRealSense/librealsense --recurse-submodule
  && git submodule update --init --recursive \
  && git checkout $LIBREALSENSE_VERSION
 
-RUN mkdir -p build \
- && cd build \
- && cmake /librealsense \
+RUN mkdir -p /librealsense/build \
+ && cd /librealsense/build \
+ && cmake .. \
     -DBUILD_GRAPHICAL_EXAMPLES=false \
     -DFORCE_RSUSB_BACKEND=true \
     -DBUILD_EXAMPLES=true \
@@ -48,7 +50,7 @@ RUN mkdir -p build \
 
 RUN cp /usr/local/lib/python3.8/pyrealsense2/* /usr/local/lib/python3.8/dist-packages/
 
-RUN rm -rf build \
+RUN rm -rf /librealsense \
  && apt purge -y cmake \
  && apt autoremove -y
 
@@ -59,8 +61,5 @@ RUN python3.8 -m pip install pip wheel --upgrade && \
     python3.8 -m pip install -r requirements.txt
 
 COPY . .
-
-# https://stackoverflow.com/a/66057286
-ENV OPENBLAS_CORETYPE=ARMV8
 
 CMD ["python3.8", "vio.py"]
