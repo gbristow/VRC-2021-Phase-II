@@ -46,7 +46,7 @@ RUN mkdir -p /librealsense/build \
     -DCMAKE_BUILD_TYPE=release \
     -DBUILD_PYTHON_BINDINGS=true \
     -DPYTHON_EXECUTABLE=/usr/bin/python3.8 \
- && make -j$(($(nproc) - 1)) \
+ && make -j3 \
  && make install
 
 RUN cp /usr/local/lib/python3.8/pyrealsense2/* /usr/local/lib/python3.8/dist-packages/
