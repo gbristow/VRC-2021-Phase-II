@@ -7,9 +7,9 @@ services:
     restart: unless-stopped
     devices:
       - "/dev/ttyTHS1:/dev/ttyTHS1"
-      ports:
-        - "5790:5790"
-        - "14541:14541"
+    ports:
+      - "5790:5790"
+      - "14541:14541"
 
   mqtt:
     image: docker.io/library/eclipse-mosquitto:2.0.11
