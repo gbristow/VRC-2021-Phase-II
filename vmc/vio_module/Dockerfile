@@ -20,8 +20,9 @@ RUN apt install -y \
     libgl1-mesa-dev \
     libglu1-mesa-dev \
     software-properties-common 
-RUN add-apt-repository -y ppa:deadsnakes/ppa \
- && apt install -y \
+RUN add-apt-repository -y ppa:deadsnakes/ppa
+RUN apt update
+RUN apt install -y \
     python3.8 \
     python3.8-dev \
     python3-setuptools \
