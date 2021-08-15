@@ -2,6 +2,27 @@
 
 ## Setup
 
+Before you run the setup script, ensure that you are able to 
+connect to the following domains. Some schools or networks may block these:
+
+```bash
+# used for linux system packages
+https://repo.download.nvidia.com
+http://ports.ubuntu.com
+https://librealsense.intel.com
+http://keyserver.ubuntu.com or http://keys.gnupg.net
+# used for python packages
+https://pypi.org
+https://files.pythonhosted.org
+# used for downloading code
+https://github.com
+https://github-releases.githubusercontent.com
+# used for Docker containers
+https://nvcr.io
+https://index.docker.io
+https://ghcr.io
+```
+
 Run the following commands:
 
 ```bash
@@ -12,6 +33,10 @@ cd ~/Documents/VRC-2021-Phase-II # Change to the directory the repo was cloned t
 chmod +x setup.sh # Make the setup script executable
 ./setup.sh # Run the setup script
 ```
+
+Please note, this setup script WILL take a while the first time 
+(depending on your download speed),
+and you may need to re-enter your `sudo` password a few times.
 
 ## Usage
 
