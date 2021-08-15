@@ -28,12 +28,12 @@ services:
     build: vmc/peripheral_control_module
     restart: unless-stopped
 
-  # vio:
-  #   depends_on:
-  #     - mqtt
-  #   build: vmc/vio_module
-  #   privileged: true
-  #   restart: unless-stopped
+  vio:
+    depends_on:
+      - mqtt
+    build: vmc/vio_module
+    privileged: true
+    restart: unless-stopped
 
   apriltag:
     depends_on:
