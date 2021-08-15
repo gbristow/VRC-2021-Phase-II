@@ -5,6 +5,8 @@ services:
     build: vmc/mavp2p
     command:  serial:/dev/ttyTHS1:500000 tcps:0.0.0.0:5790 udpc:127.0.0.1:14541 --print-errors
     restart: unless-stopped
+    devices:
+      - "/dev/ttyTHS1:/dev/ttyTHS1"
 
   mqtt:
     image: docker.io/library/eclipse-mosquitto:2.0.11
