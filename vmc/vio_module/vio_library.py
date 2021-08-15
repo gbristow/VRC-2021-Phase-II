@@ -184,8 +184,6 @@ class VIO(object):
         self.mqtt_client = mqtt_client
         self.topic_prefix = "vrc/vio"
 
-        self.mqtt_finished_init = False
-
     def handle_resync(self, msg: dict):
         # whenever new data is published to the t265 resync topic, we need to compute a new correction
         # to compensate for sensor drift over time.
@@ -242,7 +240,7 @@ class VIO(object):
                 raise ValueError("T265 has NaNs for orientation")
 
             if not np.isnan(ned_vel).any():
-                vel_update = {{"n": ned_vel[0], "e": ned_vel[1], "d": ned_vel[2]}}
+                vel_update = {"n": ned_vel[0], "e": ned_vel[1], "d": ned_vel[2]}
                 self.mqtt_client.publish(
                     f"{self.topic_prefix}/velocity/ned",
                     json.dumps(vel_update),
@@ -268,13 +266,11 @@ class VIO(object):
     def run(self):
 
         #setup the t265
+        logger.debug("Setting up T265")
         self.t265.setup()
 
-        #wait for mqtt to be ready
-        while self.mqtt_finished_init == False:
-            time.sleep(1)
-
         #start the loop
+        logger.debug("Beginning data loop")
         while True:
             data = self.t265.get_pipe_data()
             if data is not None:

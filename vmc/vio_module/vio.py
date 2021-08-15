@@ -70,7 +70,7 @@ class VIOModule(object):
     ) -> None:
         logger.debug(f"Connected with result code {str(rc)}")
         for topic in self.mqtt_topics.keys():
-            logger.debug(f"VIOCModule: Subscribed to: {topic}")
+            logger.debug(f"VIOModule: Subscribed to: {topic}")
             client.subscribe(topic)
         if rc == 0:
             self.vio.mqtt_finished_init = True

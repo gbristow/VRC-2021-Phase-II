@@ -28,24 +28,33 @@ class T265(object):
     def setup(self) -> None:
         try:
             # Reference to a post showing how to use multiple camera: https://github.com/IntelRealSense/librealsense/issues/1735
+            logger.debug("Obtaining connected RealSense devices...")
             rs_devices = self.get_rs_devices()
 
+            logger.debug("Obtaining T265 connection ID...")
             t265_sid = rs_devices.get('T265', 0)
             if t265_sid == 0:
                 raise ValueError("RealSense T265 not connected. Please connect & retry")
             
+            logger.debug("Creating RealSense context")
             context = rs.context()
 
+            logger.debug("Creating RealSense pipeline")
             self.pipe: rs.pipeline = rs.pipeline()
+            logger.debug("Creating T265 config")
             t265_config = rs.config()
 
+            logger.debug("Enabling T265 device")
             t265_config.enable_device(t265_sid)
+            logger.debug("Enabling T265 stream")
             t265_config.enable_stream(rs.stream.pose)
+            logger.debug("Starting RealSense pipeline")
             self.pipe.start(t265_config)
+            logger.debug("T265 fully connected")
 
         except Exception as e:
-                logger.exception(f"{fore.RED}T265: Error connecting to Realsense Camera: {e}{style.RESET}")
-                raise e
+            logger.exception(f"{fore.RED}T265: Error connecting to Realsense Camera: {e}{style.RESET}")
+            raise e
 
     def get_pipe_data(self) -> rs.pose:
         # Wait for the next set of frames from the camera

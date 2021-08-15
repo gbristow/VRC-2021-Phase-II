@@ -1,8 +1,9 @@
 FROM nvcr.io/nvidia/l4t-ml:r32.6.1-py3
 
-ENV APRILTAG_VERSION=v3.1.4
 ENV LIBREALSENSE_VERSION=v2.49.0
 ENV DEBIAN_FRONTEND=noninteractive
+# https://stackoverflow.com/a/66057286
+ENV OPENBLAS_CORETYPE=ARMV8
 
 RUN apt update -y
 RUN apt install -y \
@@ -34,11 +35,11 @@ RUN git clone https://github.com/IntelRealSense/librealsense --recurse-submodule
  && git submodule update --init --recursive \
  && git checkout $LIBREALSENSE_VERSION
 
-RUN mkdir -p build \
- && cd build \
- && cmake /librealsense \
+RUN mkdir -p /librealsense/build \
+ && cd /librealsense/build \
+ && cmake .. \
     -DBUILD_GRAPHICAL_EXAMPLES=false \
-    -DFORCE_RSUSB_BACKEND=false \
+    -DFORCE_RSUSB_BACKEND=true \
     -DBUILD_EXAMPLES=true \
     -DBUILD_WITH_CUDA=true \
     -DCMAKE_BUILD_TYPE=release \
@@ -47,9 +48,9 @@ RUN mkdir -p build \
  && make -j$(($(nproc) - 1)) \
  && make install
 
-RUN cp /librealsense/config/99-realsense-libusb.rules /etc/udev/rules.d/
+RUN cp /usr/local/lib/python3.8/pyrealsense2/* /usr/local/lib/python3.8/dist-packages/
 
-RUN rm -rf build \
+RUN rm -rf /librealsense \
  && apt purge -y cmake \
  && apt autoremove -y
 
