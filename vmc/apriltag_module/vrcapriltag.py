@@ -154,7 +154,7 @@ class VRCAprilTag(object):
                 [
                     tag.pose_t[0][0] * 100,
                     tag.pose_t[1][0] * 100,
-                    tag.pose_t[2][0] * 100 * 2.54,
+                    tag.pose_t[2][0] * 100 * 2.54, #TODO why is this magic value here
                 ],
                 R,
                 [1, 1, 1],
@@ -190,6 +190,9 @@ class VRCAprilTag(object):
             retain=False,
             qos=0,
         )
+
+    def publish_heartbeat(self):
+        self.publish_dict(f"{self.topic_prefix}/heartbeat", {"last_loop_timestamp":time.time()})
 
     def publish_updates(
         self,
@@ -238,10 +241,10 @@ class VRCAprilTag(object):
             current_tags = self.at.tags
             current_timestamp = self.at.tags_timestamp
 
-            # if we have new tag data
             if current_timestamp - prev_timestamp > (
                 1 / self.default_config["AT_UPDATE_FREQ"]
             ):
+                publish_heartbeat()
                 if current_tags and (current_timestamp != prev_timestamp):
 
                     # handle the data
