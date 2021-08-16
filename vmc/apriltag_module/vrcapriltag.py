@@ -191,8 +191,12 @@ class VRCAprilTag(object):
             qos=0,
         )
 
-    def publish_heartbeat(self):
-        self.publish_dict(f"{self.topic_prefix}/heartbeat", {"last_loop_timestamp":time.time()})
+    def publish_heartbeat(self, last_detection):
+        heartbeat = {
+            "last_loop_timestamp":time.time(),
+            "last_detection_timestamp":last_detection
+        }
+        self.publish_dict(f"{self.topic_prefix}/heartbeat", heartbeat)
 
     def publish_updates(
         self,
@@ -236,6 +240,8 @@ class VRCAprilTag(object):
         prev_timestamp = current_timestamp
         assert self.at  # make sure at is not none
 
+        last_hearbeat = time.time()
+
         while True:
 
             current_tags = self.at.tags
@@ -244,7 +250,7 @@ class VRCAprilTag(object):
             if current_timestamp - prev_timestamp > (
                 1 / self.default_config["AT_UPDATE_FREQ"]
             ):
-                self.publish_heartbeat()
+                
                 if current_tags and (current_timestamp != prev_timestamp):
 
                     # handle the data
@@ -287,6 +293,12 @@ class VRCAprilTag(object):
                     )
 
             prev_timestamp = current_timestamp
+            
+            now = time.time()
+            if (now - last_hearbeat > ( 1 / self.default_config["AT_UPDATE_FREQ"]) ):
+                self.publish_heartbeat(current_timestamp)
+                last_hearbeat = now
+            
             time.sleep(0.01)
 
     def main(self):
@@ -329,7 +341,7 @@ class VRCAprilTag(object):
             logger.debug(f"{fore.GREEN}AT: starting thread: {thread.name}{style.RESET}")  # type: ignore
 
         while True:
-            time.sleep(0.25)
+            time.sleep(0.1)
 
 
 if __name__ == "__main__":
