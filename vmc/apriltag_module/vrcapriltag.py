@@ -244,7 +244,7 @@ class VRCAprilTag(object):
             if current_timestamp - prev_timestamp > (
                 1 / self.default_config["AT_UPDATE_FREQ"]
             ):
-                publish_heartbeat()
+                self.publish_heartbeat()
                 if current_tags and (current_timestamp != prev_timestamp):
 
                     # handle the data
