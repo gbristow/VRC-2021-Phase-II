@@ -271,7 +271,7 @@ class FCC(MAVMQTTBase):
             update = {}
 
             update["armed"] = armed
-            update["mode"] = self.fcc_mode
+            update["mode"] = str(self.fcc_mode)
             update["timestamp"] = self._timestamp()
 
             self.mqtt_client.publish(
