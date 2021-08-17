@@ -253,7 +253,7 @@ class Fusion(object):
                 )
 
             m_per_s_2_ft_per_min = 196.85
-            climb_rate_update = { "climb_rate": -1 * msg["d"] * m_per_s_2_ft_per_min}
+            climb_rate_update = { "climb_rate_fps": -1 * msg["d"] * m_per_s_2_ft_per_min}
 
             self.mqtt_client.publish(
                 f"{self.topic_prefix}/vel/climbrate",
