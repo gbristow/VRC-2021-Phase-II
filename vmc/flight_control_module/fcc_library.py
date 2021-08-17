@@ -230,7 +230,7 @@ class FCC(MAVMQTTBase):
         async for battery in self.drone.telemetry.battery():
 
             update = {}
-            update["voltage"] = battery.voltage_v
+            update["voltage"] = battery.voltage_v * 4 #bc 4 cell
             # TODO see if mavsdk supports battery current
             # TODO see is mavsdk supports power draw
             update["soc"] = battery.remaining_percent * 100.0
