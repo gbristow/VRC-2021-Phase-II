@@ -3,7 +3,7 @@ import asyncio
 from mavsdk import System
 async def run():
     drone = System()
-    await drone.connect(system_address="udp://:14541")
+    await drone.connect(system_address="udp://127.0.0.1:14541")
     print("Waiting for drone...")
     async for state in drone.core.connection_state():
         if state.is_connected:
