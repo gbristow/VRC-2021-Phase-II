@@ -101,7 +101,7 @@ class FCCModule(object):
             self.fcc.telemetry_tasks(),
             # self.fcc.offboard_tasks(),
             # self.fcc.action_dispatcher(),
-            self.gps_fcc.run(),
+            #self.gps_fcc.run(),
         )
 
         while True:
