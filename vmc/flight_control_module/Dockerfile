@@ -8,8 +8,8 @@ RUN python -m pip install pip wheel --upgrade && \
 
 COPY . .
 
-RUN cp /app/mavlink/*.xml /usr/local/lib/python3.7/site-packages/pymavlink/dialects/v20/
-RUN cp /app/mavlink/*.py /usr/local/lib/python3.7/site-packages/pymavlink/dialects/v20/
+RUN cp /app/mavlink/*.xml /usr/local/lib/python3.9/site-packages/pymavlink/dialects/v20/
+RUN cp /app/mavlink/*.py /usr/local/lib/python3.9/site-packages/pymavlink/dialects/v20/
 
 ENV MAVLINK20=1
 ENV MAVLINK_DIALECT=bell
