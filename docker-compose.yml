@@ -24,6 +24,7 @@ services:
       - mqtt
       - mavp2p
     build: vmc/flight_control_module
+    network_mode: "host"
     restart: unless-stopped
 
   pcc:
