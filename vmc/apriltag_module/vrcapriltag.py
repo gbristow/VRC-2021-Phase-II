@@ -12,11 +12,12 @@ import numpy as np
 import transforms3d as t3d
 from setproctitle import setproctitle
 from colored import fore, back, style
+from loguru import logger
 
 # custom libraries
 from apriltag_library import AprilTagVPS
 
-from loguru import logger
+
 from typing import Dict, List, Union, Any
 
 import paho.mqtt.client as mqtt
