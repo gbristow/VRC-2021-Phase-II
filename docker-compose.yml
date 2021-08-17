@@ -22,6 +22,7 @@ services:
   fcc:
     depends_on:
       - mqtt
+      - mavp2p
     build: vmc/flight_control_module
     restart: unless-stopped
 
