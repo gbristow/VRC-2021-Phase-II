@@ -235,7 +235,7 @@ class Fusion(object):
 
             # arctan gets real noisy when the values get small, so we just lock course
             # to heading when we aren't really moving
-            if gs >= self.config["GROUNDSPEED_THRESHOLD"]:
+            if gs >= self.config["COURSE_THRESHOLD"]:
                 course = atan2(msg["e"], msg["n"])
                 # wrap [-pi, pi] to [0, 360]
                 if course < 0:
