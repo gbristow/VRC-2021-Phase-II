@@ -97,7 +97,7 @@ class Fusion(object):
             "vrc/vio/orientation/eul":self.fuse_att_euler,
             "vrc/vio/heading":self.fuse_att_heading,
             "vrc/vio/velocity/ned":self.fuse_vel,
-            f"{self.topic_prefix}/pos":self.local_to_geo
+            f"{self.topic_prefix}/pos/ned":self.local_to_geo
         }
 
         self.primary_topic = None
