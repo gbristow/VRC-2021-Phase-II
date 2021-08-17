@@ -47,7 +47,6 @@ services:
       - /tmp/argus_socket:/tmp/argus_socket
     runtime: nvidia
 
-
   fusion:
     depends_on: 
       - mqtt
