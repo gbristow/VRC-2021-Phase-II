@@ -84,7 +84,7 @@ class MAVMQTTBase:
         return datetime.datetime.now().isoformat()
 
     @try_except()
-    def _publish_state_machine_event(self, name: str, payload: str = "") -> None:
+    def _publish_event(self, name: str, payload: str = "") -> None:
         """
         Create and publish state machine event.
         """
@@ -214,9 +214,9 @@ class FCC(MAVMQTTBase):
             # if the state has been steady for debounce_time
             if (now - flip_time > debounce_time) and should_update:
                 if connected:
-                    self._publish_state_machine_event("fcc_connected_event")
+                    self._publish_event("fcc_connected_event")
                 else:
-                    self._publish_state_machine_event("fcc_disconnected_event")
+                    self._publish_event("fcc_disconnected_event")
                 should_update = False
 
             was_connected = connected
@@ -262,9 +262,9 @@ class FCC(MAVMQTTBase):
             # if the arming status is different than last time
             if armed != was_armed:
                 if armed:
-                    self._publish_state_machine_event("fcc_armed_event")
+                    self._publish_event("fcc_armed_event")
                 else:
-                    self._publish_state_machine_event("fcc_disarmed_event")
+                    self._publish_event("fcc_disarmed_event")
             was_armed = armed
             self.is_armed = armed
 
@@ -291,15 +291,15 @@ class FCC(MAVMQTTBase):
             # if we have a state change
             if mode != previous_state:
                 if mode == "IN_AIR":
-                    self._publish_state_machine_event("landed_state_in_air_event")
+                    self._publish_event("landed_state_in_air_event")
                 elif mode == "LANDING":
-                    self._publish_state_machine_event("landed_state_landing_event")
+                    self._publish_event("landed_state_landing_event")
                 elif mode == "ON_GROUND":
-                    self._publish_state_machine_event("landed_state_on_ground_event")
+                    self._publish_event("landed_state_on_ground_event")
                 elif mode == "TAKING_OFF":
-                    self._publish_state_machine_event("landed_state_taking_off_event")
+                    self._publish_event("landed_state_taking_off_event")
                 elif mode == "UNKNOWN":
-                    self._publish_state_machine_event("landed_state_unknown_event")
+                    self._publish_event("landed_state_unknown_event")
             previous_state = mode
 
     @async_try_except()
@@ -343,9 +343,9 @@ class FCC(MAVMQTTBase):
 
             if mode != fcc_mode:
                 if mode in fcc_mode_map.keys():
-                    self._publish_state_machine_event(fcc_mode_map[str(mode)])
+                    self._publish_event(fcc_mode_map[str(mode)])
                 else:
-                    self._publish_state_machine_event("fcc_mode_error_event")
+                    self._publish_event("fcc_mode_error_event")
             fcc_mode = mode
             self.fcc_mode = mode
 
@@ -525,7 +525,7 @@ class FCC(MAVMQTTBase):
                 """
                 try:
                     await asyncio.wait_for(task(**payload), timeout=self.timeout)
-                    self._publish_state_machine_event(
+                    self._publish_event(
                         "request_" + name + "_completed_event"
                     )
                     # Logging.normal(prefix, f"Task '{name}' returned")
@@ -534,7 +534,7 @@ class FCC(MAVMQTTBase):
                 except asyncio.TimeoutError:
                     try:
                         logger.warning(f"Task '{name}' timed out!")
-                        self._publish_state_machine_event("action_timeout_event", name)
+                        self._publish_event("action_timeout_event", name)
                         self.currently_running_task = None
                     except Exception as e:
                         logger.exception("ERROR IN TIMEOUT HANDLER")
@@ -578,7 +578,7 @@ class FCC(MAVMQTTBase):
                     )
             except DispatcherBusy:
                 logger.info("I'm busy running another task, try again later")
-                self._publish_state_machine_event("fcc_busy_event", payload=action["name"])
+                self._publish_event("fcc_busy_event", payload=action["name"])
             except queue.Empty:
                 await asyncio.sleep(0.1)
             except Exception as e:
@@ -597,11 +597,11 @@ class FCC(MAVMQTTBase):
             await action_fn()
             full_success_str = action_text + "_success_event"
             logger.info(f"Sending {full_success_str}")
-            self._publish_state_machine_event(full_success_str)
+            self._publish_event(full_success_str)
         except ActionError as e:
             full_fail_str = action_text + "_failed_event"
             logger.info(f"Sending {full_fail_str}")
-            self._publish_state_machine_event(full_fail_str)
+            self._publish_event(full_fail_str)
             if e._result.result_str == "CONNECTION_ERROR":
                 asyncio.create_task(self.connect())
             raise e
@@ -693,7 +693,7 @@ class FCC(MAVMQTTBase):
         logger.info("Starting the mission")
         await self.mission_api.start()
         if self.in_air:
-            self._publish_state_machine_event("mission_starting_from_air_event")
+            self._publish_event("mission_starting_from_air_event")
 
     @async_try_except(reraise=True)
     async def pause_mission(self, **kwargs) -> None:
@@ -925,12 +925,12 @@ class MissionAPI(MAVMQTTBase):
             await self.drone.mission_raw.clear_mission()
             logger.info("Uploading mission items to drone")
             await self.drone.mission_raw.upload_mission(mission_items)
-            self._publish_state_machine_event("mission_upload_success_event")
+            self._publish_event("mission_upload_success_event")
         except MissionRawError as e:
             logger.warning(
                 f"Mission upload failed because: {str(e._result.result_str)}"
             )
-            self._publish_state_machine_event(
+            self._publish_event(
                 "mission_upload_failed_event", str(e._result.result_str)
             )
 
