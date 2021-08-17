@@ -213,7 +213,7 @@ class Fusion(object):
             )
 
             # compute groundspeed
-            gs = np.linalg.norm([msg["Vn"], msg["Ve"]])
+            gs = np.linalg.norm([msg["n"], msg["e"]])
             groundspeed_update = { "groundspeed": gs }
 
             self.mqtt_client.publish(
@@ -226,7 +226,7 @@ class Fusion(object):
             # arctan gets real noisy when the values get small, so we just lock course
             # to heading when we aren't really moving
             if gs >= self.config["GROUNDSPEED_THRESHOLD"]:
-                course = atan2(msg["Ve"], msg["Vn"])
+                course = atan2(msg["e"], msg["n"])
                 # wrap [-pi, pi] to [0, 360]
                 if course < 0:
                     course += 2 * pi
@@ -243,7 +243,7 @@ class Fusion(object):
                 )
 
             m_per_s_2_ft_per_min = 196.85
-            climb_rate_update = { "climb_rate": -1 * msg["Vd"] * m_per_s_2_ft_per_min}
+            climb_rate_update = { "climb_rate": -1 * msg["d"] * m_per_s_2_ft_per_min}
 
             self.mqtt_client.publish(
                 f"{self.topic_prefix}/vel/climbrate",
