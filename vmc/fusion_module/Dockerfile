@@ -1,4 +1,4 @@
-FROM docker.io/library/python:3.9-buster
+FROM docker.io/library/python:3.8-buster
 
 RUN apt-get update -y
 RUN apt-get install -y \
