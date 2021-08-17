@@ -7,7 +7,7 @@ async def run():
     print("Waiting for drone...")
     async for state in drone.core.connection_state():
         if state.is_connected:
-            print(f"Drone discovered with UUID: {state.uuid}")
+            print(f"Drone connected!")
             break
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
