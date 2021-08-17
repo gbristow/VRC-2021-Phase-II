@@ -21,7 +21,7 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 INTERRUPTED = False
 
 class Fusion(object):
-    def __init__(self, broker, config):
+    def __init__(self):
         # ========== VMC_CORE init ========================================================================== #
         self.config = {
             "package": "VMC_CORE",
@@ -568,10 +568,13 @@ class Fusion(object):
     #         print(fore.RED + "FUS: Error in t265 resync: %s" % e, style.RESET)
     #         raise e
 
-    def main(self):
+    def run(self):
         # tells the os what to name this process, for debugging
         setproctitle("fusion_process")
         # allows for graceful shutdown of any child threads
         self.mqtt_client.connect(host=self.mqtt_host, port=self.mqtt_port, keepalive=60)
         self.mqtt_client.loop_forever()
-  
+
+if __name__ == "__main__":
+    fusion = Fusion()
+    fusion.run()

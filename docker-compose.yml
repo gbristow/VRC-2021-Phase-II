@@ -47,6 +47,15 @@ services:
       - /tmp/argus_socket:/tmp/argus_socket
     runtime: nvidia
 
+
+  fusion:
+    depends_on: 
+      - mqtt
+      - vio
+      - apriltag
+    build: vmc/fusion_module
+    restart: unless-stopped
+
   # sandbox:
   #   depends_on:
   #     - mqtt
