@@ -5,6 +5,8 @@ import time
 from math import atan2, pi
 import json
 
+print("finished basic imports")
+
 # pip installed packages
 import numpy as np
 import pymap3d
@@ -14,6 +16,8 @@ from loguru import logger
 import paho.mqtt.client as mqtt
 
 from typing import Any
+
+print("finished all imports")
 
 # find the file path to this file
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
