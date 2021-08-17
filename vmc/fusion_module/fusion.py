@@ -9,17 +9,11 @@ print("finished basic imports")
 
 # pip installed packages
 import numpy as np
-print("finished np imports")
 import pymap3d
-print("finished pymap imports")
 from setproctitle import setproctitle
-print("finished prtoc imports")
 from colored import fore, back, style
-print("finished colored imports")
 from loguru import logger
-print("finished logger imports")
 import paho.mqtt.client as mqtt
-print("finished paho imports")
 
 from typing import Any
 
