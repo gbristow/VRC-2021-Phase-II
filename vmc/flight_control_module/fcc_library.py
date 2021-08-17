@@ -169,7 +169,7 @@ class FCC(MAVMQTTBase):
         """
         Connect the Drone object.
         """
-        await self.drone.connect(system_address="udp://mavp2p:14541")
+        await self.drone.connect(system_address="udp://:14541")
 
     # region ###################  T E L E M E T R Y ###########################
 

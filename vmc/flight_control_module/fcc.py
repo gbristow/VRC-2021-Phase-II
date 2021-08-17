@@ -99,13 +99,13 @@ class FCCModule(object):
         logger.debug("Starting FCC Tasks")
         asyncio.gather(
             self.fcc.telemetry_tasks(),
-            self.fcc.offboard_tasks(),
-            self.fcc.action_dispatcher(),
+            # self.fcc.offboard_tasks(),
+            # self.fcc.action_dispatcher(),
             self.gps_fcc.run(),
         )
 
         while True:
-            await asyncio.sleep(1)
+            await asyncio.sleep(3)
 
 if __name__ == "__main__":
     setproctitle("FlightControlModule")
