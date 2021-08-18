@@ -47,7 +47,7 @@ class FCCModule(object):
 
     def on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
         try:
-            logger.debug(f"{msg.topic}: {str(msg.payload)}")
+            #logger.debug(f"{msg.topic}: {str(msg.payload)}")
             if msg.topic in self.mqtt_topics.keys():
                 data = json.loads(msg.payload)
                 self.mqtt_topics[msg.topic].put(data)
