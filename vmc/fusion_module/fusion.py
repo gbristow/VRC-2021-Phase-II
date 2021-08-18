@@ -108,7 +108,7 @@ class Fusion(object):
                     self.config["origin"]["alt"]]
 
         try:
-            ned = msg["ned"]
+            ned = msg
             lla = pymap3d.enu2geodetic( float(ned["e"])/100, # East   | Y
                                         float(ned["n"])/100, # North  | X
                                     -1 * float(ned["d"])/100, # Up     | Z
