@@ -28,42 +28,10 @@ class Fusion(object):
     def __init__(self):
         # ========== VMC_CORE init ========================================================================== #
         self.config = {
-            "package": "VMC_CORE",
-            "threads":{
-                "fuse_pos":{},
-                "fuse_vel":{},
-                "fuse_att":{},
-                "status_prints": {
-                    "init": "False",
-                    "PRINT_FREQ": 2
-                },
-                "local_to_geo":{
-                    "origin":{
-                        "lat": 32.807650,
-                        "lon": -97.157153,
-                        "alt": 161.5
-                    }
-                },
-                "assemble_hil_gps_message":{
-                    "init": "True",
-                    "hil_gps_constants":{
-                        "fix_type": 3,
-                        "eph": 20,
-                        "epv": 5,
-                        "satellites_visible": 13
-                    }
-                },
-                "pos_sensor_check":{
-                    "topics": {
-                        "vmc.mocap": {
-                            "timeout": 0.5,
-                            "priority": 1
-                        }
-                    }
-                },
-                "aprilTag_resync_t265":{
-                    "init": "True"
-                }
+            "origin":{
+                "lat": 32.807650,
+                "lon": -97.157153,
+                "alt": 161.5
             },
             "COURSE_THRESHOLD":10,
             "POS_DETLA_THRESHOLD": 10,
@@ -339,6 +307,13 @@ class Fusion(object):
     #     This code takes the pos data from the VMC and formats it into a special message that is exactly
     #     what the FCC needs to generate the hil_gps message (with heading)
     #     '''
+
+            # "hil_gps_constants":{
+            #             "fix_type": 3,
+            #             "eph": 20,
+            #             "epv": 5,
+            #             "satellites_visible": 13
+            #         }
     #     while not INTERRUPTED:
     #         time.sleep(0.01)
     #         try:
