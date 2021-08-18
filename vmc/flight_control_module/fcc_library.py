@@ -178,17 +178,17 @@ class FCC(MAVMQTTBase):
         Gathers the telemetry tasks
         """
         return asyncio.gather(
-            # self.connected_status_telemetry(),
-            #self.battery_telemetry(),
-            #self.in_air_telemetry(),
-            self.is_armed_telemetry(),
-            self.flight_mode_telemetry(),
-            self.landed_state_telemetry(),
-            self.position_ned_telemetry(),
-            self.position_lla_telemetry(),
-            self.home_lla_telemetry(),
+            self.connected_status_telemetry(),
+            self.battery_telemetry(),
+            self.in_air_telemetry(),
+            # self.is_armed_telemetry(),
+            # self.flight_mode_telemetry(),
+            # self.landed_state_telemetry(),
+            # self.position_ned_telemetry(),
+            # self.position_lla_telemetry(),
+            # self.home_lla_telemetry(),
             self.attitude_euler_telemetry(),
-            self.velocity_ned_telemetry(),
+            # self.velocity_ned_telemetry(),
         )
 
     @async_try_except()
