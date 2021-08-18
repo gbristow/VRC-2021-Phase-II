@@ -18,7 +18,7 @@ except ImportError:
 class FCCModule(object):
     def __init__(self):
 
-        self.mqtt_host = "mqtt"
+        self.mqtt_host = "localhost"
         self.mqtt_port = 18830
 
         # self.mqtt_user = "user"

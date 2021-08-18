@@ -7,9 +7,7 @@ services:
     restart: unless-stopped
     devices:
       - "/dev/ttyTHS1:/dev/ttyTHS1"
-    ports:
-      - "5790:5790"
-      - "14541:14541/udp"
+    network_mode: "host"
 
   mqtt:
     image: docker.io/library/eclipse-mosquitto:2.0.11
@@ -24,7 +22,7 @@ services:
       - mqtt
       - mavp2p
     build: vmc/flight_control_module
-    #network_mode: "host"
+    network_mode: "host"
     restart: unless-stopped
 
   pcc:
