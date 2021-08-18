@@ -3,8 +3,11 @@ version: '3'
 services:
   mavp2p:
     build: vmc/mavp2p
-    command: tcps:0.0.0.0:5790 udpc:0.0.0.0:14541 --print-errors
+    command:  serial:/dev/ttyTHS1:500000 tcps:0.0.0.0:5790 udpc:127.0.0.1:14541 udpc:127.0.0.1:14542 --print-errors
     restart: unless-stopped
+    devices:
+      - "/dev/ttyTHS1:/dev/ttyTHS1"
+    network_mode: "host"
 
   mqtt:
     image: docker.io/library/eclipse-mosquitto:2.0.11
@@ -17,7 +20,9 @@ services:
   fcc:
     depends_on:
       - mqtt
+      - mavp2p
     build: vmc/flight_control_module
+    network_mode: "host"
     restart: unless-stopped
 
   pcc:
@@ -33,16 +38,21 @@ services:
     privileged: true
     restart: unless-stopped
 
-  # apriltag:
-  #   depends_on:
-  #     - mqtt
-  #   devices:
-  #     - /dev/video0:/dev/video0
-  #   build: vmc/apriltag_module
-  #   privileged: true
-  #   restart: unless-stopped
-  #   volumes: 
-  #     - /tmp/argus_socket:/tmp/argus_socket
+  apriltag:
+    depends_on:
+      - mqtt
+    build: vmc/apriltag_module
+    restart: unless-stopped
+    volumes:
+      - /tmp/argus_socket:/tmp/argus_socket
+
+  fusion:
+    depends_on:
+      - mqtt
+      - vio
+      - apriltag
+    build: vmc/fusion_module
+    restart: unless-stopped
 
   # sandbox:
   #   depends_on:

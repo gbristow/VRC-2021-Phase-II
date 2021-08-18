@@ -1,0 +1,6 @@
+colored
+loguru
+numpy
+paho-mqtt
+setproctitle
+pymap3d

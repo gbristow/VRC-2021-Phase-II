@@ -84,7 +84,7 @@ class MAVMQTTBase:
         return datetime.datetime.now().isoformat()
 
     @try_except()
-    def _publish_state_machine_event(self, name: str, payload: str = "") -> None:
+    def _publish_event(self, name: str, payload: str = "") -> None:
         """
         Create and publish state machine event.
         """
@@ -169,7 +169,7 @@ class FCC(MAVMQTTBase):
         """
         Connect the Drone object.
         """
-        await self.drone.connect(system_address="udp://mavp2p:14541")
+        await self.drone.connect(system_address="udp://:14541")
 
     # region ###################  T E L E M E T R Y ###########################
 
@@ -178,15 +178,15 @@ class FCC(MAVMQTTBase):
         Gathers the telemetry tasks
         """
         return asyncio.gather(
-            self.connected_status_telemetry(),
+            # self.connected_status_telemetry(),
             self.battery_telemetry(),
-            self.in_air_telemetry(),
+            # self.in_air_telemetry(),
             self.is_armed_telemetry(),
             self.flight_mode_telemetry(),
             self.landed_state_telemetry(),
-            self.position_ned_telemetry(),
+            # self.position_ned_telemetry(),
             self.position_lla_telemetry(),
-            self.home_lla_telemetry(),
+            # self.home_lla_telemetry(),
             self.attitude_euler_telemetry(),
             self.velocity_ned_telemetry(),
         )
@@ -214,9 +214,9 @@ class FCC(MAVMQTTBase):
             # if the state has been steady for debounce_time
             if (now - flip_time > debounce_time) and should_update:
                 if connected:
-                    self._publish_state_machine_event("fcc_connected_event")
+                    self._publish_event("fcc_connected_event")
                 else:
-                    self._publish_state_machine_event("fcc_disconnected_event")
+                    self._publish_event("fcc_disconnected_event")
                 should_update = False
 
             was_connected = connected
@@ -230,13 +230,12 @@ class FCC(MAVMQTTBase):
         async for battery in self.drone.telemetry.battery():
 
             update = {}
-            update["voltage"] = battery.voltage_v
+            update["voltage"] = battery.voltage_v * 4 #bc 4 cell
             # TODO see if mavsdk supports battery current
             # TODO see is mavsdk supports power draw
             update["soc"] = battery.remaining_percent * 100.0
             update["timestamp"] = self._timestamp()
 
-            # publish the proto
             self.mqtt_client.publish(
                 f"{self.topic_prefix}/battery", json.dumps(update), retain=False, qos=0
             )
@@ -262,16 +261,16 @@ class FCC(MAVMQTTBase):
             # if the arming status is different than last time
             if armed != was_armed:
                 if armed:
-                    self._publish_state_machine_event("fcc_armed_event")
+                    self._publish_event("fcc_armed_event")
                 else:
-                    self._publish_state_machine_event("fcc_disarmed_event")
+                    self._publish_event("fcc_disarmed_event")
             was_armed = armed
             self.is_armed = armed
 
             update = {}
 
             update["armed"] = armed
-            update["mode"] = self.fcc_mode
+            update["mode"] = str(self.fcc_mode)
             update["timestamp"] = self._timestamp()
 
             self.mqtt_client.publish(
@@ -291,15 +290,15 @@ class FCC(MAVMQTTBase):
             # if we have a state change
             if mode != previous_state:
                 if mode == "IN_AIR":
-                    self._publish_state_machine_event("landed_state_in_air_event")
+                    self._publish_event("landed_state_in_air_event")
                 elif mode == "LANDING":
-                    self._publish_state_machine_event("landed_state_landing_event")
+                    self._publish_event("landed_state_landing_event")
                 elif mode == "ON_GROUND":
-                    self._publish_state_machine_event("landed_state_on_ground_event")
+                    self._publish_event("landed_state_on_ground_event")
                 elif mode == "TAKING_OFF":
-                    self._publish_state_machine_event("landed_state_taking_off_event")
+                    self._publish_event("landed_state_taking_off_event")
                 elif mode == "UNKNOWN":
-                    self._publish_state_machine_event("landed_state_unknown_event")
+                    self._publish_event("landed_state_unknown_event")
             previous_state = mode
 
     @async_try_except()
@@ -343,9 +342,9 @@ class FCC(MAVMQTTBase):
 
             if mode != fcc_mode:
                 if mode in fcc_mode_map.keys():
-                    self._publish_state_machine_event(fcc_mode_map[str(mode)])
+                    self._publish_event(fcc_mode_map[str(mode)])
                 else:
-                    self._publish_state_machine_event("fcc_mode_error_event")
+                    self._publish_event("fcc_mode_error_event")
             fcc_mode = mode
             self.fcc_mode = mode
 
@@ -525,7 +524,7 @@ class FCC(MAVMQTTBase):
                 """
                 try:
                     await asyncio.wait_for(task(**payload), timeout=self.timeout)
-                    self._publish_state_machine_event(
+                    self._publish_event(
                         "request_" + name + "_completed_event"
                     )
                     # Logging.normal(prefix, f"Task '{name}' returned")
@@ -534,7 +533,7 @@ class FCC(MAVMQTTBase):
                 except asyncio.TimeoutError:
                     try:
                         logger.warning(f"Task '{name}' timed out!")
-                        self._publish_state_machine_event("action_timeout_event", name)
+                        self._publish_event("action_timeout_event", name)
                         self.currently_running_task = None
                     except Exception as e:
                         logger.exception("ERROR IN TIMEOUT HANDLER")
@@ -578,7 +577,7 @@ class FCC(MAVMQTTBase):
                     )
             except DispatcherBusy:
                 logger.info("I'm busy running another task, try again later")
-                self._publish_state_machine_event("fcc_busy_event", payload=action["name"])
+                self._publish_event("fcc_busy_event", payload=action["name"])
             except queue.Empty:
                 await asyncio.sleep(0.1)
             except Exception as e:
@@ -597,11 +596,11 @@ class FCC(MAVMQTTBase):
             await action_fn()
             full_success_str = action_text + "_success_event"
             logger.info(f"Sending {full_success_str}")
-            self._publish_state_machine_event(full_success_str)
+            self._publish_event(full_success_str)
         except ActionError as e:
             full_fail_str = action_text + "_failed_event"
             logger.info(f"Sending {full_fail_str}")
-            self._publish_state_machine_event(full_fail_str)
+            self._publish_event(full_fail_str)
             if e._result.result_str == "CONNECTION_ERROR":
                 asyncio.create_task(self.connect())
             raise e
@@ -693,7 +692,7 @@ class FCC(MAVMQTTBase):
         logger.info("Starting the mission")
         await self.mission_api.start()
         if self.in_air:
-            self._publish_state_machine_event("mission_starting_from_air_event")
+            self._publish_event("mission_starting_from_air_event")
 
     @async_try_except(reraise=True)
     async def pause_mission(self, **kwargs) -> None:
@@ -925,12 +924,12 @@ class MissionAPI(MAVMQTTBase):
             await self.drone.mission_raw.clear_mission()
             logger.info("Uploading mission items to drone")
             await self.drone.mission_raw.upload_mission(mission_items)
-            self._publish_state_machine_event("mission_upload_success_event")
+            self._publish_event("mission_upload_success_event")
         except MissionRawError as e:
             logger.warning(
                 f"Mission upload failed because: {str(e._result.result_str)}"
             )
-            self._publish_state_machine_event(
+            self._publish_event(
                 "mission_upload_failed_event", str(e._result.result_str)
             )
 
@@ -1057,7 +1056,13 @@ class PyMAVLinkAgent(MAVMQTTBase):
             the last time statistics were printed.
             """
             if time.time() - last_print_time > 1:
-                logger.debug(f"Number of mocap messages {num_mocaps}")
+                #logger.debug(f"Number of mocap messages {num_mocaps}")
+                self.mqtt_client.publish(
+                f"{self.topic_prefix}/hil_gps/stats",
+                json.dumps({"num_frames":num_mocaps}),
+                retain=False,
+                qos=0,
+            )
                 return time.time()
             return last_print_time
 
@@ -1070,20 +1075,20 @@ class PyMAVLinkAgent(MAVMQTTBase):
             """
             hilgps = {}
 
-            hilgps["time_usec"] = int(mocap_msg["timestamp"])  # microseconds
-            hilgps["fix_type"] = int(3)  # this will always be "3" for a 3D fix
-            hilgps["lat"] = int(mocap_msg["latitude"] * 1e7)
-            hilgps["lon"] = int(mocap_msg["longitude"] * 1e7)
-            hilgps["alt"] = int(mocap_msg["altitude"] * 1000)  # m to mm
-            hilgps["eph"] = int(10)  # horizontal dilution of precision in ?
-            hilgps["epv"] = int(10)  # vertical duilution of precision in ?
-            hilgps["vel"] = int(mocap_msg["groundspeed"] * 100)  # m to cm
-            hilgps["v_north"] = int(mocap_msg["vX"] * 100)  # m to cm
-            hilgps["v_east"] = int(mocap_msg["vY"] * 100)  # m to cm
-            hilgps["v_down"] = int(mocap_msg["vZ"] * 100)  # m to cm
-            hilgps["cog"] = int(mocap_msg["course"] * 100)  # deg to cdeg
-            hilgps["sats_visible"] = int(13)
-            hilgps["heading"] = int(mocap_msg["heading"] * 100)  # deg to cdeg
+            hilgps["time_usec"] = int(mocap_msg["time_usec"])  # microseconds
+            hilgps["fix_type"] = int(mocap_msg["fix_type"])
+            hilgps["lat"] = int(mocap_msg["lat"])
+            hilgps["lon"] = int(mocap_msg["lon"])
+            hilgps["alt"] = int(mocap_msg["alt"])  
+            hilgps["eph"] = int(mocap_msg["eph"])  # horizontal dilution of precision in ?
+            hilgps["epv"] = int(mocap_msg["epv"])  # vertical duilution of precision in ?
+            hilgps["vel"] = int(mocap_msg["vel"] )
+            hilgps["v_north"] = int(mocap_msg["vn"])
+            hilgps["v_east"] = int(mocap_msg["ve"])
+            hilgps["v_down"] = int(mocap_msg["vd"])
+            hilgps["cog"] = int(mocap_msg["cog"])
+            hilgps["sats_visible"] = int(mocap_msg["satellites_visible"])
+            hilgps["heading"] = int(mocap_msg["heading"])
 
             return hilgps
 
@@ -1125,17 +1130,22 @@ class PyMAVLinkAgent(MAVMQTTBase):
                 last_print_time = print_stats(last_print_time)
                 # get the next item
                 data = self.mocap_queue.get_nowait()
+
+                msg = data["hil_gps"]
+
                 num_mocaps += 1
                 now = time.time()
 
                 # if time to send a new item, do so
                 if now - last_send_time > (1 / HIL_FREQ):
                     # prepare hil data
-                    hil_data = mocap_msg_to_offboard_msg(data)
+                    hil_data = mocap_msg_to_offboard_msg(msg)
                     # send it
                     send_hil_gps(hil_data)
                     last_send_time = time.time()
             except queue.Empty:
                 await asyncio.sleep(0.01)
+                continue
             except Exception as e:
                 logger.exception("Issue sending HIL GPS")
+                continue

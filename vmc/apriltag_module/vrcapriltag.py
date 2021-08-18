@@ -12,11 +12,12 @@ import numpy as np
 import transforms3d as t3d
 from setproctitle import setproctitle
 from colored import fore, back, style
+from loguru import logger
 
 # custom libraries
 from apriltag_library import AprilTagVPS
 
-from loguru import logger
+
 from typing import Dict, List, Union, Any
 
 import paho.mqtt.client as mqtt
@@ -38,7 +39,7 @@ class VRCAprilTag(object):
             "detector": {
                 "protocol": "argus",
                 "video_device": "/dev/video0",
-                "res": [640, 360],
+                "res": [1280, 720],
                 "camera_params": "160CSI",
                 "tag_size": 0.174,
                 "framerate": 5,
@@ -104,6 +105,10 @@ class VRCAprilTag(object):
             logger.debug(f"Apriltag Module: Subscribed to: {topic}")
             client.subscribe(topic)
 
+    def run_mqtt(self):
+        self.mqtt_client.connect(host=self.mqtt_host, port=self.mqtt_port, keepalive=60)
+        self.mqtt_client.loop_forever()
+
     def setup_transforms(self):
         rmat = t3d.euler.euler2mat(
             self.default_config["cam"]["rpy"][0],
@@ -150,7 +155,7 @@ class VRCAprilTag(object):
                 [
                     tag.pose_t[0][0] * 100,
                     tag.pose_t[1][0] * 100,
-                    tag.pose_t[2][0] * 100 * 2.54,
+                    tag.pose_t[2][0] * 100 * 2.54, #TODO why is this magic value here
                 ],
                 R,
                 [1, 1, 1],
@@ -187,6 +192,13 @@ class VRCAprilTag(object):
             qos=0,
         )
 
+    def publish_heartbeat(self, last_detection):
+        heartbeat = {
+            "last_loop_timestamp":time.time(),
+            "last_detection_timestamp":last_detection
+        }
+        self.publish_dict(f"{self.topic_prefix}/heartbeat", heartbeat)
+
     def publish_updates(
         self,
         visible_tag_ids,
@@ -212,6 +224,10 @@ class VRCAprilTag(object):
         update = {"id": best_tag_id, "error": best_error}
         self.publish_dict(f"{self.topic_prefix}/selected", update)
 
+        # fps and image #
+        stats = {"fps": self.at.avg, "num_images": self.at.num_images}
+        self.publish_dict(f"{self.topic_prefix}/stats", stats)
+
     def loop(self):
         """
         need to return/publish
@@ -229,15 +245,17 @@ class VRCAprilTag(object):
         prev_timestamp = current_timestamp
         assert self.at  # make sure at is not none
 
+        last_hearbeat = time.time()
+
         while True:
 
             current_tags = self.at.tags
             current_timestamp = self.at.tags_timestamp
 
-            # if we have new tag data
             if current_timestamp - prev_timestamp > (
                 1 / self.default_config["AT_UPDATE_FREQ"]
             ):
+                
                 if current_tags and (current_timestamp != prev_timestamp):
 
                     # handle the data
@@ -280,6 +298,12 @@ class VRCAprilTag(object):
                     )
 
             prev_timestamp = current_timestamp
+            
+            now = time.time()
+            if (now - last_hearbeat > ( 1 / self.default_config["AT_UPDATE_FREQ"]) ):
+                self.publish_heartbeat(current_timestamp)
+                last_hearbeat = now
+            
             time.sleep(0.01)
 
     def main(self):
@@ -312,12 +336,17 @@ class VRCAprilTag(object):
         )
         threads.append(transform_thread)
 
+        mqtt_thread = threading.Thread(
+            target=self.run_mqtt, args=(), daemon=True, name="apriltag_mqtt_thread"
+        )
+        threads.append(mqtt_thread)
+
         for thread in threads:
             thread.start()
             logger.debug(f"{fore.GREEN}AT: starting thread: {thread.name}{style.RESET}")  # type: ignore
 
         while True:
-            time.sleep(0.25)
+            time.sleep(0.1)
 
 
 if __name__ == "__main__":

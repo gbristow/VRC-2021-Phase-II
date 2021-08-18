@@ -11,10 +11,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
 
     strategy:
       matrix:
-        image: [apriltag_module, flight_control_module, mavp2p, peripheral_control_module, vio_module]
+        image: [apriltag_module, flight_control_module, mavp2p, peripheral_control_module, vio_module, fusion_module]
 
     steps:
     - name: Checkout Code
@@ -24,9 +25,8 @@ jobs:
       uses: actions/cache@v2
       with:
         path: /tmp/.buildx-cache
-        key: buildx-${{ hashFiles('**/Dockerfile') }}-${{ matrix.image }}
+        key: buildx-${{ hashFiles(join(['vmc/', matrix.image])) }}
         restore-keys: |
-          buildx-${{ hashFiles('**/Dockerfile') }}
           buildx
 
     - name: Set up QEMU

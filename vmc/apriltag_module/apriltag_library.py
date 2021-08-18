@@ -69,6 +69,9 @@ class AprilTagVPS(object):
         self.tags = None
         self.tags_timestamp = time.time()
 
+        self.avg = 0.0
+        self.num_images = 0
+
     def start(self):
         """
         Kicks off the AprilTagVPS pipeline, capturing images from a v4l2 camera @ 'video_device' and uses 'camera_params' along with 'tag_size' to calculate pose.
@@ -92,6 +95,7 @@ class AprilTagVPS(object):
         while True:
             # if the perception loop has completed analysis on a frame, show some stats or even render the frame
             if not self.tags_queue.empty():
+                self.num_images += 1
                 now = time.time()
                 tags = self.tags_queue.get()
                 if tags:
@@ -102,8 +106,8 @@ class AprilTagVPS(object):
 
                 tdelta = now - last_loop
                 delta_buckets[i % 10] = tdelta  # type: ignore
-                avg = 1 / (sum(delta_buckets) / 10)
-                logger.debug(f"{fore.GREEN}AT: FPS {avg:04.1f} \t Tags: {len(tags)}")  # type: ignore
+                self.avg = 1 / (sum(delta_buckets) / 10)
+                # logger.debug(f"{fore.GREEN}AT: FPS {avg:04.1f} \t Tags: {len(tags)}")  # type: ignore
                 last_loop = now
                 i = i + 1
             else:
