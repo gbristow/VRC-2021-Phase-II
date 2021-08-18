@@ -318,7 +318,7 @@ class Fusion(object):
             self.local_copy["heading"] = dict(heading_update)
 
             if self.local_copy["groundspeed"]["groundspeed"] < self.config["COURSE_THRESHOLD"]:
-                self.local_copy["course"]["course"] = msg["degrees"]
+                self.local_copy["course"] = dict({"course":msg["degrees"]})
         except Exception as e:
             logger.exception(f"{fore.RED}FUS: Error fusing att/heading sources {str(e)}{style.RESET}") #type: ignore
 
