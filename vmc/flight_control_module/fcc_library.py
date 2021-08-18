@@ -185,7 +185,7 @@ class FCC(MAVMQTTBase):
             # self.flight_mode_telemetry(),
             # self.landed_state_telemetry(),
             # self.position_ned_telemetry(),
-            # self.position_lla_telemetry(),
+            self.position_lla_telemetry(),
             self.home_lla_telemetry(),
             self.attitude_euler_telemetry(),
             self.velocity_ned_telemetry(),
