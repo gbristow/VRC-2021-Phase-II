@@ -1069,20 +1069,20 @@ class PyMAVLinkAgent(MAVMQTTBase):
             """
             hilgps = {}
 
-            hilgps["time_usec"] = int(mocap_msg["timestamp"])  # microseconds
-            hilgps["fix_type"] = int(3)  # this will always be "3" for a 3D fix
-            hilgps["lat"] = int(mocap_msg["latitude"] * 1e7)
-            hilgps["lon"] = int(mocap_msg["longitude"] * 1e7)
-            hilgps["alt"] = int(mocap_msg["altitude"] * 1000)  # m to mm
-            hilgps["eph"] = int(10)  # horizontal dilution of precision in ?
-            hilgps["epv"] = int(10)  # vertical duilution of precision in ?
-            hilgps["vel"] = int(mocap_msg["groundspeed"] * 100)  # m to cm
-            hilgps["v_north"] = int(mocap_msg["vX"] * 100)  # m to cm
-            hilgps["v_east"] = int(mocap_msg["vY"] * 100)  # m to cm
-            hilgps["v_down"] = int(mocap_msg["vZ"] * 100)  # m to cm
-            hilgps["cog"] = int(mocap_msg["course"] * 100)  # deg to cdeg
-            hilgps["sats_visible"] = int(13)
-            hilgps["heading"] = int(mocap_msg["heading"] * 100)  # deg to cdeg
+            hilgps["time_usec"] = int(mocap_msg["time_usec"])  # microseconds
+            hilgps["fix_type"] = int(mocap_msg["fix_type"])
+            hilgps["lat"] = int(mocap_msg["lat"])
+            hilgps["lon"] = int(mocap_msg["lon"])
+            hilgps["alt"] = int(mocap_msg["alt"])  
+            hilgps["eph"] = int(mocap_msg["eph"])  # horizontal dilution of precision in ?
+            hilgps["epv"] = int(mocap_msg["epv"])  # vertical duilution of precision in ?
+            hilgps["vel"] = int(mocap_msg["vel"] )
+            hilgps["v_north"] = int(mocap_msg["vn"])
+            hilgps["v_east"] = int(mocap_msg["ve"])
+            hilgps["v_down"] = int(mocap_msg["vd"])
+            hilgps["cog"] = int(mocap_msg["cog"])
+            hilgps["sats_visible"] = int(mocap_msg["satellites_visible"])
+            hilgps["heading"] = int(mocap_msg["heading"])
 
             return hilgps
 
@@ -1124,13 +1124,16 @@ class PyMAVLinkAgent(MAVMQTTBase):
                 last_print_time = print_stats(last_print_time)
                 # get the next item
                 data = self.mocap_queue.get_nowait()
+
+                msg = data["hil_gps"]
+
                 num_mocaps += 1
                 now = time.time()
 
                 # if time to send a new item, do so
                 if now - last_send_time > (1 / HIL_FREQ):
                     # prepare hil data
-                    hil_data = mocap_msg_to_offboard_msg(data)
+                    hil_data = mocap_msg_to_offboard_msg(msg)
                     # send it
                     send_hil_gps(hil_data)
                     last_send_time = time.time()
