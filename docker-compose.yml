@@ -30,6 +30,8 @@ services:
       - mqtt
     build: vmc/peripheral_control_module
     restart: unless-stopped
+    devices:
+    - "/dev/ttyACM0:/dev/ttyACM0"
 
   vio:
     depends_on:
