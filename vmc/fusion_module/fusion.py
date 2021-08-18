@@ -316,56 +316,57 @@ class Fusion(object):
                 qos=0,
             )
             self.local_copy["heading"] = dict(heading_update)
+
+            if self.local_copy["groundspeed"]["groundspeed"] < self.config["COURSE_THRESHOLD"]:
+                self.local_copy["course"]["course"] = msg["degrees"]
         except Exception as e:
             logger.debug(f"{fore.RED}FUS: Error fusing att/heading sources {str(e)}{style.RESET}") #type: ignore
             raise e
 
-    # def assemble_hil_gps_message(self, config=None):
-    #     '''
-    #     This code takes the pos data from the VMC and formats it into a special message that is exactly
-    #     what the FCC needs to generate the hil_gps message (with heading)
-    #     '''
-    #     while not INTERRUPTED:
-    #         time.sleep(0.01)
-    #         try:
+    def assemble_hil_gps_message(self):
+        '''
+        This code takes the pos data from fusion and formats it into a special message that is exactly
+        what the FCC needs to generate the hil_gps message (with heading)
+        '''
+        while True:
+            time.sleep(.1)
+            try:
 
-    #             lat = int( lla["lat"] * 10000000) # convert to int32 format
-    #             lon = int( lla["lon"] * 10000000)  # convert to int32 format
-
-    #             if "hil_gps_constants" not in config.keys():
-    #                 config["hil_gps_constants"] = {
-    #                     "fix_type": 3,
-    #                     "eph": 20,
-    #                     "epv": 5,
-    #                     "satellites_visible": 13
-    #                 }
+                lat = int( self.local_copy["geo"]["lat"] * 10000000) # convert to int32 format
+                lon = int( self.local_copy["geo"]["lon"] * 10000000)  # convert to int32 format
                 
-    #             # if lat / lon is 0, that means the ned -> lla conversion hasn't run yet, don't send that data to FCC
-    #             if lat != 0 and lon != 0:
-    #                 hil_gps_update = {
-    #                     "hil_gps":{
-    #                         "time_usec": int(time.time() * 1000000),
-    #                         "fix_type": int(config["hil_gps_constants"]["fix_type"]), # 3 - 3D fix
-    #                         "lat": lat,
-    #                         "lon": lon, 
-    #                         "alt": int(self.topics["vmc.pos"].message("geodetic").data["alt"] * 1000), # convert m to mm
-    #                         "eph": int(config["hil_gps_constants"]["eph"]), # cm
-    #                         "epv": int(config["hil_gps_constants"]["epv"]), # cm
-    #                         "vel": int(self.topics["vmc.vel"].message("groundspeed").data),
-    #                         "vn": int(self.topics["vmc.vel"].message("speed").data["Vn"]),
-    #                         "ve": int(self.topics["vmc.vel"].message("speed").data["Ve"]),
-    #                         "vd": int(self.topics["vmc.vel"].message("speed").data["Vd"]),
-    #                         "cog": int(self.topics["vmc.vel"].message("course").data * 100),
-    #                         "satellites_visible": int(config["hil_gps_constants"]["satellites_visible"]),
-    #                         "heading": int(self.topics["vmc.att"].message("heading").data * 100)
-    #                     }
-    #                 }
-    #                 self.topics["vmc.gps"].pub([hil_gps_update])
+                # if lat / lon is 0, that means the ned -> lla conversion hasn't run yet, don't send that data to FCC
+                if lat != 0 and lon != 0:
+                    hil_gps_update = {
+                        "hil_gps":{
+                            "time_usec": int(time.time() * 1000000),
+                            "fix_type": int(self.config["hil_gps_constants"]["fix_type"]), # 3 - 3D fix
+                            "lat": lat,
+                            "lon": lon, 
+                            "alt": int(self.local_copy["geo"]["alt"] * 1000), # convert m to mm
+                            "eph": int(self.config["hil_gps_constants"]["eph"]), # cm
+                            "epv": int(self.config["hil_gps_constants"]["epv"]), # cm
+                            "vel": int(self.local_copy["groundspeed"]["groundspeed"]),
+                            "vn": int(self.local_copy["vel"]["Vn"]),
+                            "ve": int(self.local_copy["vel"]["Ve"]),
+                            "vd": int(self.local_copy["vel"]["Vd"]),
+                            "cog": int(self.local_copy["course"]["course"] * 100),
+                            "satellites_visible": int(self.config["hil_gps_constants"]["satellites_visible"]),
+                            "heading": int(self.local_copy["heading"]["heading"] * 100)
+                        }
+                    }
+                    self.mqtt_client.publish(
+                        f"{self.topic_prefix}/fusion/hil_gps",
+                        json.dumps(hil_gps_update),
+                        retain=False,
+                        qos=0,
+                    )
+                    
 
-    #         except Exception as e:
-    #             print("FUS: Error assebling hil gps message!")
-    #             print("FUS: ", e)
-    #             continue
+            except Exception as e:
+                logger.debug(f"{fore.RED}FUS: Error creating hil_gps_message {str(e)}{style.RESET}") #type: ignore
+                #raise e
+                continue
 
     # def status_prints(self, config=None):
         
@@ -561,6 +562,12 @@ class Fusion(object):
         setproctitle("fusion_process")
         # allows for graceful shutdown of any child threads
         self.mqtt_client.connect(host=self.mqtt_host, port=self.mqtt_port, keepalive=60)
+
+        hil_thread = threading.Thread(
+            target=self.assemble_hil_gps_message, args=(), daemon=True, name="assemble_hil_gps_thread"
+        )
+        hil_thread.start()
+
         self.mqtt_client.loop_forever()
 
 if __name__ == "__main__":
