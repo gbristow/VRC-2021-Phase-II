@@ -85,7 +85,7 @@ class Fusion(object):
                 payload = json.loads(msg.payload)
                 self.topic_map[msg.topic](payload)
         except Exception as e:
-            logger.debug(f"{style.RED}Error handling message on {msg.topic}{style.RESET}") #type: ignore
+            logger.debug(f"{fore.RED}Error handling message on {msg.topic}{style.RESET}") #type: ignore
 
     def on_connect(
         self,
@@ -328,6 +328,9 @@ class Fusion(object):
         This code takes the pos data from fusion and formats it into a special message that is exactly
         what the FCC needs to generate the hil_gps message (with heading)
         '''
+
+        time.sleep(10)
+
         while True:
             time.sleep(.1)
             try:
