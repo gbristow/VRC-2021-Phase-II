@@ -84,7 +84,7 @@ class Fusion(object):
                 payload = json.loads(msg.payload)
                 self.topic_map[msg.topic](payload)
         except Exception as e:
-            logger.exception(f"{style.RED}Error handling message on {msg.topic}{style.RESET}")
+            logger.debug(f"{style.RED}Error handling message on {msg.topic}{style.RESET}")
 
     def on_connect(
         self,
