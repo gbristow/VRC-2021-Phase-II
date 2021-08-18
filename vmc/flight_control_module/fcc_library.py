@@ -179,8 +179,8 @@ class FCC(MAVMQTTBase):
         """
         return asyncio.gather(
             # self.connected_status_telemetry(),
-            #self.battery_telemetry(),
-            self.in_air_telemetry(),
+            self.battery_telemetry(),
+            #self.in_air_telemetry(),
             self.is_armed_telemetry(),
             self.flight_mode_telemetry(),
             self.landed_state_telemetry(),
