@@ -1,5 +1,6 @@
 import pyrealsense2 as rs 
 from typing import Dict
+import subprocess
 from loguru import logger
 from colored import fore, back, style
 
@@ -29,6 +30,10 @@ class T265(object):
         try:
             # Reference to a post showing how to use multiple camera: https://github.com/IntelRealSense/librealsense/issues/1735
             logger.debug("Obtaining connected RealSense devices...")
+            
+            # very ancedotally, running this before trying to open the connection seems to help
+            subprocess.run(["rs-enumerate-devices"], check=True)
+
             rs_devices = self.get_rs_devices()
 
             logger.debug("Obtaining T265 connection ID...")
@@ -69,6 +74,7 @@ class T265(object):
     
     def stop(self) -> None:
         try:
+            logger.debug("Closing RealSense pipeline")
             self.pipe.stop()
         except:
-           logger.exception("Couldn't stop the pipe")
+            logger.exception("Couldn't stop the pipe")

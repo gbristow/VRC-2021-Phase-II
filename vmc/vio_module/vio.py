@@ -1,15 +1,18 @@
 import json
 from typing import Any, Callable, Dict
-import threading 
+import signal
+import sys
+import threading
 import time
 
 from loguru import logger
 import paho.mqtt.client as mqtt
 
 try:
-    from vio_library import VIO # type: ignore
+    from vio_library import VIO  # type: ignore
 except ImportError:
     from .vio_library import VIO
+
 
 class VIOModule(object):
     def __init__(self):
@@ -39,14 +42,21 @@ class VIOModule(object):
 
     def run(self) -> None:
 
-        #connect to the MQTT Client
+        # connect to the MQTT Client
         self.mqtt_client.connect(host=self.mqtt_host, port=self.mqtt_port, keepalive=60)
 
-        #kick off the vio thread
+        # kick off the vio thread
         thread = threading.Thread(target=self.vio.run, daemon=True, name="vio_thread")
         thread.start()
 
-        #service the mqtt connection
+        # add signal handler for the T265
+        def signal_handler(sig, frame):
+            self.vio.t265.stop()
+            sys.exit(0)
+
+        signal.signal(signal.SIGTERM, signal_handler)
+
+        # service the mqtt connection
         self.mqtt_client.loop_forever()
 
         while True:
@@ -72,8 +82,6 @@ class VIOModule(object):
         for topic in self.mqtt_topics.keys():
             logger.debug(f"VIOModule: Subscribed to: {topic}")
             client.subscribe(topic)
-        if rc == 0:
-            self.vio.mqtt_finished_init = True
 
 
 if __name__ == "__main__":
