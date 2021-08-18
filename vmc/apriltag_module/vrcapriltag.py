@@ -224,6 +224,10 @@ class VRCAprilTag(object):
         update = {"id": best_tag_id, "error": best_error}
         self.publish_dict(f"{self.topic_prefix}/selected", update)
 
+        # fps and image #
+        stats = {"fps": self.at.avg, "num_images": self.at.num_images}
+        self.publish_dict(f"{self.topic_prefix}/stats", stats)
+
     def loop(self):
         """
         need to return/publish
