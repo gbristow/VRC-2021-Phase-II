@@ -358,7 +358,7 @@ class Fusion(object):
                         }
                     }
                     self.mqtt_client.publish(
-                        f"{self.topic_prefix}/fusion/hil_gps",
+                        f"{self.topic_prefix}/hil_gps",
                         json.dumps(hil_gps_update),
                         retain=False,
                         qos=0,
