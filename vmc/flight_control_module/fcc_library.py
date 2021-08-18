@@ -236,10 +236,9 @@ class FCC(MAVMQTTBase):
             update["soc"] = battery.remaining_percent * 100.0
             update["timestamp"] = self._timestamp()
 
-            # publish the proto
-            self.mqtt_client.publish(
-                f"{self.topic_prefix}/battery", json.dumps(update), retain=False, qos=0
-            )
+            # self.mqtt_client.publish(
+            #     f"{self.topic_prefix}/battery", json.dumps(update), retain=False, qos=0
+            # )
 
     @async_try_except()
     async def in_air_telemetry(self) -> None:
@@ -274,9 +273,9 @@ class FCC(MAVMQTTBase):
             update["mode"] = str(self.fcc_mode)
             update["timestamp"] = self._timestamp()
 
-            self.mqtt_client.publish(
-                f"{self.topic_prefix}/status", json.dumps(update), retain=False, qos=0
-            )
+            # self.mqtt_client.publish(
+            #     f"{self.topic_prefix}/status", json.dumps(update), retain=False, qos=0
+            # )
 
     @async_try_except()
     async def landed_state_telemetry(self) -> None:
@@ -368,12 +367,12 @@ class FCC(MAVMQTTBase):
             update["dZ"] = d
             update["timestamp"] = self._timestamp()
 
-            self.mqtt_client.publish(
-                f"{self.topic_prefix}/location/local",
-                json.dumps(update),
-                retain=False,
-                qos=0,
-            )
+            # self.mqtt_client.publish(
+            #     f"{self.topic_prefix}/location/local",
+            #     json.dumps(update),
+            #     retain=False,
+            #     qos=0,
+            # )
 
     @async_try_except()
     async def position_lla_telemetry(self) -> None:
@@ -389,12 +388,12 @@ class FCC(MAVMQTTBase):
             update["hdg"] = self.heading
             update["timestamp"] = self._timestamp()
 
-            self.mqtt_client.publish(
-                f"{self.topic_prefix}/location/global",
-                json.dumps(update),
-                retain=False,
-                qos=0,
-            )
+            # self.mqtt_client.publish(
+            #     f"{self.topic_prefix}/location/global",
+            #     json.dumps(update),
+            #     retain=False,
+            #     qos=0,
+            # )
 
     @async_try_except()
     async def home_lla_telemetry(self) -> None:
@@ -409,12 +408,12 @@ class FCC(MAVMQTTBase):
             update["alt"] = home_position.relative_altitude_m  # agl
             update["timestamp"] = self._timestamp()
 
-            self.mqtt_client.publish(
-                f"{self.topic_prefix}/location/home",
-                json.dumps(update),
-                retain=False,
-                qos=0,
-            )
+            # self.mqtt_client.publish(
+            #     f"{self.topic_prefix}/location/home",
+            #     json.dumps(update),
+            #     retain=False,
+            #     qos=0,
+            # )
 
     @async_try_except()
     async def attitude_euler_telemetry(self) -> None:
@@ -472,9 +471,9 @@ class FCC(MAVMQTTBase):
             update["vZ"] = velocity.down_m_s
             update["timestamp"] = self._timestamp()
 
-            self.mqtt_client.publish(
-                f"{self.topic_prefix}/velocity", json.dumps(update), retain=False, qos=0
-            )
+            # self.mqtt_client.publish(
+            #     f"{self.topic_prefix}/velocity", json.dumps(update), retain=False, qos=0
+            # )
 
     # endregion ###############################################################
 
