@@ -39,7 +39,7 @@ class VRCAprilTag(object):
             "detector": {
                 "protocol": "argus",
                 "video_device": "/dev/video0",
-                "res": [640, 360],
+                "res": [1280, 720],
                 "camera_params": "160CSI",
                 "tag_size": 0.174,
                 "framerate": 5,
