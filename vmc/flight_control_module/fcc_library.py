@@ -188,7 +188,7 @@ class FCC(MAVMQTTBase):
             # self.position_lla_telemetry(),
             # self.home_lla_telemetry(),
             self.attitude_euler_telemetry(),
-            self.velocity_ned_telemetry(),
+            #self.velocity_ned_telemetry(),
         )
 
     @async_try_except()
