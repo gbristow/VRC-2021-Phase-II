@@ -32,22 +32,20 @@ class FCCModule(object):
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_message = self.on_message
 
-        self.topic_prefix = "vrc"
-
-        self.mocap_queue = queue.Queue()
-        self.mqtt_topics = {
-            f"{self.topic_prefix}/vision/position": self.mocap_queue,
-        }
-
-
         self.command_queue = queue.Queue()
         self.mocap_queue = queue.Queue()
         self.offboard_ned_queue = queue.Queue()
         self.offboard_body_queue = queue.Queue()
 
+        self.topic_prefix = "vrc"
+
+        self.mqtt_topics = {
+            f"{self.topic_prefix}/fusion/hil_gps": self.mocap_queue,
+        }
+
     def on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
         try:
-            logger.debug(f"{msg.topic}: {str(msg.payload)}")
+            #logger.debug(f"{msg.topic}: {str(msg.payload)}")
             if msg.topic in self.mqtt_topics.keys():
                 data = json.loads(msg.payload)
                 self.mqtt_topics[msg.topic].put(data)
@@ -101,7 +99,7 @@ class FCCModule(object):
             self.fcc.telemetry_tasks(),
             # self.fcc.offboard_tasks(),
             # self.fcc.action_dispatcher(),
-            #self.gps_fcc.run(),
+            self.gps_fcc.run(),
         )
 
         while True:

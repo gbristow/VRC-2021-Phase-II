@@ -26,44 +26,17 @@ INTERRUPTED = False
 
 class Fusion(object):
     def __init__(self):
-        # ========== VMC_CORE init ========================================================================== #
         self.config = {
-            "package": "VMC_CORE",
-            "threads":{
-                "fuse_pos":{},
-                "fuse_vel":{},
-                "fuse_att":{},
-                "status_prints": {
-                    "init": "False",
-                    "PRINT_FREQ": 2
-                },
-                "local_to_geo":{
-                    "origin":{
-                        "lat": 32.807650,
-                        "lon": -97.157153,
-                        "alt": 161.5
-                    }
-                },
-                "assemble_hil_gps_message":{
-                    "init": "True",
-                    "hil_gps_constants":{
-                        "fix_type": 3,
-                        "eph": 20,
-                        "epv": 5,
-                        "satellites_visible": 13
-                    }
-                },
-                "pos_sensor_check":{
-                    "topics": {
-                        "vmc.mocap": {
-                            "timeout": 0.5,
-                            "priority": 1
-                        }
-                    }
-                },
-                "aprilTag_resync_t265":{
-                    "init": "True"
-                }
+            "origin":{
+                "lat": 32.807650,
+                "lon": -97.157153,
+                "alt": 161.5
+            },
+            "hil_gps_constants":{
+                "fix_type": 3,
+                "eph": 20,
+                "epv": 5,
+                "satellites_visible": 13
             },
             "COURSE_THRESHOLD":10,
             "POS_DETLA_THRESHOLD": 10,
@@ -74,17 +47,11 @@ class Fusion(object):
             "AT_DERIV_THRESH": 10,
             "INIT_WAIT_TIME": 2
         }
-        # ========== fusion init ========================================================================== #
+
         self.mqtt_host = "mqtt"
         self.mqtt_port = 18830
 
-        # self.mqtt_user = "user"
-        # self.mqtt_pass = "password"
-
         self.mqtt_client = mqtt.Client()
-        # self.mqtt_client.username_pw_set(
-        #     username=self.mqtt_user, password=self.mqtt_pass
-        # )
 
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_message = self.on_message
@@ -105,6 +72,8 @@ class Fusion(object):
         self.heading_delta = None
         self.deriv_norm = None
 
+        self.local_copy = {}
+
         logger.debug(f"{fore.LIGHT_CYAN_1} FUS: Object created! {style.RESET}") #type: ignore
 
     def on_message(
@@ -116,7 +85,7 @@ class Fusion(object):
                 payload = json.loads(msg.payload)
                 self.topic_map[msg.topic](payload)
         except Exception as e:
-            logger.exception(f"Error handling message on {msg.topic}")
+            logger.debug(f"{fore.RED}Error handling message on {msg.topic}{style.RESET}") #type: ignore
 
     def on_connect(
         self,
@@ -140,7 +109,7 @@ class Fusion(object):
                     self.config["origin"]["alt"]]
 
         try:
-            ned = msg["ned"]
+            ned = msg
             lla = pymap3d.enu2geodetic( float(ned["e"])/100, # East   | Y
                                         float(ned["n"])/100, # North  | X
                                     -1 * float(ned["d"])/100, # Up     | Z
@@ -163,6 +132,9 @@ class Fusion(object):
                 qos=0,
             )
 
+            self.local_copy["geo"] = dict(geo_update["geodetic"])
+
+
         except Exception as e:
             logger.debug(f"{fore.RED} FUS: Error updating Geodetic location {style.RESET}") #type: ignore
             logger.debug(f"{fore.RED} FUS: {str(e)}") #type: ignore
@@ -176,12 +148,11 @@ class Fusion(object):
 
         '''
         try:
-            #TODO - properly fill out this dict 
             pos_update = {
-                    "n": msg["n"],
-                    "e": msg["e"],
-                    "d": msg["d"]
-                }
+                "n": msg["n"],
+                "e": msg["e"],
+                "d": msg["d"]
+            }
 
             self.mqtt_client.publish(
                 f"{self.topic_prefix}/pos/ned",
@@ -189,6 +160,8 @@ class Fusion(object):
                 retain=False,
                 qos=0,
             )
+
+            self.local_copy["pos"] = dict(pos_update)
 
         except Exception as e:
             logger.debug(f"{fore.RED}FUS: Error fusing pos sources {str(e)}{style.RESET}") #type: ignore
@@ -216,6 +189,8 @@ class Fusion(object):
                 qos=0,
             )
 
+            self.local_copy["vel"] = dict(vmc_vel_update)
+
             # compute groundspeed
             gs = np.linalg.norm([msg["n"], msg["e"]])
             groundspeed_update = { "groundspeed": gs }
@@ -226,6 +201,8 @@ class Fusion(object):
                 retain=False,
                 qos=0,
             )
+
+            self.local_copy["groundspeed"] = dict(groundspeed_update)
 
             # arctan gets real noisy when the values get small, so we just lock course
             # to heading when we aren't really moving
@@ -246,6 +223,8 @@ class Fusion(object):
                     qos=0,
                 )
 
+                self.local_copy["course"] = course_update
+
             m_per_s_2_ft_per_min = 196.85
             climb_rate_update = { "climb_rate_fps": -1 * msg["d"] * m_per_s_2_ft_per_min}
 
@@ -255,6 +234,8 @@ class Fusion(object):
                 retain=False,
                 qos=0,
             )
+
+            self.local_copy["climbrate"] = dict(climb_rate_update)
 
         except Exception as e:
             logger.debug(f"{fore.RED}FUS: Error fusing vel sources {str(e)}{style.RESET}") #type: ignore
@@ -282,6 +263,8 @@ class Fusion(object):
                 retain=False,
                 qos=0,
             )
+
+            self.local_copy["quat"] = dict(quat_update)
         except Exception as e:
             logger.debug(f"{fore.RED}FUS: Error fusing att/quat sources {str(e)}{style.RESET}") #type: ignore
             raise e
@@ -307,6 +290,8 @@ class Fusion(object):
                 retain=False,
                 qos=0,
             )
+
+            self.local_copy["euler"] = dict(euler_update)
         except Exception as e:
             logger.debug(f"{fore.RED}FUS: Error fusing att/eul sources {str(e)}{style.RESET}") #type: ignore
             raise e
@@ -330,58 +315,60 @@ class Fusion(object):
                 retain=False,
                 qos=0,
             )
+            self.local_copy["heading"] = dict(heading_update)
+
+            if self.local_copy["groundspeed"]["groundspeed"] < self.config["COURSE_THRESHOLD"]:
+                self.local_copy["course"] = dict({"course":msg["degrees"]})
         except Exception as e:
-            logger.debug(f"{fore.RED}FUS: Error fusing att/heading sources {str(e)}{style.RESET}") #type: ignore
-            raise e
+            logger.exception(f"{fore.RED}FUS: Error fusing att/heading sources {str(e)}{style.RESET}") #type: ignore
 
-    # def assemble_hil_gps_message(self, config=None):
-    #     '''
-    #     This code takes the pos data from the VMC and formats it into a special message that is exactly
-    #     what the FCC needs to generate the hil_gps message (with heading)
-    #     '''
-    #     while not INTERRUPTED:
-    #         time.sleep(0.01)
-    #         try:
-    #             if self.topics["vmc.pos"].message("geodetic").block_until_new:
-    #                 lla = self.topics["vmc.pos"].message("geodetic").data
+    def assemble_hil_gps_message(self):
+        '''
+        This code takes the pos data from fusion and formats it into a special message that is exactly
+        what the FCC needs to generate the hil_gps message (with heading)
+        '''
 
-    #                 lat = int( lla["lat"] * 10000000) # convert to int32 format
-    #                 lon = int( lla["lon"] * 10000000)  # convert to int32 format
+        time.sleep(10)
 
-    #                 if "hil_gps_constants" not in config.keys():
-    #                     config["hil_gps_constants"] = {
-    #                         "fix_type": 3,
-    #                         "eph": 10,
-    #                         "epv": 10,
-    #                         "satellites_visible": 13
-    #                     }
+        while True:
+            time.sleep(.1)
+            try:
+
+                lat = int( self.local_copy["geo"]["lat"] * 10000000) # convert to int32 format
+                lon = int( self.local_copy["geo"]["lon"] * 10000000)  # convert to int32 format
+                
+                # if lat / lon is 0, that means the ned -> lla conversion hasn't run yet, don't send that data to FCC
+                if lat != 0 and lon != 0:
+                    hil_gps_update = {
+                        "hil_gps":{
+                            "time_usec": int(time.time() * 1000000),
+                            "fix_type": int(self.config["hil_gps_constants"]["fix_type"]), # 3 - 3D fix
+                            "lat": lat,
+                            "lon": lon, 
+                            "alt": int(self.local_copy["geo"]["alt"] * 1000), # convert m to mm
+                            "eph": int(self.config["hil_gps_constants"]["eph"]), # cm
+                            "epv": int(self.config["hil_gps_constants"]["epv"]), # cm
+                            "vel": int(self.local_copy["groundspeed"]["groundspeed"]),
+                            "vn": int(self.local_copy["vel"]["Vn"]),
+                            "ve": int(self.local_copy["vel"]["Ve"]),
+                            "vd": int(self.local_copy["vel"]["Vd"]),
+                            "cog": int(self.local_copy["course"]["course"] * 100),
+                            "satellites_visible": int(self.config["hil_gps_constants"]["satellites_visible"]),
+                            "heading": int(self.local_copy["heading"]["heading"] * 100)
+                        }
+                    }
+                    self.mqtt_client.publish(
+                        f"{self.topic_prefix}/hil_gps",
+                        json.dumps(hil_gps_update),
+                        retain=False,
+                        qos=0,
+                    )
                     
-    #                 # if lat / lon is 0, that means the ned -> lla conversion hasn't run yet, don't send that data to FCC
-    #                 if lat != 0 and lon != 0:
-    #                     hil_gps_update = {
-    #                         "hil_gps":{
-    #                             "time_usec": int(time.time() * 1000000),
-    #                             "fix_type": int(config["hil_gps_constants"]["fix_type"]), # 3 - 3D fix
-    #                             "lat": lat,
-    #                             "lon": lon, 
-    #                             "alt": int(self.topics["vmc.pos"].message("geodetic").data["alt"] * 1000), # convert m to mm
-    #                             "eph": int(config["hil_gps_constants"]["eph"]), # cm
-    #                             "epv": int(config["hil_gps_constants"]["epv"]), # cm
-    #                             "vel": int(self.topics["vmc.vel"].message("groundspeed").data),
-    #                             "vn": int(self.topics["vmc.vel"].message("speed").data["Vn"]),
-    #                             "ve": int(self.topics["vmc.vel"].message("speed").data["Ve"]),
-    #                             "vd": int(self.topics["vmc.vel"].message("speed").data["Vd"]),
-    #                             "cog": int(self.topics["vmc.vel"].message("course").data * 100),
-    #                             "satellites_visible": int(config["hil_gps_constants"]["satellites_visible"]),
-    #                             "heading": int(self.topics["vmc.att"].message("heading").data * 100)
-    #                         }
-    #                     }
-    #                     self.topics["vmc.gps"].pub([hil_gps_update])
 
-    #         except Exception as e:
-    #             print("FUS: Error assebling hil gps message!")
-    #             print("FUS: ", e)
-    #             continue
+            except Exception as e:
+                logger.exception(f"{fore.RED}FUS: Error creating hil_gps_message {str(e)}{style.RESET}") #type: ignore
+                #raise e
+                continue
 
     # def status_prints(self, config=None):
         
@@ -577,6 +564,12 @@ class Fusion(object):
         setproctitle("fusion_process")
         # allows for graceful shutdown of any child threads
         self.mqtt_client.connect(host=self.mqtt_host, port=self.mqtt_port, keepalive=60)
+
+        hil_thread = threading.Thread(
+            target=self.assemble_hil_gps_message, args=(), daemon=True, name="assemble_hil_gps_thread"
+        )
+        hil_thread.start()
+
         self.mqtt_client.loop_forever()
 
 if __name__ == "__main__":

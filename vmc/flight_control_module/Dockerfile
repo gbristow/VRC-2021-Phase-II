@@ -21,4 +21,4 @@ RUN cp /app/mavlink/*.py /usr/local/lib/python3.9/site-packages/pymavlink/dialec
 ENV MAVLINK20=1
 ENV MAVLINK_DIALECT=bell
 
-CMD ["python3", "-u", "simple_test.py"]
+CMD ["python3", "-u", "fcc.py"]

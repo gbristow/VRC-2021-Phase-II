@@ -39,7 +39,7 @@ class VRCAprilTag(object):
             "detector": {
                 "protocol": "argus",
                 "video_device": "/dev/video0",
-                "res": [640, 360],
+                "res": [1280, 720],
                 "camera_params": "160CSI",
                 "tag_size": 0.174,
                 "framerate": 5,
@@ -223,6 +223,10 @@ class VRCAprilTag(object):
         # selected id & error
         update = {"id": best_tag_id, "error": best_error}
         self.publish_dict(f"{self.topic_prefix}/selected", update)
+
+        # fps and image #
+        stats = {"fps": self.at.avg, "num_images": self.at.num_images}
+        self.publish_dict(f"{self.topic_prefix}/stats", stats)
 
     def loop(self):
         """
