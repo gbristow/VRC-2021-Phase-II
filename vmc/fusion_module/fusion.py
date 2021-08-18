@@ -202,7 +202,7 @@ class Fusion(object):
                 qos=0,
             )
 
-            self.local_copy["groundspeed"] = gs
+            self.local_copy["groundspeed"] = dict(groundspeed_update)
 
             # arctan gets real noisy when the values get small, so we just lock course
             # to heading when we aren't really moving
