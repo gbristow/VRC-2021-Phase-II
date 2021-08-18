@@ -1145,5 +1145,7 @@ class PyMAVLinkAgent(MAVMQTTBase):
                     last_send_time = time.time()
             except queue.Empty:
                 await asyncio.sleep(0.01)
+                continue
             except Exception as e:
                 logger.exception("Issue sending HIL GPS")
+                continue

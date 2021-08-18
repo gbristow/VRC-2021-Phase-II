@@ -32,18 +32,16 @@ class FCCModule(object):
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_message = self.on_message
 
-        self.topic_prefix = "vrc"
-
-        self.mocap_queue = queue.Queue()
-        self.mqtt_topics = {
-            f"{self.topic_prefix}/fusion/hil_gps": self.mocap_queue,
-        }
-
-
         self.command_queue = queue.Queue()
         self.mocap_queue = queue.Queue()
         self.offboard_ned_queue = queue.Queue()
         self.offboard_body_queue = queue.Queue()
+
+        self.topic_prefix = "vrc"
+
+        self.mqtt_topics = {
+            f"{self.topic_prefix}/fusion/hil_gps": self.mocap_queue,
+        }
 
     def on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
         try:
