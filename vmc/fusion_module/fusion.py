@@ -320,8 +320,7 @@ class Fusion(object):
             if self.local_copy["groundspeed"]["groundspeed"] < self.config["COURSE_THRESHOLD"]:
                 self.local_copy["course"]["course"] = msg["degrees"]
         except Exception as e:
-            logger.debug(f"{fore.RED}FUS: Error fusing att/heading sources {str(e)}{style.RESET}") #type: ignore
-            raise e
+            logger.exception(f"{fore.RED}FUS: Error fusing att/heading sources {str(e)}{style.RESET}") #type: ignore
 
     def assemble_hil_gps_message(self):
         '''
@@ -367,7 +366,7 @@ class Fusion(object):
                     
 
             except Exception as e:
-                logger.debug(f"{fore.RED}FUS: Error creating hil_gps_message {str(e)}{style.RESET}") #type: ignore
+                logger.exception(f"{fore.RED}FUS: Error creating hil_gps_message {str(e)}{style.RESET}") #type: ignore
                 #raise e
                 continue
 
