@@ -1056,7 +1056,13 @@ class PyMAVLinkAgent(MAVMQTTBase):
             the last time statistics were printed.
             """
             if time.time() - last_print_time > 1:
-                logger.debug(f"Number of mocap messages {num_mocaps}")
+                #logger.debug(f"Number of mocap messages {num_mocaps}")
+                self.mqtt_client.publish(
+                f"{self.topic_prefix}/hil_gps/stats",
+                json.dumps({"num_frames":num_mocaps}),
+                retain=False,
+                qos=0,
+            )
                 return time.time()
             return last_print_time
 
