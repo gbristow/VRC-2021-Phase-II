@@ -132,9 +132,9 @@ This is a list of topics you can subscribe to, to obtain telemetry information.
 This is a list of topics you can send data to, to make things happen on the drone:
 
 - vrc/pcc/set_base_color
-  - "wrgb": A list of 4 `int`s between 0 and 255 to set the base color of the LEDs. Example: `[0, 128, 255]`.
+  - "wrgb": A list of 4 `int`s between 0 and 255 to set the base color of the LEDs. Example: `[255, 0, 128, 255]`.
 - vrc/pcc/set_temp_color
-  - "wrgb": A list of 4 `int`s between 0 and 255 to set a temporary color of the LEDs. Example: `[0, 128, 255]`.
+  - "wrgb": A list of 4 `int`s between 0 and 255 to set a temporary color of the LEDs. Example: `[255, 0, 128, 255]`.
   - "time": Optional `float` for the number of seconds the color should be set for. Default is `0.5`.
 - vrc/pcc/set_servo_open_close
   - "servo": ID of the servo to open or close as a `int`.
