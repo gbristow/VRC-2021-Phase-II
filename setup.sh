@@ -97,7 +97,7 @@ bar
 echo -e "${CYAN}Installing prerequisites${NC}"
 bar
 # install some useful prereqs
-$s apt install -y git apt-transport-https ca-certificates apt-utils software-properties-common gnupg lsb-release unzip curl htop nano python3 python3-wheel python3-pip jq
+$s apt install -y git apt-transport-https ca-certificates apt-utils software-properties-common gnupg lsb-release unzip curl rsync htop nano python3 python3-wheel python3-pip jq
 $s -H python3 -m pip install pip wheel --upgrade
 $s -H python3 -m pip install -U jetson-stats --upgrade
 # set to high-power 10W mode. 1 is 5W mode
@@ -164,7 +164,7 @@ $s -H python3 -m pip install docker-compose --upgrade
 
 # set the nvidia runtime to be default
 # https://lukeyeager.github.io/2018/01/22/setting-the-default-docker-runtime-to-nvidia.html
-pushd $(mktemp -d)
+pushd "$(mktemp -d)"
 ($s cat /etc/docker/daemon.json 2>/dev/null || echo '{}') | jq '. + {"default-runtime": "nvidia"}' | tee tmp.json
 $s mv tmp.json /etc/docker/daemon.json
 popd
@@ -172,16 +172,12 @@ popd
 $s service docker stop
 $s service docker start
 
-# ensure the container runtime works
-echo "Testing Nvidia container runtime..."
-$s docker run --rm --gpus all --env NVIDIA_DISABLE_REQUIRE=1 nvcr.io/nvidia/cuda:11.4.1-base-ubuntu18.04 echo "Sucess"
-
 # set up group rights for docker
 # had issues with the script suddenly exiting, commented out
 # set +e
 # $s groupadd docker
 # $s usermod -aG docker "$USER"
-# newgrp docker 
+# newgrp docker
 # set -e
 bar
 
@@ -199,6 +195,33 @@ bar
 $s apt autoremove -y
 bar
 
+
+echo -e "${CYAN}Performing self-test${NC}"
+bar
+
+# make sure jtop got installed
+echo -n "Making sure 'jtop' works... "
+if [ -n "$(which jtop)" ]; then
+    echo -e "${LIGHTGREEN}Passed!${NC}"
+else
+    echo -e "${LIGHTRED}Failed!${NC}"
+    exit 1
+fi
+
+# make sure rs-enumerate-devices
+echo -n "Making sure 'rs-enumerate-devices' works... "
+if [ -n "$(which rs-enumerate-devices)" ]; then
+    echo -e "${LIGHTGREEN}Passed!${NC}"
+else
+    echo -e "${LIGHTRED}Failed!${NC}"
+    exit 1
+fi
+
+# ensure the container runtime works
+echo -n "Testing Nvidia container runtime... "
+($s docker run --rm --gpus all --env NVIDIA_DISABLE_REQUIRE=1 nvcr.io/nvidia/cuda:11.4.1-base-ubuntu18.04 echo -e "${LIGHTGREEN}Passed!${NC}") || echo -e "${LIGHTRED}Failed!${NC}"
+
+bar
 
 echo  -e "${GREEN}VRC Phase 2 finished setting up!${NC}"
 echo  -e "${GREEN}Please reboot your VMC now.${NC}"
