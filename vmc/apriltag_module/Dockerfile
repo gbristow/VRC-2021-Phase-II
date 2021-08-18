@@ -15,5 +15,3 @@ RUN python3 -m pip install pip wheel --upgrade && \
 COPY . .
 
 CMD ["python3", "vrcapriltag.py"]
-
-#sudo docker run -it --entrypoint /bin/bash --privileged --runtime nvidia  -v /tmp/argus_socket:/tmp/argus_socket 55c0c0712954
