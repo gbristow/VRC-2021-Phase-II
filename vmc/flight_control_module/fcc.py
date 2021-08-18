@@ -36,7 +36,7 @@ class FCCModule(object):
 
         self.mocap_queue = queue.Queue()
         self.mqtt_topics = {
-            f"{self.topic_prefix}/vision/position": self.mocap_queue,
+            f"{self.topic_prefix}/fusion/hil_gps": self.mocap_queue,
         }
 
 
@@ -101,7 +101,7 @@ class FCCModule(object):
             self.fcc.telemetry_tasks(),
             # self.fcc.offboard_tasks(),
             # self.fcc.action_dispatcher(),
-            #self.gps_fcc.run(),
+            self.gps_fcc.run(),
         )
 
         while True:
