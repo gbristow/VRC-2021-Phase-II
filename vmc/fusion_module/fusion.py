@@ -1,51 +1,42 @@
-# python standard library
+import json
 import os
 import threading
 import time
 from math import atan2, pi
-import json
 
-print("finished basic imports")
-
-# pip installed packages
-import numpy as np
-import pymap3d
-from setproctitle import setproctitle
-from colored import fore, back, style
-from loguru import logger
-import paho.mqtt.client as mqtt
 
 from typing import Any
 
-print("finished all imports")
+import numpy as np
+import paho.mqtt.client as mqtt
+import pymap3d
+from colored import back, fore, style
+from loguru import logger
 
 # find the file path to this file
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
 INTERRUPTED = False
 
+
 class Fusion(object):
     def __init__(self):
         self.config = {
-            "origin":{
-                "lat": 32.807650,
-                "lon": -97.157153,
-                "alt": 161.5
-            },
-            "hil_gps_constants":{
+            "origin": {"lat": 32.807650, "lon": -97.157153, "alt": 161.5},
+            "hil_gps_constants": {
                 "fix_type": 3,
                 "eph": 20,
                 "epv": 5,
-                "satellites_visible": 13
+                "satellites_visible": 13,
             },
-            "COURSE_THRESHOLD":10,
+            "COURSE_THRESHOLD": 10,
             "POS_DETLA_THRESHOLD": 10,
             "POS_D_THRESHOLD": 30,
             "HEADING_DELTA_THRESHOLD": 5,
             "AT_THRESH": 0.25,
             "T265_THRESH": 0.25,
             "AT_DERIV_THRESH": 10,
-            "INIT_WAIT_TIME": 2
+            "INIT_WAIT_TIME": 2,
         }
 
         self.mqtt_host = "mqtt"
@@ -58,13 +49,12 @@ class Fusion(object):
 
         self.topic_prefix = "vrc/fusion"
 
-        
         self.topic_map = {
-            "vrc/vio/position/ned":self.fuse_pos,
-            "vrc/vio/orientation/eul":self.fuse_att_euler,
-            "vrc/vio/heading":self.fuse_att_heading,
-            "vrc/vio/velocity/ned":self.fuse_vel,
-            f"{self.topic_prefix}/pos/ned":self.local_to_geo,
+            "vrc/vio/position/ned": self.fuse_pos,
+            "vrc/vio/orientation/eul": self.fuse_att_euler,
+            "vrc/vio/heading": self.fuse_att_heading,
+            "vrc/vio/velocity/ned": self.fuse_vel,
+            f"{self.topic_prefix}/pos/ned": self.local_to_geo,
             # "vrc/apriltag/selected/pos/ned"
         }
 
@@ -75,18 +65,18 @@ class Fusion(object):
 
         self.local_copy = {}
 
-        logger.debug(f"{fore.LIGHT_CYAN_1} FUS: Object created! {style.RESET}") #type: ignore
+        logger.debug(f"{fore.LIGHT_CYAN_1} FUS: Object created! {style.RESET}")  # type: ignore
 
     def on_message(
         self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage
     ) -> None:
         try:
-            #logger.debug(f"{msg.topic}: {str(msg.payload)}")
+            # logger.debug(f"{msg.topic}: {str(msg.payload)}")
             if msg.topic in self.topic_map:
                 payload = json.loads(msg.payload)
                 self.topic_map[msg.topic](payload)
         except Exception as e:
-            logger.debug(f"{fore.RED}Error handling message on {msg.topic}{style.RESET}") #type: ignore
+            logger.debug(f"{fore.RED}Error handling message on {msg.topic}{style.RESET}")  # type: ignore
 
     def on_connect(
         self,
@@ -101,31 +91,29 @@ class Fusion(object):
             client.subscribe(topic)
 
     def local_to_geo(self, msg: dict) -> None:
-        '''
-        Callback for the fusion/pos topic. This method calculates the 
+        """
+        Callback for the fusion/pos topic. This method calculates the
         geodetic location from an NED position and origin and publishes it.
-        '''
-        origin = [  self.config["origin"]["lat"],
-                    self.config["origin"]["lon"],
-                    self.config["origin"]["alt"]]
+        """
+        origin = [
+            self.config["origin"]["lat"],
+            self.config["origin"]["lon"],
+            self.config["origin"]["alt"],
+        ]
 
         try:
             ned = msg
-            lla = pymap3d.enu2geodetic( float(ned["e"])/100, # type: ignore # East   | Y 
-                                        float(ned["n"])/100, # type: ignore # North  | X
-                                    -1 * float(ned["d"])/100, # type: ignore # Up     | Z
-                                        origin[0], # Origin lat
-                                        origin[1], # Origin lon
-                                        origin[2], # Origin alt
-                                        deg=True)
+            lla = pymap3d.enu2geodetic(
+                float(ned["e"]) / 100,  # type: ignore # East   | Y
+                float(ned["n"]) / 100,  # type: ignore # North  | X
+                -1 * float(ned["d"]) / 100,  # type: ignore # Up     | Z
+                origin[0],  # Origin lat
+                origin[1],  # Origin lon
+                origin[2],  # Origin alt
+                deg=True,
+            )
 
-            geo_update = {
-                "geodetic": {
-                    "lat": lla[0],
-                    "lon": lla[1],
-                    "alt": lla[2]
-                }
-            }
+            geo_update = {"geodetic": {"lat": lla[0], "lon": lla[1], "alt": lla[2]}}
             self.mqtt_client.publish(
                 f"{self.topic_prefix}/geo",
                 json.dumps(geo_update),
@@ -135,25 +123,20 @@ class Fusion(object):
 
             self.local_copy["geo"] = dict(geo_update["geodetic"])
 
-
         except Exception as e:
-            logger.debug(f"{fore.RED} FUS: Error updating Geodetic location {style.RESET}") #type: ignore
-            logger.debug(f"{fore.RED} FUS: {str(e)}") #type: ignore
+            logger.debug(f"{fore.RED} FUS: Error updating Geodetic location {style.RESET}")  # type: ignore
+            logger.debug(f"{fore.RED} FUS: {str(e)}")  # type: ignore
             raise
-                
+
     def fuse_pos(self, msg: dict) -> None:
-        '''
-        Callback for receiving pos data in NED reference frame from vio and publishes into a fusion/pos topic. 
+        """
+        Callback for receiving pos data in NED reference frame from vio and publishes into a fusion/pos topic.
 
         VRC doesnt have sophisticated fusion yet, so this just re-routes the message onto the fusion topic.
 
-        '''
+        """
         try:
-            pos_update = {
-                "n": msg["n"],
-                "e": msg["e"],
-                "d": msg["d"]
-            }
+            pos_update = {"n": msg["n"], "e": msg["e"], "d": msg["d"]}
 
             self.mqtt_client.publish(
                 f"{self.topic_prefix}/pos/ned",
@@ -165,23 +148,19 @@ class Fusion(object):
             self.local_copy["pos"] = dict(pos_update)
 
         except Exception as e:
-            logger.debug(f"{fore.RED}FUS: Error fusing pos sources {str(e)}{style.RESET}") #type: ignore
+            logger.debug(f"{fore.RED}FUS: Error fusing pos sources {str(e)}{style.RESET}")  # type: ignore
             raise e
 
     def fuse_vel(self, msg: dict) -> None:
-        '''
-        Callback for receiving vel data in NED reference frame from vio and publishes into a fusion/vel topic. 
+        """
+        Callback for receiving vel data in NED reference frame from vio and publishes into a fusion/vel topic.
 
         VRC doesnt have sophisticated fusion yet, so this just re-routes the message onto the fusion topic.
-        
-        '''
+
+        """
         try:
 
-            vmc_vel_update = {
-                    "Vn": msg["n"],
-                    "Ve": msg["e"],
-                    "Vd": msg["d"]
-                }
+            vmc_vel_update = {"Vn": msg["n"], "Ve": msg["e"], "Vd": msg["d"]}
 
             self.mqtt_client.publish(
                 f"{self.topic_prefix}/vel/ned",
@@ -194,7 +173,7 @@ class Fusion(object):
 
             # compute groundspeed
             gs = np.linalg.norm([msg["n"], msg["e"]])
-            groundspeed_update = { "groundspeed": gs }
+            groundspeed_update = {"groundspeed": gs}
 
             self.mqtt_client.publish(
                 f"{self.topic_prefix}/vel/groundspeed",
@@ -215,7 +194,7 @@ class Fusion(object):
                 # rad to deg
                 course = course * 180 / pi
 
-                course_update = { "course": course }
+                course_update = {"course": course}
 
                 self.mqtt_client.publish(
                     f"{self.topic_prefix}/vel/course",
@@ -227,7 +206,7 @@ class Fusion(object):
                 self.local_copy["course"] = course_update
 
             m_per_s_2_ft_per_min = 196.85
-            climb_rate_update = { "climb_rate_fps": -1 * msg["d"] * m_per_s_2_ft_per_min}
+            climb_rate_update = {"climb_rate_fps": -1 * msg["d"] * m_per_s_2_ft_per_min}
 
             self.mqtt_client.publish(
                 f"{self.topic_prefix}/vel/climbrate",
@@ -239,24 +218,19 @@ class Fusion(object):
             self.local_copy["climbrate"] = dict(climb_rate_update)
 
         except Exception as e:
-            logger.debug(f"{fore.RED}FUS: Error fusing vel sources {str(e)}{style.RESET}") #type: ignore
+            logger.debug(f"{fore.RED}FUS: Error fusing vel sources {str(e)}{style.RESET}")  # type: ignore
             raise e
 
     def fuse_att_quat(self, msg: dict) -> None:
-        '''
-        Callback for receiving quaternion att data in NED reference frame from vio and publishes into a fusion/att/quat topic. 
+        """
+        Callback for receiving quaternion att data in NED reference frame from vio and publishes into a fusion/att/quat topic.
 
         VRC doesnt have sophisticated fusion yet, so this just re-routes the message onto the fusion topic.
 
-        '''
+        """
 
         try:
-            quat_update = {
-                    "w": msg["w"],
-                    "x": msg["x"],
-                    "y": msg["y"],
-                    "z": msg["z"]
-                }
+            quat_update = {"w": msg["w"], "x": msg["x"], "y": msg["y"], "z": msg["z"]}
 
             self.mqtt_client.publish(
                 f"{self.topic_prefix}/att/quat",
@@ -267,23 +241,19 @@ class Fusion(object):
 
             self.local_copy["quat"] = dict(quat_update)
         except Exception as e:
-            logger.debug(f"{fore.RED}FUS: Error fusing att/quat sources {str(e)}{style.RESET}") #type: ignore
+            logger.debug(f"{fore.RED}FUS: Error fusing att/quat sources {str(e)}{style.RESET}")  # type: ignore
             raise e
-    
-    def fuse_att_euler(self, msg:dict) -> None:
-        '''
-        Callback for receiving euler att data in NED reference frame from vio and publishes into a fusion/att/euler topic. 
+
+    def fuse_att_euler(self, msg: dict) -> None:
+        """
+        Callback for receiving euler att data in NED reference frame from vio and publishes into a fusion/att/euler topic.
 
         VRC doesnt have sophisticated fusion yet, so this just re-routes the message onto the fusion topic.
 
-        '''
+        """
 
         try:
-            euler_update = {
-                "psi": msg["psi"],
-                "theta": msg["theta"],
-                "phi": msg["phi"]
-            }
+            euler_update = {"psi": msg["psi"], "theta": msg["theta"], "phi": msg["phi"]}
 
             self.mqtt_client.publish(
                 f"{self.topic_prefix}/att/euler",
@@ -294,21 +264,19 @@ class Fusion(object):
 
             self.local_copy["euler"] = dict(euler_update)
         except Exception as e:
-            logger.debug(f"{fore.RED}FUS: Error fusing att/eul sources {str(e)}{style.RESET}") #type: ignore
+            logger.debug(f"{fore.RED}FUS: Error fusing att/eul sources {str(e)}{style.RESET}")  # type: ignore
             raise e
 
     def fuse_att_heading(self, msg: dict) -> None:
-        '''
-        Callback for receiving heading att data in NED reference frame from vio and publishes into a fusion/att/heading topic. 
+        """
+        Callback for receiving heading att data in NED reference frame from vio and publishes into a fusion/att/heading topic.
 
         VRC doesnt have sophisticated fusion yet, so this just re-routes the message onto the fusion topic.
 
-        '''
+        """
 
         try:
-            heading_update = {
-                "heading": msg["degrees"]
-            }
+            heading_update = {"heading": msg["degrees"]}
 
             self.mqtt_client.publish(
                 f"{self.topic_prefix}/att/heading",
@@ -318,44 +286,57 @@ class Fusion(object):
             )
             self.local_copy["heading"] = dict(heading_update)
 
-            if self.local_copy["groundspeed"]["groundspeed"] < self.config["COURSE_THRESHOLD"]:
-                self.local_copy["course"] = dict({"course":msg["degrees"]})
+            if (
+                self.local_copy["groundspeed"]["groundspeed"]
+                < self.config["COURSE_THRESHOLD"]
+            ):
+                self.local_copy["course"] = dict({"course": msg["degrees"]})
         except Exception as e:
-            logger.exception(f"{fore.RED}FUS: Error fusing att/heading sources {str(e)}{style.RESET}") #type: ignore
+            logger.exception(f"{fore.RED}FUS: Error fusing att/heading sources {str(e)}{style.RESET}")  # type: ignore
 
     def assemble_hil_gps_message(self):
-        '''
+        """
         This code takes the pos data from fusion and formats it into a special message that is exactly
         what the FCC needs to generate the hil_gps message (with heading)
-        '''
+        """
 
         time.sleep(10)
 
         while True:
-            time.sleep(.1)
+            time.sleep(0.1)
             try:
 
-                lat = int( self.local_copy["geo"]["lat"] * 10000000) # convert to int32 format
-                lon = int( self.local_copy["geo"]["lon"] * 10000000)  # convert to int32 format
-                
+                lat = int(
+                    self.local_copy["geo"]["lat"] * 10000000
+                )  # convert to int32 format
+                lon = int(
+                    self.local_copy["geo"]["lon"] * 10000000
+                )  # convert to int32 format
+
                 # if lat / lon is 0, that means the ned -> lla conversion hasn't run yet, don't send that data to FCC
                 if lat != 0 and lon != 0:
                     hil_gps_update = {
-                        "hil_gps":{
+                        "hil_gps": {
                             "time_usec": int(time.time() * 1000000),
-                            "fix_type": int(self.config["hil_gps_constants"]["fix_type"]), # 3 - 3D fix
+                            "fix_type": int(
+                                self.config["hil_gps_constants"]["fix_type"]
+                            ),  # 3 - 3D fix
                             "lat": lat,
-                            "lon": lon, 
-                            "alt": int(self.local_copy["geo"]["alt"] * 1000), # convert m to mm
-                            "eph": int(self.config["hil_gps_constants"]["eph"]), # cm
-                            "epv": int(self.config["hil_gps_constants"]["epv"]), # cm
+                            "lon": lon,
+                            "alt": int(
+                                self.local_copy["geo"]["alt"] * 1000
+                            ),  # convert m to mm
+                            "eph": int(self.config["hil_gps_constants"]["eph"]),  # cm
+                            "epv": int(self.config["hil_gps_constants"]["epv"]),  # cm
                             "vel": int(self.local_copy["groundspeed"]["groundspeed"]),
                             "vn": int(self.local_copy["vel"]["Vn"]),
                             "ve": int(self.local_copy["vel"]["Ve"]),
                             "vd": int(self.local_copy["vel"]["Vd"]),
                             "cog": int(self.local_copy["course"]["course"] * 100),
-                            "satellites_visible": int(self.config["hil_gps_constants"]["satellites_visible"]),
-                            "heading": int(self.local_copy["heading"]["heading"] * 100)
+                            "satellites_visible": int(
+                                self.config["hil_gps_constants"]["satellites_visible"]
+                            ),
+                            "heading": int(self.local_copy["heading"]["heading"] * 100),
                         }
                     }
                     self.mqtt_client.publish(
@@ -364,19 +345,17 @@ class Fusion(object):
                         retain=False,
                         qos=0,
                     )
-                    
 
             except Exception as e:
-                logger.exception(f"{fore.RED}FUS: Error creating hil_gps_message {str(e)}{style.RESET}") #type: ignore
-                #raise e
+                logger.exception(f"{fore.RED}FUS: Error creating hil_gps_message {str(e)}{style.RESET}")  # type: ignore
+                # raise e
                 continue
 
     # def status_prints(self, config=None):
-        
-        
+
     #     while self.primary_topic is None:
     #         time.sleep(.5)
-            
+
     #     time.sleep(1)
 
     #     while not INTERRUPTED:
@@ -387,10 +366,9 @@ class Fusion(object):
     #         at_heading = self.topics["vrc.aprilTag"].message("heading").data
     #         tags = self.topics["vrc.aprilTag"].message("tags").data
     #         AT_ts = self.topics["vrc.aprilTag"].message("last_loop").data
-    #         norm = self.norm 
+    #         norm = self.norm
     #         heading_delta = self.heading_delta
     #         deriv_norm = self.deriv_norm
-
 
     #         # os.system('cls' if os.name=='nt' else 'clear -x')
     #         print(fore.GREY_0 + "========================================================================", style.RESET)
@@ -417,7 +395,7 @@ class Fusion(object):
     #                     color = fore.ORANGE_3
     #                 else:
     #                     color = fore.GREEN
-                    
+
     #             print(color + "T265:\tN: {:.3f}\tE: {:.3f}\tD: {:.3f}\tHeading: {:.3f}\t".format(
     #                     t265_ned["n"], t265_ned["e"], t265_ned["d"], t265_heading), style.RESET)
 
@@ -426,12 +404,12 @@ class Fusion(object):
     #                     color1 = fore.ORANGE_3
     #                 else:
     #                     color1 = fore.GREEN
-                    
+
     #                 if heading_delta > self.config["HEADING_DELTA_THRESHOLD"]:
     #                     color2 = fore.ORANGE_3
     #                 else:
     #                     color2 = fore.GREEN
-                    
+
     #                 if deriv_norm > self.config["AT_DERIV_THRESH"]:
     #                     color3 = fore.ORANGE_3
     #                 else:
@@ -440,7 +418,7 @@ class Fusion(object):
     #                 norm = "{:.3f}".format(norm)
     #                 heading_delta = "{:.3f}".format(heading_delta)
     #                 deriv_norm = "{:.3f}".format(deriv_norm)
-                
+
     #             else:
     #                 color1 = fore.RED
     #                 color2 = fore.RED
@@ -448,7 +426,7 @@ class Fusion(object):
     #                 norm = "-"
     #                 heading_delta = "-"
     #                 deriv_norm = "-"
-                    
+
     #             print(color1 + "Norm: {},".format(norm) + color2 + "\tHeading Delta: {}".format(heading_delta) + color3 + "\tAT Deriv: {}".format(deriv_norm), style.RESET)
 
     #             if '-1' in tags:
@@ -462,12 +440,11 @@ class Fusion(object):
     #             else:
     #                 print(fore.ORANGE_3 + "AT Pipe Bad!: {}".format(AT_ts), style.RESET)
 
-
     #             try:
     #                 time.sleep(1/self.config["PRINT_FREQ"])
     #             except:
     #                 time.sleep(1)
-            
+
     #         except Exception as e:
     #             print(fore.RED + "FUS: Error printing: %s" % e, style.RESET)
     #             raise e
@@ -475,7 +452,7 @@ class Fusion(object):
     # def aprilTag_resync_t265(self, config=None):
     #     '''
     #     Compares the pos data from april tags and t265, if both are valid and
-    #     t265 drifts outside of a defined threshold, trigger a resync event 
+    #     t265 drifts outside of a defined threshold, trigger a resync event
     #     within t265.
 
     #     Subscribes
@@ -504,7 +481,7 @@ class Fusion(object):
     #                 t265_heading = self.topics["vmc.t265"].subtopic("att").message("heading").data
     #                 at_ned = self.topics["vrc.aprilTag"].message("ned").data
     #                 at_heading = self.topics["vrc.aprilTag"].message("heading").data
-                    
+
     #                 del_n = abs(at_ned["n"] - t265_ned["n"])
     #                 del_e = abs(at_ned["e"] - t265_ned["e"])
     #                 del_d = abs(at_ned["d"] - t265_ned["d"])
@@ -521,17 +498,14 @@ class Fusion(object):
 
     #                 self.deriv_norm = np.linalg.norm(deriv)
 
-                    
     #                 if (self.norm > self.config["POS_DETLA_THRESHOLD"] or abs(self.heading_delta) > self.config["HEADING_DELTA_THRESHOLD"]) and self.deriv_norm < self.config["AT_DERIV_THRESH"]:
     #                     # print(fore.YELLOW + "FUS: Resync Triggered! Delta= {}".format(norm), style.RESET)
     #                     updates = []
 
-
-
     #                     if del_d > self.config["POS_D_THRESHOLD"]:
     #                         # don't resync Z if del_d is too great, reject AT readings that are extraineous
     #                         at_ned["d"] = t265_ned["d"]
-                        
+
     #                     resync_ned_update = {
     #                         "ned":{
     #                             "n": at_ned["n"],
@@ -561,17 +535,18 @@ class Fusion(object):
     #         raise e
 
     def run(self):
-        # tells the os what to name this process, for debugging
-        setproctitle("fusion_process")
-        # allows for graceful shutdown of any child threads
         self.mqtt_client.connect(host=self.mqtt_host, port=self.mqtt_port, keepalive=60)
 
         hil_thread = threading.Thread(
-            target=self.assemble_hil_gps_message, args=(), daemon=True, name="assemble_hil_gps_thread"
+            target=self.assemble_hil_gps_message,
+            args=(),
+            daemon=True,
+            name="assemble_hil_gps_thread",
         )
         hil_thread.start()
 
         self.mqtt_client.loop_forever()
+
 
 if __name__ == "__main__":
     fusion = Fusion()

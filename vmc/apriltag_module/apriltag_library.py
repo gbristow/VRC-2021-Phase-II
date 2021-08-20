@@ -1,19 +1,14 @@
-# python standard libraries
-import logging
-import time
 import multiprocessing
-import os
-
-# pip installed packages
-import numpy
-from setproctitle import setproctitle
-from colored import fore, back, style
-from pupil_apriltags import Detector
+import time
+from typing import List
 
 from loguru import logger
+from pupil_apriltags import Detector
 
-from capture_device import CaptureDevice
-
+try:
+    from capture_device import CaptureDevice  # type: ignore
+except ImportError:
+    from .capture_device import CaptureDevice
 
 # camera_params=[584.3866,583.3444,661.2944,320.7182],tag_size=0.057
 
@@ -37,13 +32,12 @@ class AprilTagWrapper(object):
         """
         Takes an image as input and returns the detected apriltags in list format
         """
-        tags = self.detector.detect(
+        return self.detector.detect(
             frame,
             estimate_tag_pose=True,
             camera_params=self.camera_params,
             tag_size=self.tag_size,
         )
-        return tags
 
 
 class AprilTagVPS(object):
@@ -74,11 +68,12 @@ class AprilTagVPS(object):
 
     def start(self):
         """
-        Kicks off the AprilTagVPS pipeline, capturing images from a v4l2 camera @ 'video_device' and uses 'camera_params' along with 'tag_size' to calculate pose.
+        Kicks off the AprilTagVPS pipeline, capturing images from a v4l2 camera
+        @ 'video_device' and uses 'camera_params' along with 'tag_size' to calculate pose.
         """
         self.consumer_processes = []
         # we will setup 2 processing consumers for the imagery.
-        for i in range(0, 2):
+        for i in range(2):
             proc = multiprocessing.Process(
                 target=self.perception_loop, args=[], daemon=True  # type: ignore
             )
@@ -89,7 +84,7 @@ class AprilTagVPS(object):
         proc.start()
 
         last_loop = time.time()
-        delta_buckets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        delta_buckets: List[float] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         i = 0
 
         while True:
@@ -105,41 +100,42 @@ class AprilTagVPS(object):
                     self.tags = []
 
                 tdelta = now - last_loop
-                delta_buckets[i % 10] = tdelta  # type: ignore
+                delta_buckets[i % 10] = tdelta
                 self.avg = 1 / (sum(delta_buckets) / 10)
-                # logger.debug(f"{fore.GREEN}AT: FPS {avg:04.1f} \t Tags: {len(tags)}")  # type: ignore
+                # logger.debug(f"AT: FPS {avg:04.1f} \t Tags: {len(tags)}")
                 last_loop = now
-                i = i + 1
+                i += 1
             else:
                 time.sleep(0.01)
 
     def capture_loop(self):
         """
-        Captures frames from the camera and places them into the image queue to be consumed downstream by "perception loop"
-        Checks to make sure queue is not being overloaded and limits queue size to "max_depth"
+        Captures frames from the camera and places them into the image queue
+        to be consumed downstream by "perception loop"
+        Checks to make sure queue is not being overloaded
+        and limits queue size to "max_depth"
         """
-        setproctitle("AprilTagVPS_capture")
         max_depth = 3
         capture = CaptureDevice(
             self.protocol, self.video_device, self.res, self.framerate
         )
-        logger.debug(f"{fore.GREEN}AT: Capture Loop Started!{style.RESET}")  # type: ignore
+        logger.debug(f"AT: Capture Loop Started!")
         while True:
             ret, img = capture.read_gray()
-            # logger.debug(f"{fore.GREEN}AT: ret: {ret}{style.RESET}") #type: ignore
+            # logger.debug(f"AT: ret: {ret}")
             # if theres room in the queue and we have a valid image
             if (self.img_queue.qsize() < max_depth) and (ret is True):
                 # put the image in the queue
                 self.img_queue.put(img)
-                # logger.debug(f"{fore.GREEN}AT: Placed an image!{style.RESET}") #type: ignore
+                # logger.debug(f"AT: Placed an image!")
             time.sleep(0.01)
 
     def perception_loop(self):
         """
-        Pulls images off the image queue, hands them to the apriltag detector, and then places the results in the tags queue
+        Pulls images off the image queue, hands them to the apriltag detector,
+        and then places the results in the tags queue
         """
-        setproctitle("AprilTagVPS_perception")
-        logger.debug(f"{fore.GREEN}AT: Perception Loop Started!{style.RESET}")  # type: ignore
+        logger.debug(f"AT: Perception Loop Started!")
         try:
             while True:
                 if not self.img_queue.empty():
@@ -149,7 +145,7 @@ class AprilTagVPS(object):
                 else:
                     time.sleep(0.01)
         except Exception as e:
-            logger.exception(f"{fore.RED}AT: Perception Loop Error: {e}{style.RESET}")  # type: ignore
+            logger.exception(f"AT: Perception Loop Error: {e}")
             raise e
 
 

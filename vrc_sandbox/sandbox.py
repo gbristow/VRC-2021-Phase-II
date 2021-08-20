@@ -2,10 +2,6 @@
 # https://docs.python.org/3/library/json.html
 import json
 
-# This imports the "time" module from the Python standard library
-# https://docs.python.org/3/library/time.html
-import time
-
 # This is outside the scope of beginner Python and VRC, but this is for
 # something called "type-hinting" that makes Python code easier to debug
 from typing import Any, Callable, Dict
@@ -73,18 +69,9 @@ class Sandbox():
         # the connection should stay alive if connection is lost.
         self.mqtt_client.connect(host=self.mqtt_host, port=self.mqtt_port, keepalive=60)
         # This method of the Paho MQTT client tells it to start running in a loop
-        # forever until it is stopped.
+        # forever until it is stopped. This is a blocking method, so the
+        # code will not get past this.
         self.mqtt_client.loop_forever()
-
-        # As the above method returns immediately, we need to loop forever,
-        # otherwise this method would exit immediately. A simple way to do this is
-        # create a while True loop. However, adding a short sleep inside the loop
-        # is important, as otherwise the loop would run as fast a possible and use
-        # all the CPU of the computer. Artifically limiting this to 10 times per second
-        # makes this effectively use no CPU power. This is why we imported the time
-        # library at the top of the file.
-        while True:
-            time.sleep(0.1)
 
     # As we described above, this method runs after the Paho MQTT client has connected
     # to the server. This is generally used to do any setup work after the connection

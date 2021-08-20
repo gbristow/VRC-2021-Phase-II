@@ -1,12 +1,12 @@
 import json
-from typing import Any, Callable, Dict
 import signal
 import sys
 import threading
 import time
+from typing import Any, Callable, Dict
 
-from loguru import logger
 import paho.mqtt.client as mqtt
+from loguru import logger
 
 try:
     from vio_library import VIO  # type: ignore
@@ -19,13 +19,7 @@ class VIOModule(object):
         self.mqtt_host = "mqtt"
         self.mqtt_port = 18830
 
-        # self.mqtt_user = "user"
-        # self.mqtt_pass = "password"
-
         self.mqtt_client = mqtt.Client()
-        # self.mqtt_client.username_pw_set(
-        #     username=self.mqtt_user, password=self.mqtt_pass
-        # )
 
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_message = self.on_message
@@ -58,9 +52,6 @@ class VIOModule(object):
 
         # service the mqtt connection
         self.mqtt_client.loop_forever()
-
-        while True:
-            time.sleep(0.1)
 
     def on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
         try:
