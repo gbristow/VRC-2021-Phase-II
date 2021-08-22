@@ -1,4 +1,4 @@
-name: Build MAVLink/PX4
+name: Build PX4
 
 on:
   workflow_dispatch:
