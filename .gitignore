@@ -138,3 +138,5 @@ dmypy.json
 cython_debug/
 
 .vscode/
+custom_mavlink/build/
+custom_mavlink/target/
