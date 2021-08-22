@@ -3,6 +3,7 @@
 set -e
 shopt -s dotglob
 
+# warning, v1.10.2 does not appear to build anymore
 PX4_VERSION=v1.11.0
 
 # record starting directory
@@ -10,7 +11,7 @@ startdir=$(pwd)
 
 echo "--- Cleaning old data"
 cd "$(dirname "$0")"
-rm -rf build/
+sudo rm -rf build/
 mkdir -p build
 mkdir -p target
 cd build
