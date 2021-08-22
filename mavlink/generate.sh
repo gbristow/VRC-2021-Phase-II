@@ -85,11 +85,10 @@ eval "$base_docker_cmd 'make nxp_fmuk66-v3_default -j$(nproc)'"
 cp build/nxp_fmuk66-v3_default/nxp_fmuk66-v3_default.px4 ../../target/nxp_fmuk66-v3_default.$PX4_VERSION.px4
 
 echo "--- Cleaning up"
-cd ..
+cd ../..
 deactivate
 
 echo "--- Copying outputs"
-
 cp target/*.xml ../vmc/flight_control/mavlink/
 cp target/*.py ../vmc/flight_control/mavlink/
 
