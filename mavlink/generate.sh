@@ -68,9 +68,9 @@ git commit -m "Local commit to facilitate build"
 
 base_docker_cmd="docker run --rm -w \"$(pwd)\" --volume=\"$(pwd)\":\"$(pwd)\":rw px4io/px4-dev-nuttx-focal:latest /bin/bash -c"
 
-echo "--- Building PX4 SITL"
-echo "$base_docker_cmd 'make px4_sitl_default'"
-eval "$base_docker_cmd 'make px4_sitl_default -j$(nproc)'"
+# echo "--- Building PX4 SITL"
+# echo "$base_docker_cmd 'make px4_sitl_default'"
+# eval "$base_docker_cmd 'make px4_sitl_default -j$(nproc)'"
 
 # build Pixhawk firmware
 echo "--- Building Pixhawk firmware"
