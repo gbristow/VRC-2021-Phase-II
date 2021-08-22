@@ -89,7 +89,7 @@ cd ../..
 deactivate
 
 echo "--- Copying outputs"
-cp target/*.xml ../vmc/flight_control/mavlink/
-cp target/*.py ../vmc/flight_control/mavlink/
+cp target/*.xml ../vmc/flight_control_module/mavlink/
+cp target/*.py ../vmc/flight_control_module/mavlink/
 
 cd "$startdir"
