@@ -76,13 +76,13 @@ base_docker_cmd="docker run --rm -w \"$(pwd)\" --volume=\"$(pwd)\":\"$(pwd)\":rw
 echo "--- Building Pixhawk firmware"
 echo "$base_docker_cmd 'make px4_fmu-v5_default'"
 eval "$base_docker_cmd 'make px4_fmu-v5_default -j$(nproc)'"
-cp build/px4fmu-v5_default/px4fmu-v5_default.px4 ../../target/px4fmu-v5_default.px4
+cp build/px4_fmu-v5_default/px4_fmu-v5_default.px4 ../../target/px4_fmu-v5_default.$PX4_VERSION.px4
 
 # build NXP firmware
 echo "--- Building NXP firmware"
 echo "$base_docker_cmd 'make nxp_fmuk66-v3_default'"
 eval "$base_docker_cmd 'make nxp_fmuk66-v3_default -j$(nproc)'"
-cp build/nxp_fmuk66-v3_default/nxp_fmuk66-v3_default.px4 ../../target/nxp_fmuk66-v3_default.px4
+cp build/nxp_fmuk66-v3_default/nxp_fmuk66-v3_default.px4 ../../target/nxp_fmuk66-v3_default.$PX4_VERSION.px4
 
 echo "--- Cleaning up"
 cd ..

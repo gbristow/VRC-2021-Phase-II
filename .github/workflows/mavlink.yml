@@ -37,6 +37,6 @@ jobs:
     - name: Create release
       uses: softprops/action-gh-release@v1
       with:
+        fail_on_unmatched_files: true
         files: |
-          mavlink/target/px4fmu-v5_default.px4
-          mavlink/target/nxp_fmuk66-v3_default.px4
+          mavlink/target/*.px4
