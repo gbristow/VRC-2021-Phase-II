@@ -3,8 +3,7 @@
 set -e
 shopt -s dotglob
 
-MAVLINK_VERSION=master
-PX4_VERSION=v1.10.2
+PX4_VERSION=v1.11.0
 
 # record starting directory
 startdir=$(pwd)
@@ -18,7 +17,7 @@ cd build
 
 echo "--- Cloning MAVLink"
 mavlinkdir="mavlink"
-git clone https://github.com/mavlink/mavlink.git $mavlinkdir --branch $MAVLINK_VERSION --recursive
+git clone https://github.com/mavlink/mavlink.git $mavlinkdir --recursive
 
 echo "--- Copying MAVLink dialect"
 cp ../bell.xml ../target/bell.xml
@@ -50,7 +49,6 @@ python3 -m pymavlink.tools.mavgen --lang=WLua --wire-protocol=2.0 --output=../..
 echo "--- Cloning PX4 $PX4_VERSION"
 cd ..
 px4dir="PX4-Autopilot"
-# DO NOT recurse submodules yet, we need to apply patches first
 git clone https://github.com/PX4/PX4-Autopilot --depth 5 $px4dir --branch $PX4_VERSION --recurse-submodules
 
 echo "--- Applying PX4 patch"
@@ -72,24 +70,23 @@ base_docker_cmd="docker run --rm -w \"$(pwd)\" --volume=\"$(pwd)\":\"$(pwd)\":rw
 
 echo "--- Building PX4 SITL"
 echo "$base_docker_cmd 'make px4_sitl_default'"
-eval "$base_docker_cmd 'make px4_sitl_default'"
+eval "$base_docker_cmd 'make px4_sitl_default -j$(nproc)'"
 
 # build Pixhawk firmware
 echo "--- Building Pixhawk firmware"
 echo "$base_docker_cmd 'make px4_fmu-v5_default'"
-eval "$base_docker_cmd 'make px4_fmu-v5_default'"
+eval "$base_docker_cmd 'make px4_fmu-v5_default -j$(nproc)'"
+cp build/px4fmu-v5_default/px4fmu-v5_default.px4 ../../target/px4fmu-v5_default.px4
 
 # build NXP firmware
 echo "--- Building NXP firmware"
 echo "$base_docker_cmd 'make nxp_fmuk66-v3_default'"
-eval "$base_docker_cmd 'make nxp_fmuk66-v3_default'"
+eval "$base_docker_cmd 'make nxp_fmuk66-v3_default -j$(nproc)'"
+cp build/nxp_fmuk66-v3_default/nxp_fmuk66-v3_default.px4 ../../target/nxp_fmuk66-v3_default.px4
 
 echo "--- Cleaning up"
 cd ..
 deactivate
-
-cd ..
-#rm -rf build/
 
 echo "--- Copying outputs"
 
