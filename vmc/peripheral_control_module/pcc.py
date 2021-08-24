@@ -25,7 +25,7 @@ class PCCModule(object):
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_message = self.on_message
 
-        self.pcc = VRC_Peripheral(serial_port, use_serial=False)
+        self.pcc = VRC_Peripheral(serial_port)
 
         self.topic_prefix = "vrc/pcc"
 
@@ -100,5 +100,5 @@ class PCCModule(object):
 
 
 if __name__ == "__main__":
-    pcc = PCCModule("na")
+    pcc = PCCModule("/dev/ttyACM0")
     pcc.run()
