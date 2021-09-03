@@ -16,7 +16,6 @@ payload_fns = {}
 
 messageName = {
     [12916] = 'HIL_GPS_HEADING',
-    [0] = 'HEARTBEAT',
     [1] = 'SYS_STATUS',
     [2] = 'SYSTEM_TIME',
     [4] = 'PING',
@@ -25,6 +24,7 @@ messageName = {
     [7] = 'AUTH_KEY',
     [8] = 'LINK_NODE_STATUS',
     [11] = 'SET_MODE',
+    [19] = 'PARAM_ACK_TRANSACTION',
     [20] = 'PARAM_REQUEST_READ',
     [21] = 'PARAM_REQUEST_LIST',
     [22] = 'PARAM_VALUE',
@@ -74,6 +74,7 @@ messageName = {
     [75] = 'COMMAND_INT',
     [76] = 'COMMAND_LONG',
     [77] = 'COMMAND_ACK',
+    [80] = 'COMMAND_CANCEL',
     [81] = 'MANUAL_SETPOINT',
     [82] = 'SET_ATTITUDE_TARGET',
     [83] = 'ATTITUDE_TARGET',
@@ -136,6 +137,8 @@ messageName = {
     [148] = 'AUTOPILOT_VERSION',
     [149] = 'LANDING_TARGET',
     [162] = 'FENCE_STATUS',
+    [192] = 'MAG_CAL_REPORT',
+    [225] = 'EFI_STATUS',
     [230] = 'ESTIMATOR_STATUS',
     [231] = 'WIND_COV',
     [232] = 'GPS_INPUT',
@@ -171,6 +174,9 @@ messageName = {
     [268] = 'LOGGING_ACK',
     [269] = 'VIDEO_STREAM_INFORMATION',
     [270] = 'VIDEO_STREAM_STATUS',
+    [271] = 'CAMERA_FOV_STATUS',
+    [275] = 'CAMERA_TRACKING_IMAGE_STATUS',
+    [276] = 'CAMERA_TRACKING_GEO_STATUS',
     [280] = 'GIMBAL_MANAGER_INFORMATION',
     [281] = 'GIMBAL_MANAGER_STATUS',
     [282] = 'GIMBAL_MANAGER_SET_ATTITUDE',
@@ -178,8 +184,11 @@ messageName = {
     [284] = 'GIMBAL_DEVICE_SET_ATTITUDE',
     [285] = 'GIMBAL_DEVICE_ATTITUDE_STATUS',
     [286] = 'AUTOPILOT_STATE_FOR_GIMBAL_DEVICE',
+    [287] = 'GIMBAL_MANAGER_SET_PITCHYAW',
+    [288] = 'GIMBAL_MANAGER_SET_MANUAL_CONTROL',
+    [290] = 'ESC_INFO',
+    [291] = 'ESC_STATUS',
     [299] = 'WIFI_CONFIG_AP',
-    [300] = 'PROTOCOL_VERSION',
     [301] = 'AIS_VESSEL',
     [310] = 'UAVCAN_NODE_STATUS',
     [311] = 'UAVCAN_NODE_INFO',
@@ -194,12 +203,12 @@ messageName = {
     [333] = 'TRAJECTORY_REPRESENTATION_BEZIER',
     [334] = 'CELLULAR_STATUS',
     [335] = 'ISBD_LINK_STATUS',
+    [336] = 'CELLULAR_CONFIG',
     [339] = 'RAW_RPM',
     [340] = 'UTM_GLOBAL_POSITION',
     [350] = 'DEBUG_FLOAT_ARRAY',
     [360] = 'ORBIT_EXECUTION_STATUS',
     [370] = 'SMART_BATTERY_INFO',
-    [371] = 'SMART_BATTERY_STATUS',
     [373] = 'GENERATOR_STATUS',
     [375] = 'ACTUATOR_OUTPUT_STATUS',
     [380] = 'TIME_ESTIMATE_TO_TARGET',
@@ -208,7 +217,12 @@ messageName = {
     [395] = 'COMPONENT_INFORMATION',
     [400] = 'PLAY_TUNE_V2',
     [401] = 'SUPPORTED_TUNES',
+    [410] = 'EVENT',
+    [411] = 'CURRENT_EVENT_SEQUENCE',
+    [412] = 'REQUEST_EVENT',
+    [413] = 'RESPONSE_EVENT_ERROR',
     [9000] = 'WHEEL_DISTANCE',
+    [9005] = 'WINCH_STATUS',
     [12900] = 'OPEN_DRONE_ID_BASIC_ID',
     [12901] = 'OPEN_DRONE_ID_LOCATION',
     [12902] = 'OPEN_DRONE_ID_AUTHENTICATION',
@@ -216,6 +230,9 @@ messageName = {
     [12904] = 'OPEN_DRONE_ID_SYSTEM',
     [12905] = 'OPEN_DRONE_ID_OPERATOR_ID',
     [12915] = 'OPEN_DRONE_ID_MESSAGE_PACK',
+    [12920] = 'HYGROMETER_SENSOR',
+    [0] = 'HEARTBEAT',
+    [300] = 'PROTOCOL_VERSION',
 }
 
 f.magic = ProtoField.uint8("mavlink_proto.magic", "Magic value / version", base.HEX)
@@ -249,13 +266,6 @@ f.HIL_GPS_HEADING_cog = ProtoField.uint16("mavlink_proto.HIL_GPS_HEADING_cog", "
 f.HIL_GPS_HEADING_satellites_visible = ProtoField.uint8("mavlink_proto.HIL_GPS_HEADING_satellites_visible", "satellites_visible (uint8)")
 f.HIL_GPS_HEADING_heading = ProtoField.uint16("mavlink_proto.HIL_GPS_HEADING_heading", "heading (uint16)")
 f.HIL_GPS_HEADING_id = ProtoField.uint8("mavlink_proto.HIL_GPS_HEADING_id", "id (uint8)")
-
-f.HEARTBEAT_type = ProtoField.uint8("mavlink_proto.HEARTBEAT_type", "type (uint8)")
-f.HEARTBEAT_autopilot = ProtoField.uint8("mavlink_proto.HEARTBEAT_autopilot", "autopilot (uint8)")
-f.HEARTBEAT_base_mode = ProtoField.uint8("mavlink_proto.HEARTBEAT_base_mode", "base_mode (uint8)")
-f.HEARTBEAT_custom_mode = ProtoField.uint32("mavlink_proto.HEARTBEAT_custom_mode", "custom_mode (uint32)")
-f.HEARTBEAT_system_status = ProtoField.uint8("mavlink_proto.HEARTBEAT_system_status", "system_status (uint8)")
-f.HEARTBEAT_mavlink_version = ProtoField.uint8("mavlink_proto.HEARTBEAT_mavlink_version", "mavlink_version (uint8)")
 
 f.SYS_STATUS_onboard_control_sensors_present = ProtoField.uint32("mavlink_proto.SYS_STATUS_onboard_control_sensors_present", "onboard_control_sensors_present (uint32)")
 f.SYS_STATUS_onboard_control_sensors_enabled = ProtoField.uint32("mavlink_proto.SYS_STATUS_onboard_control_sensors_enabled", "onboard_control_sensors_enabled (uint32)")
@@ -305,6 +315,13 @@ f.LINK_NODE_STATUS_messages_lost = ProtoField.uint32("mavlink_proto.LINK_NODE_ST
 f.SET_MODE_target_system = ProtoField.uint8("mavlink_proto.SET_MODE_target_system", "target_system (uint8)")
 f.SET_MODE_base_mode = ProtoField.uint8("mavlink_proto.SET_MODE_base_mode", "base_mode (uint8)")
 f.SET_MODE_custom_mode = ProtoField.uint32("mavlink_proto.SET_MODE_custom_mode", "custom_mode (uint32)")
+
+f.PARAM_ACK_TRANSACTION_target_system = ProtoField.uint8("mavlink_proto.PARAM_ACK_TRANSACTION_target_system", "target_system (uint8)")
+f.PARAM_ACK_TRANSACTION_target_component = ProtoField.uint8("mavlink_proto.PARAM_ACK_TRANSACTION_target_component", "target_component (uint8)")
+f.PARAM_ACK_TRANSACTION_param_id = ProtoField.string("mavlink_proto.PARAM_ACK_TRANSACTION_param_id", "param_id (string)")
+f.PARAM_ACK_TRANSACTION_param_value = ProtoField.float("mavlink_proto.PARAM_ACK_TRANSACTION_param_value", "param_value (float)")
+f.PARAM_ACK_TRANSACTION_param_type = ProtoField.uint8("mavlink_proto.PARAM_ACK_TRANSACTION_param_type", "param_type (uint8)")
+f.PARAM_ACK_TRANSACTION_param_result = ProtoField.uint8("mavlink_proto.PARAM_ACK_TRANSACTION_param_result", "param_result (uint8)")
 
 f.PARAM_REQUEST_READ_target_system = ProtoField.uint8("mavlink_proto.PARAM_REQUEST_READ_target_system", "target_system (uint8)")
 f.PARAM_REQUEST_READ_target_component = ProtoField.uint8("mavlink_proto.PARAM_REQUEST_READ_target_component", "target_component (uint8)")
@@ -480,6 +497,7 @@ f.SCALED_PRESSURE_time_boot_ms = ProtoField.uint32("mavlink_proto.SCALED_PRESSUR
 f.SCALED_PRESSURE_press_abs = ProtoField.float("mavlink_proto.SCALED_PRESSURE_press_abs", "press_abs (float)")
 f.SCALED_PRESSURE_press_diff = ProtoField.float("mavlink_proto.SCALED_PRESSURE_press_diff", "press_diff (float)")
 f.SCALED_PRESSURE_temperature = ProtoField.int16("mavlink_proto.SCALED_PRESSURE_temperature", "temperature (int16)")
+f.SCALED_PRESSURE_temperature_press_diff = ProtoField.int16("mavlink_proto.SCALED_PRESSURE_temperature_press_diff", "temperature_press_diff (int16)")
 
 f.ATTITUDE_time_boot_ms = ProtoField.uint32("mavlink_proto.ATTITUDE_time_boot_ms", "time_boot_ms (uint32)")
 f.ATTITUDE_roll = ProtoField.float("mavlink_proto.ATTITUDE_roll", "roll (float)")
@@ -918,6 +936,10 @@ f.COMMAND_ACK_result_param2 = ProtoField.int32("mavlink_proto.COMMAND_ACK_result
 f.COMMAND_ACK_target_system = ProtoField.uint8("mavlink_proto.COMMAND_ACK_target_system", "target_system (uint8)")
 f.COMMAND_ACK_target_component = ProtoField.uint8("mavlink_proto.COMMAND_ACK_target_component", "target_component (uint8)")
 
+f.COMMAND_CANCEL_target_system = ProtoField.uint8("mavlink_proto.COMMAND_CANCEL_target_system", "target_system (uint8)")
+f.COMMAND_CANCEL_target_component = ProtoField.uint8("mavlink_proto.COMMAND_CANCEL_target_component", "target_component (uint8)")
+f.COMMAND_CANCEL_command = ProtoField.uint16("mavlink_proto.COMMAND_CANCEL_command", "command (uint16)")
+
 f.MANUAL_SETPOINT_time_boot_ms = ProtoField.uint32("mavlink_proto.MANUAL_SETPOINT_time_boot_ms", "time_boot_ms (uint32)")
 f.MANUAL_SETPOINT_roll = ProtoField.float("mavlink_proto.MANUAL_SETPOINT_roll", "roll (float)")
 f.MANUAL_SETPOINT_pitch = ProtoField.float("mavlink_proto.MANUAL_SETPOINT_pitch", "pitch (float)")
@@ -938,6 +960,9 @@ f.SET_ATTITUDE_TARGET_body_roll_rate = ProtoField.float("mavlink_proto.SET_ATTIT
 f.SET_ATTITUDE_TARGET_body_pitch_rate = ProtoField.float("mavlink_proto.SET_ATTITUDE_TARGET_body_pitch_rate", "body_pitch_rate (float)")
 f.SET_ATTITUDE_TARGET_body_yaw_rate = ProtoField.float("mavlink_proto.SET_ATTITUDE_TARGET_body_yaw_rate", "body_yaw_rate (float)")
 f.SET_ATTITUDE_TARGET_thrust = ProtoField.float("mavlink_proto.SET_ATTITUDE_TARGET_thrust", "thrust (float)")
+f.SET_ATTITUDE_TARGET_thrust_body_0 = ProtoField.float("mavlink_proto.SET_ATTITUDE_TARGET_thrust_body_0", "thrust_body[0] (float)")
+f.SET_ATTITUDE_TARGET_thrust_body_1 = ProtoField.float("mavlink_proto.SET_ATTITUDE_TARGET_thrust_body_1", "thrust_body[1] (float)")
+f.SET_ATTITUDE_TARGET_thrust_body_2 = ProtoField.float("mavlink_proto.SET_ATTITUDE_TARGET_thrust_body_2", "thrust_body[2] (float)")
 
 f.ATTITUDE_TARGET_time_boot_ms = ProtoField.uint32("mavlink_proto.ATTITUDE_TARGET_time_boot_ms", "time_boot_ms (uint32)")
 f.ATTITUDE_TARGET_type_mask = ProtoField.uint8("mavlink_proto.ATTITUDE_TARGET_type_mask", "type_mask (uint8)")
@@ -1246,6 +1271,7 @@ f.HIL_SENSOR_diff_pressure = ProtoField.float("mavlink_proto.HIL_SENSOR_diff_pre
 f.HIL_SENSOR_pressure_alt = ProtoField.float("mavlink_proto.HIL_SENSOR_pressure_alt", "pressure_alt (float)")
 f.HIL_SENSOR_temperature = ProtoField.float("mavlink_proto.HIL_SENSOR_temperature", "temperature (float)")
 f.HIL_SENSOR_fields_updated = ProtoField.uint32("mavlink_proto.HIL_SENSOR_fields_updated", "fields_updated (uint32)")
+f.HIL_SENSOR_id = ProtoField.uint8("mavlink_proto.HIL_SENSOR_id", "id (uint8)")
 
 f.SIM_STATE_q1 = ProtoField.float("mavlink_proto.SIM_STATE_q1", "q1 (float)")
 f.SIM_STATE_q2 = ProtoField.float("mavlink_proto.SIM_STATE_q2", "q2 (float)")
@@ -1552,6 +1578,7 @@ f.HIL_GPS_vd = ProtoField.int16("mavlink_proto.HIL_GPS_vd", "vd (int16)")
 f.HIL_GPS_cog = ProtoField.uint16("mavlink_proto.HIL_GPS_cog", "cog (uint16)")
 f.HIL_GPS_satellites_visible = ProtoField.uint8("mavlink_proto.HIL_GPS_satellites_visible", "satellites_visible (uint8)")
 f.HIL_GPS_id = ProtoField.uint8("mavlink_proto.HIL_GPS_id", "id (uint8)")
+f.HIL_GPS_yaw = ProtoField.uint16("mavlink_proto.HIL_GPS_yaw", "yaw (uint16)")
 
 f.HIL_OPTICAL_FLOW_time_usec = ProtoField.uint64("mavlink_proto.HIL_OPTICAL_FLOW_time_usec", "time_usec (uint64)")
 f.HIL_OPTICAL_FLOW_sensor_id = ProtoField.uint8("mavlink_proto.HIL_OPTICAL_FLOW_sensor_id", "sensor_id (uint8)")
@@ -1842,6 +1869,11 @@ f.GPS2_RAW_satellites_visible = ProtoField.uint8("mavlink_proto.GPS2_RAW_satelli
 f.GPS2_RAW_dgps_numch = ProtoField.uint8("mavlink_proto.GPS2_RAW_dgps_numch", "dgps_numch (uint8)")
 f.GPS2_RAW_dgps_age = ProtoField.uint32("mavlink_proto.GPS2_RAW_dgps_age", "dgps_age (uint32)")
 f.GPS2_RAW_yaw = ProtoField.uint16("mavlink_proto.GPS2_RAW_yaw", "yaw (uint16)")
+f.GPS2_RAW_alt_ellipsoid = ProtoField.int32("mavlink_proto.GPS2_RAW_alt_ellipsoid", "alt_ellipsoid (int32)")
+f.GPS2_RAW_h_acc = ProtoField.uint32("mavlink_proto.GPS2_RAW_h_acc", "h_acc (uint32)")
+f.GPS2_RAW_v_acc = ProtoField.uint32("mavlink_proto.GPS2_RAW_v_acc", "v_acc (uint32)")
+f.GPS2_RAW_vel_acc = ProtoField.uint32("mavlink_proto.GPS2_RAW_vel_acc", "vel_acc (uint32)")
+f.GPS2_RAW_hdg_acc = ProtoField.uint32("mavlink_proto.GPS2_RAW_hdg_acc", "hdg_acc (uint32)")
 
 f.POWER_STATUS_Vcc = ProtoField.uint16("mavlink_proto.POWER_STATUS_Vcc", "Vcc (uint16)")
 f.POWER_STATUS_Vservo = ProtoField.uint16("mavlink_proto.POWER_STATUS_Vservo", "Vservo (uint16)")
@@ -2283,6 +2315,7 @@ f.SCALED_PRESSURE2_time_boot_ms = ProtoField.uint32("mavlink_proto.SCALED_PRESSU
 f.SCALED_PRESSURE2_press_abs = ProtoField.float("mavlink_proto.SCALED_PRESSURE2_press_abs", "press_abs (float)")
 f.SCALED_PRESSURE2_press_diff = ProtoField.float("mavlink_proto.SCALED_PRESSURE2_press_diff", "press_diff (float)")
 f.SCALED_PRESSURE2_temperature = ProtoField.int16("mavlink_proto.SCALED_PRESSURE2_temperature", "temperature (int16)")
+f.SCALED_PRESSURE2_temperature_press_diff = ProtoField.int16("mavlink_proto.SCALED_PRESSURE2_temperature_press_diff", "temperature_press_diff (int16)")
 
 f.ATT_POS_MOCAP_time_usec = ProtoField.uint64("mavlink_proto.ATT_POS_MOCAP_time_usec", "time_usec (uint64)")
 f.ATT_POS_MOCAP_q_0 = ProtoField.float("mavlink_proto.ATT_POS_MOCAP_q_0", "q[0] (float)")
@@ -2594,6 +2627,7 @@ f.SCALED_PRESSURE3_time_boot_ms = ProtoField.uint32("mavlink_proto.SCALED_PRESSU
 f.SCALED_PRESSURE3_press_abs = ProtoField.float("mavlink_proto.SCALED_PRESSURE3_press_abs", "press_abs (float)")
 f.SCALED_PRESSURE3_press_diff = ProtoField.float("mavlink_proto.SCALED_PRESSURE3_press_diff", "press_diff (float)")
 f.SCALED_PRESSURE3_temperature = ProtoField.int16("mavlink_proto.SCALED_PRESSURE3_temperature", "temperature (int16)")
+f.SCALED_PRESSURE3_temperature_press_diff = ProtoField.int16("mavlink_proto.SCALED_PRESSURE3_temperature_press_diff", "temperature_press_diff (int16)")
 
 f.FOLLOW_TARGET_timestamp = ProtoField.uint64("mavlink_proto.FOLLOW_TARGET_timestamp", "timestamp (uint64)")
 f.FOLLOW_TARGET_est_capabilities = ProtoField.uint8("mavlink_proto.FOLLOW_TARGET_est_capabilities", "est_capabilities (uint8)")
@@ -2663,6 +2697,12 @@ f.BATTERY_STATUS_energy_consumed = ProtoField.int32("mavlink_proto.BATTERY_STATU
 f.BATTERY_STATUS_battery_remaining = ProtoField.int8("mavlink_proto.BATTERY_STATUS_battery_remaining", "battery_remaining (int8)")
 f.BATTERY_STATUS_time_remaining = ProtoField.int32("mavlink_proto.BATTERY_STATUS_time_remaining", "time_remaining (int32)")
 f.BATTERY_STATUS_charge_state = ProtoField.uint8("mavlink_proto.BATTERY_STATUS_charge_state", "charge_state (uint8)")
+f.BATTERY_STATUS_voltages_ext_0 = ProtoField.uint16("mavlink_proto.BATTERY_STATUS_voltages_ext_0", "voltages_ext[0] (uint16)")
+f.BATTERY_STATUS_voltages_ext_1 = ProtoField.uint16("mavlink_proto.BATTERY_STATUS_voltages_ext_1", "voltages_ext[1] (uint16)")
+f.BATTERY_STATUS_voltages_ext_2 = ProtoField.uint16("mavlink_proto.BATTERY_STATUS_voltages_ext_2", "voltages_ext[2] (uint16)")
+f.BATTERY_STATUS_voltages_ext_3 = ProtoField.uint16("mavlink_proto.BATTERY_STATUS_voltages_ext_3", "voltages_ext[3] (uint16)")
+f.BATTERY_STATUS_mode = ProtoField.uint8("mavlink_proto.BATTERY_STATUS_mode", "mode (uint8)")
+f.BATTERY_STATUS_fault_bitmask = ProtoField.uint32("mavlink_proto.BATTERY_STATUS_fault_bitmask", "fault_bitmask (uint32)")
 
 f.AUTOPILOT_VERSION_capabilities = ProtoField.uint64("mavlink_proto.AUTOPILOT_VERSION_capabilities", "capabilities (uint64)")
 f.AUTOPILOT_VERSION_flight_sw_version = ProtoField.uint32("mavlink_proto.AUTOPILOT_VERSION_flight_sw_version", "flight_sw_version (uint32)")
@@ -2738,6 +2778,43 @@ f.FENCE_STATUS_breach_count = ProtoField.uint16("mavlink_proto.FENCE_STATUS_brea
 f.FENCE_STATUS_breach_type = ProtoField.uint8("mavlink_proto.FENCE_STATUS_breach_type", "breach_type (uint8)")
 f.FENCE_STATUS_breach_time = ProtoField.uint32("mavlink_proto.FENCE_STATUS_breach_time", "breach_time (uint32)")
 f.FENCE_STATUS_breach_mitigation = ProtoField.uint8("mavlink_proto.FENCE_STATUS_breach_mitigation", "breach_mitigation (uint8)")
+
+f.MAG_CAL_REPORT_compass_id = ProtoField.uint8("mavlink_proto.MAG_CAL_REPORT_compass_id", "compass_id (uint8)")
+f.MAG_CAL_REPORT_cal_mask = ProtoField.uint8("mavlink_proto.MAG_CAL_REPORT_cal_mask", "cal_mask (uint8)")
+f.MAG_CAL_REPORT_cal_status = ProtoField.uint8("mavlink_proto.MAG_CAL_REPORT_cal_status", "cal_status (uint8)")
+f.MAG_CAL_REPORT_autosaved = ProtoField.uint8("mavlink_proto.MAG_CAL_REPORT_autosaved", "autosaved (uint8)")
+f.MAG_CAL_REPORT_fitness = ProtoField.float("mavlink_proto.MAG_CAL_REPORT_fitness", "fitness (float)")
+f.MAG_CAL_REPORT_ofs_x = ProtoField.float("mavlink_proto.MAG_CAL_REPORT_ofs_x", "ofs_x (float)")
+f.MAG_CAL_REPORT_ofs_y = ProtoField.float("mavlink_proto.MAG_CAL_REPORT_ofs_y", "ofs_y (float)")
+f.MAG_CAL_REPORT_ofs_z = ProtoField.float("mavlink_proto.MAG_CAL_REPORT_ofs_z", "ofs_z (float)")
+f.MAG_CAL_REPORT_diag_x = ProtoField.float("mavlink_proto.MAG_CAL_REPORT_diag_x", "diag_x (float)")
+f.MAG_CAL_REPORT_diag_y = ProtoField.float("mavlink_proto.MAG_CAL_REPORT_diag_y", "diag_y (float)")
+f.MAG_CAL_REPORT_diag_z = ProtoField.float("mavlink_proto.MAG_CAL_REPORT_diag_z", "diag_z (float)")
+f.MAG_CAL_REPORT_offdiag_x = ProtoField.float("mavlink_proto.MAG_CAL_REPORT_offdiag_x", "offdiag_x (float)")
+f.MAG_CAL_REPORT_offdiag_y = ProtoField.float("mavlink_proto.MAG_CAL_REPORT_offdiag_y", "offdiag_y (float)")
+f.MAG_CAL_REPORT_offdiag_z = ProtoField.float("mavlink_proto.MAG_CAL_REPORT_offdiag_z", "offdiag_z (float)")
+f.MAG_CAL_REPORT_orientation_confidence = ProtoField.float("mavlink_proto.MAG_CAL_REPORT_orientation_confidence", "orientation_confidence (float)")
+f.MAG_CAL_REPORT_old_orientation = ProtoField.uint8("mavlink_proto.MAG_CAL_REPORT_old_orientation", "old_orientation (uint8)")
+f.MAG_CAL_REPORT_new_orientation = ProtoField.uint8("mavlink_proto.MAG_CAL_REPORT_new_orientation", "new_orientation (uint8)")
+f.MAG_CAL_REPORT_scale_factor = ProtoField.float("mavlink_proto.MAG_CAL_REPORT_scale_factor", "scale_factor (float)")
+
+f.EFI_STATUS_health = ProtoField.uint8("mavlink_proto.EFI_STATUS_health", "health (uint8)")
+f.EFI_STATUS_ecu_index = ProtoField.float("mavlink_proto.EFI_STATUS_ecu_index", "ecu_index (float)")
+f.EFI_STATUS_rpm = ProtoField.float("mavlink_proto.EFI_STATUS_rpm", "rpm (float)")
+f.EFI_STATUS_fuel_consumed = ProtoField.float("mavlink_proto.EFI_STATUS_fuel_consumed", "fuel_consumed (float)")
+f.EFI_STATUS_fuel_flow = ProtoField.float("mavlink_proto.EFI_STATUS_fuel_flow", "fuel_flow (float)")
+f.EFI_STATUS_engine_load = ProtoField.float("mavlink_proto.EFI_STATUS_engine_load", "engine_load (float)")
+f.EFI_STATUS_throttle_position = ProtoField.float("mavlink_proto.EFI_STATUS_throttle_position", "throttle_position (float)")
+f.EFI_STATUS_spark_dwell_time = ProtoField.float("mavlink_proto.EFI_STATUS_spark_dwell_time", "spark_dwell_time (float)")
+f.EFI_STATUS_barometric_pressure = ProtoField.float("mavlink_proto.EFI_STATUS_barometric_pressure", "barometric_pressure (float)")
+f.EFI_STATUS_intake_manifold_pressure = ProtoField.float("mavlink_proto.EFI_STATUS_intake_manifold_pressure", "intake_manifold_pressure (float)")
+f.EFI_STATUS_intake_manifold_temperature = ProtoField.float("mavlink_proto.EFI_STATUS_intake_manifold_temperature", "intake_manifold_temperature (float)")
+f.EFI_STATUS_cylinder_head_temperature = ProtoField.float("mavlink_proto.EFI_STATUS_cylinder_head_temperature", "cylinder_head_temperature (float)")
+f.EFI_STATUS_ignition_timing = ProtoField.float("mavlink_proto.EFI_STATUS_ignition_timing", "ignition_timing (float)")
+f.EFI_STATUS_injection_time = ProtoField.float("mavlink_proto.EFI_STATUS_injection_time", "injection_time (float)")
+f.EFI_STATUS_exhaust_gas_temperature = ProtoField.float("mavlink_proto.EFI_STATUS_exhaust_gas_temperature", "exhaust_gas_temperature (float)")
+f.EFI_STATUS_throttle_out = ProtoField.float("mavlink_proto.EFI_STATUS_throttle_out", "throttle_out (float)")
+f.EFI_STATUS_pt_compensation = ProtoField.float("mavlink_proto.EFI_STATUS_pt_compensation", "pt_compensation (float)")
 
 f.ESTIMATOR_STATUS_time_usec = ProtoField.uint64("mavlink_proto.ESTIMATOR_STATUS_time_usec", "time_usec (uint64)")
 f.ESTIMATOR_STATUS_flags = ProtoField.uint16("mavlink_proto.ESTIMATOR_STATUS_flags", "flags (uint16)")
@@ -3531,6 +3608,8 @@ f.STORAGE_INFORMATION_used_capacity = ProtoField.float("mavlink_proto.STORAGE_IN
 f.STORAGE_INFORMATION_available_capacity = ProtoField.float("mavlink_proto.STORAGE_INFORMATION_available_capacity", "available_capacity (float)")
 f.STORAGE_INFORMATION_read_speed = ProtoField.float("mavlink_proto.STORAGE_INFORMATION_read_speed", "read_speed (float)")
 f.STORAGE_INFORMATION_write_speed = ProtoField.float("mavlink_proto.STORAGE_INFORMATION_write_speed", "write_speed (float)")
+f.STORAGE_INFORMATION_type = ProtoField.uint8("mavlink_proto.STORAGE_INFORMATION_type", "type (uint8)")
+f.STORAGE_INFORMATION_name = ProtoField.string("mavlink_proto.STORAGE_INFORMATION_name", "name (string)")
 
 f.CAMERA_CAPTURE_STATUS_time_boot_ms = ProtoField.uint32("mavlink_proto.CAMERA_CAPTURE_STATUS_time_boot_ms", "time_boot_ms (uint32)")
 f.CAMERA_CAPTURE_STATUS_image_status = ProtoField.uint8("mavlink_proto.CAMERA_CAPTURE_STATUS_image_status", "image_status (uint8)")
@@ -4102,19 +4181,62 @@ f.VIDEO_STREAM_STATUS_bitrate = ProtoField.uint32("mavlink_proto.VIDEO_STREAM_ST
 f.VIDEO_STREAM_STATUS_rotation = ProtoField.uint16("mavlink_proto.VIDEO_STREAM_STATUS_rotation", "rotation (uint16)")
 f.VIDEO_STREAM_STATUS_hfov = ProtoField.uint16("mavlink_proto.VIDEO_STREAM_STATUS_hfov", "hfov (uint16)")
 
+f.CAMERA_FOV_STATUS_time_boot_ms = ProtoField.uint32("mavlink_proto.CAMERA_FOV_STATUS_time_boot_ms", "time_boot_ms (uint32)")
+f.CAMERA_FOV_STATUS_lat_camera = ProtoField.int32("mavlink_proto.CAMERA_FOV_STATUS_lat_camera", "lat_camera (int32)")
+f.CAMERA_FOV_STATUS_lon_camera = ProtoField.int32("mavlink_proto.CAMERA_FOV_STATUS_lon_camera", "lon_camera (int32)")
+f.CAMERA_FOV_STATUS_alt_camera = ProtoField.int32("mavlink_proto.CAMERA_FOV_STATUS_alt_camera", "alt_camera (int32)")
+f.CAMERA_FOV_STATUS_lat_image = ProtoField.int32("mavlink_proto.CAMERA_FOV_STATUS_lat_image", "lat_image (int32)")
+f.CAMERA_FOV_STATUS_lon_image = ProtoField.int32("mavlink_proto.CAMERA_FOV_STATUS_lon_image", "lon_image (int32)")
+f.CAMERA_FOV_STATUS_alt_image = ProtoField.int32("mavlink_proto.CAMERA_FOV_STATUS_alt_image", "alt_image (int32)")
+f.CAMERA_FOV_STATUS_q_0 = ProtoField.float("mavlink_proto.CAMERA_FOV_STATUS_q_0", "q[0] (float)")
+f.CAMERA_FOV_STATUS_q_1 = ProtoField.float("mavlink_proto.CAMERA_FOV_STATUS_q_1", "q[1] (float)")
+f.CAMERA_FOV_STATUS_q_2 = ProtoField.float("mavlink_proto.CAMERA_FOV_STATUS_q_2", "q[2] (float)")
+f.CAMERA_FOV_STATUS_q_3 = ProtoField.float("mavlink_proto.CAMERA_FOV_STATUS_q_3", "q[3] (float)")
+f.CAMERA_FOV_STATUS_hfov = ProtoField.float("mavlink_proto.CAMERA_FOV_STATUS_hfov", "hfov (float)")
+f.CAMERA_FOV_STATUS_vfov = ProtoField.float("mavlink_proto.CAMERA_FOV_STATUS_vfov", "vfov (float)")
+
+f.CAMERA_TRACKING_IMAGE_STATUS_tracking_status = ProtoField.uint8("mavlink_proto.CAMERA_TRACKING_IMAGE_STATUS_tracking_status", "tracking_status (uint8)")
+f.CAMERA_TRACKING_IMAGE_STATUS_tracking_mode = ProtoField.uint8("mavlink_proto.CAMERA_TRACKING_IMAGE_STATUS_tracking_mode", "tracking_mode (uint8)")
+f.CAMERA_TRACKING_IMAGE_STATUS_target_data = ProtoField.uint8("mavlink_proto.CAMERA_TRACKING_IMAGE_STATUS_target_data", "target_data (uint8)")
+f.CAMERA_TRACKING_IMAGE_STATUS_point_x = ProtoField.float("mavlink_proto.CAMERA_TRACKING_IMAGE_STATUS_point_x", "point_x (float)")
+f.CAMERA_TRACKING_IMAGE_STATUS_point_y = ProtoField.float("mavlink_proto.CAMERA_TRACKING_IMAGE_STATUS_point_y", "point_y (float)")
+f.CAMERA_TRACKING_IMAGE_STATUS_radius = ProtoField.float("mavlink_proto.CAMERA_TRACKING_IMAGE_STATUS_radius", "radius (float)")
+f.CAMERA_TRACKING_IMAGE_STATUS_rec_top_x = ProtoField.float("mavlink_proto.CAMERA_TRACKING_IMAGE_STATUS_rec_top_x", "rec_top_x (float)")
+f.CAMERA_TRACKING_IMAGE_STATUS_rec_top_y = ProtoField.float("mavlink_proto.CAMERA_TRACKING_IMAGE_STATUS_rec_top_y", "rec_top_y (float)")
+f.CAMERA_TRACKING_IMAGE_STATUS_rec_bottom_x = ProtoField.float("mavlink_proto.CAMERA_TRACKING_IMAGE_STATUS_rec_bottom_x", "rec_bottom_x (float)")
+f.CAMERA_TRACKING_IMAGE_STATUS_rec_bottom_y = ProtoField.float("mavlink_proto.CAMERA_TRACKING_IMAGE_STATUS_rec_bottom_y", "rec_bottom_y (float)")
+
+f.CAMERA_TRACKING_GEO_STATUS_tracking_status = ProtoField.uint8("mavlink_proto.CAMERA_TRACKING_GEO_STATUS_tracking_status", "tracking_status (uint8)")
+f.CAMERA_TRACKING_GEO_STATUS_lat = ProtoField.int32("mavlink_proto.CAMERA_TRACKING_GEO_STATUS_lat", "lat (int32)")
+f.CAMERA_TRACKING_GEO_STATUS_lon = ProtoField.int32("mavlink_proto.CAMERA_TRACKING_GEO_STATUS_lon", "lon (int32)")
+f.CAMERA_TRACKING_GEO_STATUS_alt = ProtoField.float("mavlink_proto.CAMERA_TRACKING_GEO_STATUS_alt", "alt (float)")
+f.CAMERA_TRACKING_GEO_STATUS_h_acc = ProtoField.float("mavlink_proto.CAMERA_TRACKING_GEO_STATUS_h_acc", "h_acc (float)")
+f.CAMERA_TRACKING_GEO_STATUS_v_acc = ProtoField.float("mavlink_proto.CAMERA_TRACKING_GEO_STATUS_v_acc", "v_acc (float)")
+f.CAMERA_TRACKING_GEO_STATUS_vel_n = ProtoField.float("mavlink_proto.CAMERA_TRACKING_GEO_STATUS_vel_n", "vel_n (float)")
+f.CAMERA_TRACKING_GEO_STATUS_vel_e = ProtoField.float("mavlink_proto.CAMERA_TRACKING_GEO_STATUS_vel_e", "vel_e (float)")
+f.CAMERA_TRACKING_GEO_STATUS_vel_d = ProtoField.float("mavlink_proto.CAMERA_TRACKING_GEO_STATUS_vel_d", "vel_d (float)")
+f.CAMERA_TRACKING_GEO_STATUS_vel_acc = ProtoField.float("mavlink_proto.CAMERA_TRACKING_GEO_STATUS_vel_acc", "vel_acc (float)")
+f.CAMERA_TRACKING_GEO_STATUS_dist = ProtoField.float("mavlink_proto.CAMERA_TRACKING_GEO_STATUS_dist", "dist (float)")
+f.CAMERA_TRACKING_GEO_STATUS_hdg = ProtoField.float("mavlink_proto.CAMERA_TRACKING_GEO_STATUS_hdg", "hdg (float)")
+f.CAMERA_TRACKING_GEO_STATUS_hdg_acc = ProtoField.float("mavlink_proto.CAMERA_TRACKING_GEO_STATUS_hdg_acc", "hdg_acc (float)")
+
 f.GIMBAL_MANAGER_INFORMATION_time_boot_ms = ProtoField.uint32("mavlink_proto.GIMBAL_MANAGER_INFORMATION_time_boot_ms", "time_boot_ms (uint32)")
 f.GIMBAL_MANAGER_INFORMATION_cap_flags = ProtoField.uint32("mavlink_proto.GIMBAL_MANAGER_INFORMATION_cap_flags", "cap_flags (uint32)")
 f.GIMBAL_MANAGER_INFORMATION_gimbal_device_id = ProtoField.uint8("mavlink_proto.GIMBAL_MANAGER_INFORMATION_gimbal_device_id", "gimbal_device_id (uint8)")
-f.GIMBAL_MANAGER_INFORMATION_tilt_max = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_INFORMATION_tilt_max", "tilt_max (float)")
-f.GIMBAL_MANAGER_INFORMATION_tilt_min = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_INFORMATION_tilt_min", "tilt_min (float)")
-f.GIMBAL_MANAGER_INFORMATION_tilt_rate_max = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_INFORMATION_tilt_rate_max", "tilt_rate_max (float)")
-f.GIMBAL_MANAGER_INFORMATION_pan_max = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_INFORMATION_pan_max", "pan_max (float)")
-f.GIMBAL_MANAGER_INFORMATION_pan_min = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_INFORMATION_pan_min", "pan_min (float)")
-f.GIMBAL_MANAGER_INFORMATION_pan_rate_max = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_INFORMATION_pan_rate_max", "pan_rate_max (float)")
+f.GIMBAL_MANAGER_INFORMATION_roll_min = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_INFORMATION_roll_min", "roll_min (float)")
+f.GIMBAL_MANAGER_INFORMATION_roll_max = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_INFORMATION_roll_max", "roll_max (float)")
+f.GIMBAL_MANAGER_INFORMATION_pitch_min = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_INFORMATION_pitch_min", "pitch_min (float)")
+f.GIMBAL_MANAGER_INFORMATION_pitch_max = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_INFORMATION_pitch_max", "pitch_max (float)")
+f.GIMBAL_MANAGER_INFORMATION_yaw_min = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_INFORMATION_yaw_min", "yaw_min (float)")
+f.GIMBAL_MANAGER_INFORMATION_yaw_max = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_INFORMATION_yaw_max", "yaw_max (float)")
 
 f.GIMBAL_MANAGER_STATUS_time_boot_ms = ProtoField.uint32("mavlink_proto.GIMBAL_MANAGER_STATUS_time_boot_ms", "time_boot_ms (uint32)")
 f.GIMBAL_MANAGER_STATUS_flags = ProtoField.uint32("mavlink_proto.GIMBAL_MANAGER_STATUS_flags", "flags (uint32)")
 f.GIMBAL_MANAGER_STATUS_gimbal_device_id = ProtoField.uint8("mavlink_proto.GIMBAL_MANAGER_STATUS_gimbal_device_id", "gimbal_device_id (uint8)")
+f.GIMBAL_MANAGER_STATUS_primary_control_sysid = ProtoField.uint8("mavlink_proto.GIMBAL_MANAGER_STATUS_primary_control_sysid", "primary_control_sysid (uint8)")
+f.GIMBAL_MANAGER_STATUS_primary_control_compid = ProtoField.uint8("mavlink_proto.GIMBAL_MANAGER_STATUS_primary_control_compid", "primary_control_compid (uint8)")
+f.GIMBAL_MANAGER_STATUS_secondary_control_sysid = ProtoField.uint8("mavlink_proto.GIMBAL_MANAGER_STATUS_secondary_control_sysid", "secondary_control_sysid (uint8)")
+f.GIMBAL_MANAGER_STATUS_secondary_control_compid = ProtoField.uint8("mavlink_proto.GIMBAL_MANAGER_STATUS_secondary_control_compid", "secondary_control_compid (uint8)")
 
 f.GIMBAL_MANAGER_SET_ATTITUDE_target_system = ProtoField.uint8("mavlink_proto.GIMBAL_MANAGER_SET_ATTITUDE_target_system", "target_system (uint8)")
 f.GIMBAL_MANAGER_SET_ATTITUDE_target_component = ProtoField.uint8("mavlink_proto.GIMBAL_MANAGER_SET_ATTITUDE_target_component", "target_component (uint8)")
@@ -4129,78 +4251,20 @@ f.GIMBAL_MANAGER_SET_ATTITUDE_angular_velocity_y = ProtoField.float("mavlink_pro
 f.GIMBAL_MANAGER_SET_ATTITUDE_angular_velocity_z = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_SET_ATTITUDE_angular_velocity_z", "angular_velocity_z (float)")
 
 f.GIMBAL_DEVICE_INFORMATION_time_boot_ms = ProtoField.uint32("mavlink_proto.GIMBAL_DEVICE_INFORMATION_time_boot_ms", "time_boot_ms (uint32)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_0 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_0", "vendor_name[0] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_1 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_1", "vendor_name[1] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_2 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_2", "vendor_name[2] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_3 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_3", "vendor_name[3] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_4 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_4", "vendor_name[4] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_5 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_5", "vendor_name[5] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_6 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_6", "vendor_name[6] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_7 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_7", "vendor_name[7] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_8 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_8", "vendor_name[8] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_9 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_9", "vendor_name[9] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_10 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_10", "vendor_name[10] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_11 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_11", "vendor_name[11] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_12 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_12", "vendor_name[12] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_13 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_13", "vendor_name[13] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_14 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_14", "vendor_name[14] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_15 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_15", "vendor_name[15] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_16 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_16", "vendor_name[16] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_17 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_17", "vendor_name[17] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_18 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_18", "vendor_name[18] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_19 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_19", "vendor_name[19] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_20 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_20", "vendor_name[20] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_21 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_21", "vendor_name[21] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_22 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_22", "vendor_name[22] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_23 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_23", "vendor_name[23] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_24 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_24", "vendor_name[24] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_25 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_25", "vendor_name[25] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_26 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_26", "vendor_name[26] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_27 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_27", "vendor_name[27] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_28 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_28", "vendor_name[28] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_29 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_29", "vendor_name[29] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_30 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_30", "vendor_name[30] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_vendor_name_31 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name_31", "vendor_name[31] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_0 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_0", "model_name[0] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_1 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_1", "model_name[1] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_2 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_2", "model_name[2] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_3 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_3", "model_name[3] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_4 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_4", "model_name[4] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_5 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_5", "model_name[5] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_6 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_6", "model_name[6] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_7 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_7", "model_name[7] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_8 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_8", "model_name[8] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_9 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_9", "model_name[9] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_10 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_10", "model_name[10] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_11 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_11", "model_name[11] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_12 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_12", "model_name[12] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_13 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_13", "model_name[13] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_14 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_14", "model_name[14] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_15 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_15", "model_name[15] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_16 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_16", "model_name[16] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_17 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_17", "model_name[17] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_18 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_18", "model_name[18] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_19 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_19", "model_name[19] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_20 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_20", "model_name[20] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_21 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_21", "model_name[21] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_22 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_22", "model_name[22] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_23 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_23", "model_name[23] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_24 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_24", "model_name[24] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_25 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_25", "model_name[25] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_26 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_26", "model_name[26] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_27 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_27", "model_name[27] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_28 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_28", "model_name[28] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_29 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_29", "model_name[29] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_30 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_30", "model_name[30] (uint8)")
-f.GIMBAL_DEVICE_INFORMATION_model_name_31 = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name_31", "model_name[31] (uint8)")
+f.GIMBAL_DEVICE_INFORMATION_vendor_name = ProtoField.string("mavlink_proto.GIMBAL_DEVICE_INFORMATION_vendor_name", "vendor_name (string)")
+f.GIMBAL_DEVICE_INFORMATION_model_name = ProtoField.string("mavlink_proto.GIMBAL_DEVICE_INFORMATION_model_name", "model_name (string)")
+f.GIMBAL_DEVICE_INFORMATION_custom_name = ProtoField.string("mavlink_proto.GIMBAL_DEVICE_INFORMATION_custom_name", "custom_name (string)")
 f.GIMBAL_DEVICE_INFORMATION_firmware_version = ProtoField.uint32("mavlink_proto.GIMBAL_DEVICE_INFORMATION_firmware_version", "firmware_version (uint32)")
+f.GIMBAL_DEVICE_INFORMATION_hardware_version = ProtoField.uint32("mavlink_proto.GIMBAL_DEVICE_INFORMATION_hardware_version", "hardware_version (uint32)")
+f.GIMBAL_DEVICE_INFORMATION_uid = ProtoField.uint64("mavlink_proto.GIMBAL_DEVICE_INFORMATION_uid", "uid (uint64)")
 f.GIMBAL_DEVICE_INFORMATION_cap_flags = ProtoField.uint16("mavlink_proto.GIMBAL_DEVICE_INFORMATION_cap_flags", "cap_flags (uint16)")
-f.GIMBAL_DEVICE_INFORMATION_tilt_max = ProtoField.float("mavlink_proto.GIMBAL_DEVICE_INFORMATION_tilt_max", "tilt_max (float)")
-f.GIMBAL_DEVICE_INFORMATION_tilt_min = ProtoField.float("mavlink_proto.GIMBAL_DEVICE_INFORMATION_tilt_min", "tilt_min (float)")
-f.GIMBAL_DEVICE_INFORMATION_tilt_rate_max = ProtoField.float("mavlink_proto.GIMBAL_DEVICE_INFORMATION_tilt_rate_max", "tilt_rate_max (float)")
-f.GIMBAL_DEVICE_INFORMATION_pan_max = ProtoField.float("mavlink_proto.GIMBAL_DEVICE_INFORMATION_pan_max", "pan_max (float)")
-f.GIMBAL_DEVICE_INFORMATION_pan_min = ProtoField.float("mavlink_proto.GIMBAL_DEVICE_INFORMATION_pan_min", "pan_min (float)")
-f.GIMBAL_DEVICE_INFORMATION_pan_rate_max = ProtoField.float("mavlink_proto.GIMBAL_DEVICE_INFORMATION_pan_rate_max", "pan_rate_max (float)")
+f.GIMBAL_DEVICE_INFORMATION_custom_cap_flags = ProtoField.uint16("mavlink_proto.GIMBAL_DEVICE_INFORMATION_custom_cap_flags", "custom_cap_flags (uint16)")
+f.GIMBAL_DEVICE_INFORMATION_roll_min = ProtoField.float("mavlink_proto.GIMBAL_DEVICE_INFORMATION_roll_min", "roll_min (float)")
+f.GIMBAL_DEVICE_INFORMATION_roll_max = ProtoField.float("mavlink_proto.GIMBAL_DEVICE_INFORMATION_roll_max", "roll_max (float)")
+f.GIMBAL_DEVICE_INFORMATION_pitch_min = ProtoField.float("mavlink_proto.GIMBAL_DEVICE_INFORMATION_pitch_min", "pitch_min (float)")
+f.GIMBAL_DEVICE_INFORMATION_pitch_max = ProtoField.float("mavlink_proto.GIMBAL_DEVICE_INFORMATION_pitch_max", "pitch_max (float)")
+f.GIMBAL_DEVICE_INFORMATION_yaw_min = ProtoField.float("mavlink_proto.GIMBAL_DEVICE_INFORMATION_yaw_min", "yaw_min (float)")
+f.GIMBAL_DEVICE_INFORMATION_yaw_max = ProtoField.float("mavlink_proto.GIMBAL_DEVICE_INFORMATION_yaw_max", "yaw_max (float)")
 
 f.GIMBAL_DEVICE_SET_ATTITUDE_target_system = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_SET_ATTITUDE_target_system", "target_system (uint8)")
 f.GIMBAL_DEVICE_SET_ATTITUDE_target_component = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_SET_ATTITUDE_target_component", "target_component (uint8)")
@@ -4213,6 +4277,8 @@ f.GIMBAL_DEVICE_SET_ATTITUDE_angular_velocity_x = ProtoField.float("mavlink_prot
 f.GIMBAL_DEVICE_SET_ATTITUDE_angular_velocity_y = ProtoField.float("mavlink_proto.GIMBAL_DEVICE_SET_ATTITUDE_angular_velocity_y", "angular_velocity_y (float)")
 f.GIMBAL_DEVICE_SET_ATTITUDE_angular_velocity_z = ProtoField.float("mavlink_proto.GIMBAL_DEVICE_SET_ATTITUDE_angular_velocity_z", "angular_velocity_z (float)")
 
+f.GIMBAL_DEVICE_ATTITUDE_STATUS_target_system = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_ATTITUDE_STATUS_target_system", "target_system (uint8)")
+f.GIMBAL_DEVICE_ATTITUDE_STATUS_target_component = ProtoField.uint8("mavlink_proto.GIMBAL_DEVICE_ATTITUDE_STATUS_target_component", "target_component (uint8)")
 f.GIMBAL_DEVICE_ATTITUDE_STATUS_time_boot_ms = ProtoField.uint32("mavlink_proto.GIMBAL_DEVICE_ATTITUDE_STATUS_time_boot_ms", "time_boot_ms (uint32)")
 f.GIMBAL_DEVICE_ATTITUDE_STATUS_flags = ProtoField.uint16("mavlink_proto.GIMBAL_DEVICE_ATTITUDE_STATUS_flags", "flags (uint16)")
 f.GIMBAL_DEVICE_ATTITUDE_STATUS_q_0 = ProtoField.float("mavlink_proto.GIMBAL_DEVICE_ATTITUDE_STATUS_q_0", "q[0] (float)")
@@ -4224,9 +4290,9 @@ f.GIMBAL_DEVICE_ATTITUDE_STATUS_angular_velocity_y = ProtoField.float("mavlink_p
 f.GIMBAL_DEVICE_ATTITUDE_STATUS_angular_velocity_z = ProtoField.float("mavlink_proto.GIMBAL_DEVICE_ATTITUDE_STATUS_angular_velocity_z", "angular_velocity_z (float)")
 f.GIMBAL_DEVICE_ATTITUDE_STATUS_failure_flags = ProtoField.uint32("mavlink_proto.GIMBAL_DEVICE_ATTITUDE_STATUS_failure_flags", "failure_flags (uint32)")
 
-f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_time_boot_us = ProtoField.uint64("mavlink_proto.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_time_boot_us", "time_boot_us (uint64)")
 f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_target_system = ProtoField.uint8("mavlink_proto.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_target_system", "target_system (uint8)")
 f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_target_component = ProtoField.uint8("mavlink_proto.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_target_component", "target_component (uint8)")
+f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_time_boot_us = ProtoField.uint64("mavlink_proto.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_time_boot_us", "time_boot_us (uint64)")
 f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_q_0 = ProtoField.float("mavlink_proto.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_q_0", "q[0] (float)")
 f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_q_1 = ProtoField.float("mavlink_proto.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_q_1", "q[1] (float)")
 f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_q_2 = ProtoField.float("mavlink_proto.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_q_2", "q[2] (float)")
@@ -4237,31 +4303,65 @@ f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_vy = ProtoField.float("mavlink_proto.AUTOPIL
 f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_vz = ProtoField.float("mavlink_proto.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_vz", "vz (float)")
 f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_v_estimated_delay_us = ProtoField.uint32("mavlink_proto.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_v_estimated_delay_us", "v_estimated_delay_us (uint32)")
 f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_feed_forward_angular_velocity_z = ProtoField.float("mavlink_proto.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_feed_forward_angular_velocity_z", "feed_forward_angular_velocity_z (float)")
+f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_estimator_status = ProtoField.uint16("mavlink_proto.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_estimator_status", "estimator_status (uint16)")
+f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_landed_state = ProtoField.uint8("mavlink_proto.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_landed_state", "landed_state (uint8)")
+
+f.GIMBAL_MANAGER_SET_PITCHYAW_target_system = ProtoField.uint8("mavlink_proto.GIMBAL_MANAGER_SET_PITCHYAW_target_system", "target_system (uint8)")
+f.GIMBAL_MANAGER_SET_PITCHYAW_target_component = ProtoField.uint8("mavlink_proto.GIMBAL_MANAGER_SET_PITCHYAW_target_component", "target_component (uint8)")
+f.GIMBAL_MANAGER_SET_PITCHYAW_flags = ProtoField.uint32("mavlink_proto.GIMBAL_MANAGER_SET_PITCHYAW_flags", "flags (uint32)")
+f.GIMBAL_MANAGER_SET_PITCHYAW_gimbal_device_id = ProtoField.uint8("mavlink_proto.GIMBAL_MANAGER_SET_PITCHYAW_gimbal_device_id", "gimbal_device_id (uint8)")
+f.GIMBAL_MANAGER_SET_PITCHYAW_pitch = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_SET_PITCHYAW_pitch", "pitch (float)")
+f.GIMBAL_MANAGER_SET_PITCHYAW_yaw = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_SET_PITCHYAW_yaw", "yaw (float)")
+f.GIMBAL_MANAGER_SET_PITCHYAW_pitch_rate = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_SET_PITCHYAW_pitch_rate", "pitch_rate (float)")
+f.GIMBAL_MANAGER_SET_PITCHYAW_yaw_rate = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_SET_PITCHYAW_yaw_rate", "yaw_rate (float)")
+
+f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_target_system = ProtoField.uint8("mavlink_proto.GIMBAL_MANAGER_SET_MANUAL_CONTROL_target_system", "target_system (uint8)")
+f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_target_component = ProtoField.uint8("mavlink_proto.GIMBAL_MANAGER_SET_MANUAL_CONTROL_target_component", "target_component (uint8)")
+f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_flags = ProtoField.uint32("mavlink_proto.GIMBAL_MANAGER_SET_MANUAL_CONTROL_flags", "flags (uint32)")
+f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_gimbal_device_id = ProtoField.uint8("mavlink_proto.GIMBAL_MANAGER_SET_MANUAL_CONTROL_gimbal_device_id", "gimbal_device_id (uint8)")
+f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_pitch = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_SET_MANUAL_CONTROL_pitch", "pitch (float)")
+f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_yaw = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_SET_MANUAL_CONTROL_yaw", "yaw (float)")
+f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_pitch_rate = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_SET_MANUAL_CONTROL_pitch_rate", "pitch_rate (float)")
+f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_yaw_rate = ProtoField.float("mavlink_proto.GIMBAL_MANAGER_SET_MANUAL_CONTROL_yaw_rate", "yaw_rate (float)")
+
+f.ESC_INFO_index = ProtoField.uint8("mavlink_proto.ESC_INFO_index", "index (uint8)")
+f.ESC_INFO_time_usec = ProtoField.uint64("mavlink_proto.ESC_INFO_time_usec", "time_usec (uint64)")
+f.ESC_INFO_counter = ProtoField.uint16("mavlink_proto.ESC_INFO_counter", "counter (uint16)")
+f.ESC_INFO_count = ProtoField.uint8("mavlink_proto.ESC_INFO_count", "count (uint8)")
+f.ESC_INFO_connection_type = ProtoField.uint8("mavlink_proto.ESC_INFO_connection_type", "connection_type (uint8)")
+f.ESC_INFO_info = ProtoField.uint8("mavlink_proto.ESC_INFO_info", "info (uint8)")
+f.ESC_INFO_failure_flags_0 = ProtoField.uint16("mavlink_proto.ESC_INFO_failure_flags_0", "failure_flags[0] (uint16)")
+f.ESC_INFO_failure_flags_1 = ProtoField.uint16("mavlink_proto.ESC_INFO_failure_flags_1", "failure_flags[1] (uint16)")
+f.ESC_INFO_failure_flags_2 = ProtoField.uint16("mavlink_proto.ESC_INFO_failure_flags_2", "failure_flags[2] (uint16)")
+f.ESC_INFO_failure_flags_3 = ProtoField.uint16("mavlink_proto.ESC_INFO_failure_flags_3", "failure_flags[3] (uint16)")
+f.ESC_INFO_error_count_0 = ProtoField.uint32("mavlink_proto.ESC_INFO_error_count_0", "error_count[0] (uint32)")
+f.ESC_INFO_error_count_1 = ProtoField.uint32("mavlink_proto.ESC_INFO_error_count_1", "error_count[1] (uint32)")
+f.ESC_INFO_error_count_2 = ProtoField.uint32("mavlink_proto.ESC_INFO_error_count_2", "error_count[2] (uint32)")
+f.ESC_INFO_error_count_3 = ProtoField.uint32("mavlink_proto.ESC_INFO_error_count_3", "error_count[3] (uint32)")
+f.ESC_INFO_temperature_0 = ProtoField.uint8("mavlink_proto.ESC_INFO_temperature_0", "temperature[0] (uint8)")
+f.ESC_INFO_temperature_1 = ProtoField.uint8("mavlink_proto.ESC_INFO_temperature_1", "temperature[1] (uint8)")
+f.ESC_INFO_temperature_2 = ProtoField.uint8("mavlink_proto.ESC_INFO_temperature_2", "temperature[2] (uint8)")
+f.ESC_INFO_temperature_3 = ProtoField.uint8("mavlink_proto.ESC_INFO_temperature_3", "temperature[3] (uint8)")
+
+f.ESC_STATUS_index = ProtoField.uint8("mavlink_proto.ESC_STATUS_index", "index (uint8)")
+f.ESC_STATUS_time_usec = ProtoField.uint64("mavlink_proto.ESC_STATUS_time_usec", "time_usec (uint64)")
+f.ESC_STATUS_rpm_0 = ProtoField.int32("mavlink_proto.ESC_STATUS_rpm_0", "rpm[0] (int32)")
+f.ESC_STATUS_rpm_1 = ProtoField.int32("mavlink_proto.ESC_STATUS_rpm_1", "rpm[1] (int32)")
+f.ESC_STATUS_rpm_2 = ProtoField.int32("mavlink_proto.ESC_STATUS_rpm_2", "rpm[2] (int32)")
+f.ESC_STATUS_rpm_3 = ProtoField.int32("mavlink_proto.ESC_STATUS_rpm_3", "rpm[3] (int32)")
+f.ESC_STATUS_voltage_0 = ProtoField.float("mavlink_proto.ESC_STATUS_voltage_0", "voltage[0] (float)")
+f.ESC_STATUS_voltage_1 = ProtoField.float("mavlink_proto.ESC_STATUS_voltage_1", "voltage[1] (float)")
+f.ESC_STATUS_voltage_2 = ProtoField.float("mavlink_proto.ESC_STATUS_voltage_2", "voltage[2] (float)")
+f.ESC_STATUS_voltage_3 = ProtoField.float("mavlink_proto.ESC_STATUS_voltage_3", "voltage[3] (float)")
+f.ESC_STATUS_current_0 = ProtoField.float("mavlink_proto.ESC_STATUS_current_0", "current[0] (float)")
+f.ESC_STATUS_current_1 = ProtoField.float("mavlink_proto.ESC_STATUS_current_1", "current[1] (float)")
+f.ESC_STATUS_current_2 = ProtoField.float("mavlink_proto.ESC_STATUS_current_2", "current[2] (float)")
+f.ESC_STATUS_current_3 = ProtoField.float("mavlink_proto.ESC_STATUS_current_3", "current[3] (float)")
 
 f.WIFI_CONFIG_AP_ssid = ProtoField.string("mavlink_proto.WIFI_CONFIG_AP_ssid", "ssid (string)")
 f.WIFI_CONFIG_AP_password = ProtoField.string("mavlink_proto.WIFI_CONFIG_AP_password", "password (string)")
 f.WIFI_CONFIG_AP_mode = ProtoField.int8("mavlink_proto.WIFI_CONFIG_AP_mode", "mode (int8)")
 f.WIFI_CONFIG_AP_response = ProtoField.int8("mavlink_proto.WIFI_CONFIG_AP_response", "response (int8)")
-
-f.PROTOCOL_VERSION_version = ProtoField.uint16("mavlink_proto.PROTOCOL_VERSION_version", "version (uint16)")
-f.PROTOCOL_VERSION_min_version = ProtoField.uint16("mavlink_proto.PROTOCOL_VERSION_min_version", "min_version (uint16)")
-f.PROTOCOL_VERSION_max_version = ProtoField.uint16("mavlink_proto.PROTOCOL_VERSION_max_version", "max_version (uint16)")
-f.PROTOCOL_VERSION_spec_version_hash_0 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_spec_version_hash_0", "spec_version_hash[0] (uint8)")
-f.PROTOCOL_VERSION_spec_version_hash_1 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_spec_version_hash_1", "spec_version_hash[1] (uint8)")
-f.PROTOCOL_VERSION_spec_version_hash_2 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_spec_version_hash_2", "spec_version_hash[2] (uint8)")
-f.PROTOCOL_VERSION_spec_version_hash_3 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_spec_version_hash_3", "spec_version_hash[3] (uint8)")
-f.PROTOCOL_VERSION_spec_version_hash_4 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_spec_version_hash_4", "spec_version_hash[4] (uint8)")
-f.PROTOCOL_VERSION_spec_version_hash_5 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_spec_version_hash_5", "spec_version_hash[5] (uint8)")
-f.PROTOCOL_VERSION_spec_version_hash_6 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_spec_version_hash_6", "spec_version_hash[6] (uint8)")
-f.PROTOCOL_VERSION_spec_version_hash_7 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_spec_version_hash_7", "spec_version_hash[7] (uint8)")
-f.PROTOCOL_VERSION_library_version_hash_0 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_library_version_hash_0", "library_version_hash[0] (uint8)")
-f.PROTOCOL_VERSION_library_version_hash_1 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_library_version_hash_1", "library_version_hash[1] (uint8)")
-f.PROTOCOL_VERSION_library_version_hash_2 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_library_version_hash_2", "library_version_hash[2] (uint8)")
-f.PROTOCOL_VERSION_library_version_hash_3 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_library_version_hash_3", "library_version_hash[3] (uint8)")
-f.PROTOCOL_VERSION_library_version_hash_4 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_library_version_hash_4", "library_version_hash[4] (uint8)")
-f.PROTOCOL_VERSION_library_version_hash_5 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_library_version_hash_5", "library_version_hash[5] (uint8)")
-f.PROTOCOL_VERSION_library_version_hash_6 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_library_version_hash_6", "library_version_hash[6] (uint8)")
-f.PROTOCOL_VERSION_library_version_hash_7 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_library_version_hash_7", "library_version_hash[7] (uint8)")
 
 f.AIS_VESSEL_MMSI = ProtoField.uint32("mavlink_proto.AIS_VESSEL_MMSI", "MMSI (uint32)")
 f.AIS_VESSEL_lat = ProtoField.int32("mavlink_proto.AIS_VESSEL_lat", "lat (int32)")
@@ -4571,13 +4671,13 @@ f.TRAJECTORY_REPRESENTATION_BEZIER_pos_yaw_2 = ProtoField.float("mavlink_proto.T
 f.TRAJECTORY_REPRESENTATION_BEZIER_pos_yaw_3 = ProtoField.float("mavlink_proto.TRAJECTORY_REPRESENTATION_BEZIER_pos_yaw_3", "pos_yaw[3] (float)")
 f.TRAJECTORY_REPRESENTATION_BEZIER_pos_yaw_4 = ProtoField.float("mavlink_proto.TRAJECTORY_REPRESENTATION_BEZIER_pos_yaw_4", "pos_yaw[4] (float)")
 
-f.CELLULAR_STATUS_status = ProtoField.uint16("mavlink_proto.CELLULAR_STATUS_status", "status (uint16)")
+f.CELLULAR_STATUS_status = ProtoField.uint8("mavlink_proto.CELLULAR_STATUS_status", "status (uint8)")
+f.CELLULAR_STATUS_failure_reason = ProtoField.uint8("mavlink_proto.CELLULAR_STATUS_failure_reason", "failure_reason (uint8)")
 f.CELLULAR_STATUS_type = ProtoField.uint8("mavlink_proto.CELLULAR_STATUS_type", "type (uint8)")
 f.CELLULAR_STATUS_quality = ProtoField.uint8("mavlink_proto.CELLULAR_STATUS_quality", "quality (uint8)")
 f.CELLULAR_STATUS_mcc = ProtoField.uint16("mavlink_proto.CELLULAR_STATUS_mcc", "mcc (uint16)")
 f.CELLULAR_STATUS_mnc = ProtoField.uint16("mavlink_proto.CELLULAR_STATUS_mnc", "mnc (uint16)")
 f.CELLULAR_STATUS_lac = ProtoField.uint16("mavlink_proto.CELLULAR_STATUS_lac", "lac (uint16)")
-f.CELLULAR_STATUS_cid = ProtoField.uint32("mavlink_proto.CELLULAR_STATUS_cid", "cid (uint32)")
 
 f.ISBD_LINK_STATUS_timestamp = ProtoField.uint64("mavlink_proto.ISBD_LINK_STATUS_timestamp", "timestamp (uint64)")
 f.ISBD_LINK_STATUS_last_heartbeat = ProtoField.uint64("mavlink_proto.ISBD_LINK_STATUS_last_heartbeat", "last_heartbeat (uint64)")
@@ -4587,6 +4687,15 @@ f.ISBD_LINK_STATUS_signal_quality = ProtoField.uint8("mavlink_proto.ISBD_LINK_ST
 f.ISBD_LINK_STATUS_ring_pending = ProtoField.uint8("mavlink_proto.ISBD_LINK_STATUS_ring_pending", "ring_pending (uint8)")
 f.ISBD_LINK_STATUS_tx_session_pending = ProtoField.uint8("mavlink_proto.ISBD_LINK_STATUS_tx_session_pending", "tx_session_pending (uint8)")
 f.ISBD_LINK_STATUS_rx_session_pending = ProtoField.uint8("mavlink_proto.ISBD_LINK_STATUS_rx_session_pending", "rx_session_pending (uint8)")
+
+f.CELLULAR_CONFIG_enable_lte = ProtoField.uint8("mavlink_proto.CELLULAR_CONFIG_enable_lte", "enable_lte (uint8)")
+f.CELLULAR_CONFIG_enable_pin = ProtoField.uint8("mavlink_proto.CELLULAR_CONFIG_enable_pin", "enable_pin (uint8)")
+f.CELLULAR_CONFIG_pin = ProtoField.string("mavlink_proto.CELLULAR_CONFIG_pin", "pin (string)")
+f.CELLULAR_CONFIG_new_pin = ProtoField.string("mavlink_proto.CELLULAR_CONFIG_new_pin", "new_pin (string)")
+f.CELLULAR_CONFIG_apn = ProtoField.string("mavlink_proto.CELLULAR_CONFIG_apn", "apn (string)")
+f.CELLULAR_CONFIG_puk = ProtoField.string("mavlink_proto.CELLULAR_CONFIG_puk", "puk (string)")
+f.CELLULAR_CONFIG_roaming = ProtoField.uint8("mavlink_proto.CELLULAR_CONFIG_roaming", "roaming (uint8)")
+f.CELLULAR_CONFIG_response = ProtoField.uint8("mavlink_proto.CELLULAR_CONFIG_response", "response (uint8)")
 
 f.RAW_RPM_index = ProtoField.uint8("mavlink_proto.RAW_RPM_index", "index (uint8)")
 f.RAW_RPM_frequency = ProtoField.float("mavlink_proto.RAW_RPM_frequency", "frequency (float)")
@@ -4697,39 +4806,22 @@ f.ORBIT_EXECUTION_STATUS_y = ProtoField.int32("mavlink_proto.ORBIT_EXECUTION_STA
 f.ORBIT_EXECUTION_STATUS_z = ProtoField.float("mavlink_proto.ORBIT_EXECUTION_STATUS_z", "z (float)")
 
 f.SMART_BATTERY_INFO_id = ProtoField.uint8("mavlink_proto.SMART_BATTERY_INFO_id", "id (uint8)")
+f.SMART_BATTERY_INFO_battery_function = ProtoField.uint8("mavlink_proto.SMART_BATTERY_INFO_battery_function", "battery_function (uint8)")
+f.SMART_BATTERY_INFO_type = ProtoField.uint8("mavlink_proto.SMART_BATTERY_INFO_type", "type (uint8)")
 f.SMART_BATTERY_INFO_capacity_full_specification = ProtoField.int32("mavlink_proto.SMART_BATTERY_INFO_capacity_full_specification", "capacity_full_specification (int32)")
 f.SMART_BATTERY_INFO_capacity_full = ProtoField.int32("mavlink_proto.SMART_BATTERY_INFO_capacity_full", "capacity_full (int32)")
 f.SMART_BATTERY_INFO_cycle_count = ProtoField.uint16("mavlink_proto.SMART_BATTERY_INFO_cycle_count", "cycle_count (uint16)")
-f.SMART_BATTERY_INFO_serial_number = ProtoField.int32("mavlink_proto.SMART_BATTERY_INFO_serial_number", "serial_number (int32)")
+f.SMART_BATTERY_INFO_serial_number = ProtoField.string("mavlink_proto.SMART_BATTERY_INFO_serial_number", "serial_number (string)")
 f.SMART_BATTERY_INFO_device_name = ProtoField.string("mavlink_proto.SMART_BATTERY_INFO_device_name", "device_name (string)")
 f.SMART_BATTERY_INFO_weight = ProtoField.uint16("mavlink_proto.SMART_BATTERY_INFO_weight", "weight (uint16)")
 f.SMART_BATTERY_INFO_discharge_minimum_voltage = ProtoField.uint16("mavlink_proto.SMART_BATTERY_INFO_discharge_minimum_voltage", "discharge_minimum_voltage (uint16)")
 f.SMART_BATTERY_INFO_charging_minimum_voltage = ProtoField.uint16("mavlink_proto.SMART_BATTERY_INFO_charging_minimum_voltage", "charging_minimum_voltage (uint16)")
 f.SMART_BATTERY_INFO_resting_minimum_voltage = ProtoField.uint16("mavlink_proto.SMART_BATTERY_INFO_resting_minimum_voltage", "resting_minimum_voltage (uint16)")
-
-f.SMART_BATTERY_STATUS_id = ProtoField.uint16("mavlink_proto.SMART_BATTERY_STATUS_id", "id (uint16)")
-f.SMART_BATTERY_STATUS_capacity_remaining = ProtoField.int16("mavlink_proto.SMART_BATTERY_STATUS_capacity_remaining", "capacity_remaining (int16)")
-f.SMART_BATTERY_STATUS_current = ProtoField.int16("mavlink_proto.SMART_BATTERY_STATUS_current", "current (int16)")
-f.SMART_BATTERY_STATUS_temperature = ProtoField.int16("mavlink_proto.SMART_BATTERY_STATUS_temperature", "temperature (int16)")
-f.SMART_BATTERY_STATUS_fault_bitmask = ProtoField.int32("mavlink_proto.SMART_BATTERY_STATUS_fault_bitmask", "fault_bitmask (int32)")
-f.SMART_BATTERY_STATUS_time_remaining = ProtoField.int32("mavlink_proto.SMART_BATTERY_STATUS_time_remaining", "time_remaining (int32)")
-f.SMART_BATTERY_STATUS_cell_offset = ProtoField.uint16("mavlink_proto.SMART_BATTERY_STATUS_cell_offset", "cell_offset (uint16)")
-f.SMART_BATTERY_STATUS_voltages_0 = ProtoField.uint16("mavlink_proto.SMART_BATTERY_STATUS_voltages_0", "voltages[0] (uint16)")
-f.SMART_BATTERY_STATUS_voltages_1 = ProtoField.uint16("mavlink_proto.SMART_BATTERY_STATUS_voltages_1", "voltages[1] (uint16)")
-f.SMART_BATTERY_STATUS_voltages_2 = ProtoField.uint16("mavlink_proto.SMART_BATTERY_STATUS_voltages_2", "voltages[2] (uint16)")
-f.SMART_BATTERY_STATUS_voltages_3 = ProtoField.uint16("mavlink_proto.SMART_BATTERY_STATUS_voltages_3", "voltages[3] (uint16)")
-f.SMART_BATTERY_STATUS_voltages_4 = ProtoField.uint16("mavlink_proto.SMART_BATTERY_STATUS_voltages_4", "voltages[4] (uint16)")
-f.SMART_BATTERY_STATUS_voltages_5 = ProtoField.uint16("mavlink_proto.SMART_BATTERY_STATUS_voltages_5", "voltages[5] (uint16)")
-f.SMART_BATTERY_STATUS_voltages_6 = ProtoField.uint16("mavlink_proto.SMART_BATTERY_STATUS_voltages_6", "voltages[6] (uint16)")
-f.SMART_BATTERY_STATUS_voltages_7 = ProtoField.uint16("mavlink_proto.SMART_BATTERY_STATUS_voltages_7", "voltages[7] (uint16)")
-f.SMART_BATTERY_STATUS_voltages_8 = ProtoField.uint16("mavlink_proto.SMART_BATTERY_STATUS_voltages_8", "voltages[8] (uint16)")
-f.SMART_BATTERY_STATUS_voltages_9 = ProtoField.uint16("mavlink_proto.SMART_BATTERY_STATUS_voltages_9", "voltages[9] (uint16)")
-f.SMART_BATTERY_STATUS_voltages_10 = ProtoField.uint16("mavlink_proto.SMART_BATTERY_STATUS_voltages_10", "voltages[10] (uint16)")
-f.SMART_BATTERY_STATUS_voltages_11 = ProtoField.uint16("mavlink_proto.SMART_BATTERY_STATUS_voltages_11", "voltages[11] (uint16)")
-f.SMART_BATTERY_STATUS_voltages_12 = ProtoField.uint16("mavlink_proto.SMART_BATTERY_STATUS_voltages_12", "voltages[12] (uint16)")
-f.SMART_BATTERY_STATUS_voltages_13 = ProtoField.uint16("mavlink_proto.SMART_BATTERY_STATUS_voltages_13", "voltages[13] (uint16)")
-f.SMART_BATTERY_STATUS_voltages_14 = ProtoField.uint16("mavlink_proto.SMART_BATTERY_STATUS_voltages_14", "voltages[14] (uint16)")
-f.SMART_BATTERY_STATUS_voltages_15 = ProtoField.uint16("mavlink_proto.SMART_BATTERY_STATUS_voltages_15", "voltages[15] (uint16)")
+f.SMART_BATTERY_INFO_charging_maximum_voltage = ProtoField.uint16("mavlink_proto.SMART_BATTERY_INFO_charging_maximum_voltage", "charging_maximum_voltage (uint16)")
+f.SMART_BATTERY_INFO_cells_in_series = ProtoField.uint8("mavlink_proto.SMART_BATTERY_INFO_cells_in_series", "cells_in_series (uint8)")
+f.SMART_BATTERY_INFO_discharge_maximum_current = ProtoField.uint32("mavlink_proto.SMART_BATTERY_INFO_discharge_maximum_current", "discharge_maximum_current (uint32)")
+f.SMART_BATTERY_INFO_discharge_maximum_burst_current = ProtoField.uint32("mavlink_proto.SMART_BATTERY_INFO_discharge_maximum_burst_current", "discharge_maximum_burst_current (uint32)")
+f.SMART_BATTERY_INFO_manufacture_date = ProtoField.string("mavlink_proto.SMART_BATTERY_INFO_manufacture_date", "manufacture_date (string)")
 
 f.GENERATOR_STATUS_status = ProtoField.uint64("mavlink_proto.GENERATOR_STATUS_status", "status (uint64)")
 f.GENERATOR_STATUS_generator_speed = ProtoField.uint16("mavlink_proto.GENERATOR_STATUS_generator_speed", "generator_speed (uint16)")
@@ -4740,6 +4832,8 @@ f.GENERATOR_STATUS_bus_voltage = ProtoField.float("mavlink_proto.GENERATOR_STATU
 f.GENERATOR_STATUS_rectifier_temperature = ProtoField.int16("mavlink_proto.GENERATOR_STATUS_rectifier_temperature", "rectifier_temperature (int16)")
 f.GENERATOR_STATUS_bat_current_setpoint = ProtoField.float("mavlink_proto.GENERATOR_STATUS_bat_current_setpoint", "bat_current_setpoint (float)")
 f.GENERATOR_STATUS_generator_temperature = ProtoField.int16("mavlink_proto.GENERATOR_STATUS_generator_temperature", "generator_temperature (int16)")
+f.GENERATOR_STATUS_runtime = ProtoField.uint32("mavlink_proto.GENERATOR_STATUS_runtime", "runtime (uint32)")
+f.GENERATOR_STATUS_time_until_maintenance = ProtoField.int32("mavlink_proto.GENERATOR_STATUS_time_until_maintenance", "time_until_maintenance (int32)")
 
 f.ACTUATOR_OUTPUT_STATUS_time_usec = ProtoField.uint64("mavlink_proto.ACTUATOR_OUTPUT_STATUS_time_usec", "time_usec (uint64)")
 f.ACTUATOR_OUTPUT_STATUS_active = ProtoField.uint32("mavlink_proto.ACTUATOR_OUTPUT_STATUS_active", "active (uint32)")
@@ -5009,75 +5103,10 @@ f.ONBOARD_COMPUTER_STATUS_link_rx_max_4 = ProtoField.uint32("mavlink_proto.ONBOA
 f.ONBOARD_COMPUTER_STATUS_link_rx_max_5 = ProtoField.uint32("mavlink_proto.ONBOARD_COMPUTER_STATUS_link_rx_max_5", "link_rx_max[5] (uint32)")
 
 f.COMPONENT_INFORMATION_time_boot_ms = ProtoField.uint32("mavlink_proto.COMPONENT_INFORMATION_time_boot_ms", "time_boot_ms (uint32)")
-f.COMPONENT_INFORMATION_vendor_name_0 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_0", "vendor_name[0] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_1 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_1", "vendor_name[1] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_2 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_2", "vendor_name[2] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_3 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_3", "vendor_name[3] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_4 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_4", "vendor_name[4] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_5 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_5", "vendor_name[5] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_6 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_6", "vendor_name[6] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_7 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_7", "vendor_name[7] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_8 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_8", "vendor_name[8] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_9 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_9", "vendor_name[9] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_10 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_10", "vendor_name[10] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_11 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_11", "vendor_name[11] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_12 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_12", "vendor_name[12] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_13 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_13", "vendor_name[13] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_14 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_14", "vendor_name[14] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_15 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_15", "vendor_name[15] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_16 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_16", "vendor_name[16] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_17 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_17", "vendor_name[17] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_18 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_18", "vendor_name[18] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_19 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_19", "vendor_name[19] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_20 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_20", "vendor_name[20] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_21 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_21", "vendor_name[21] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_22 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_22", "vendor_name[22] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_23 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_23", "vendor_name[23] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_24 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_24", "vendor_name[24] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_25 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_25", "vendor_name[25] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_26 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_26", "vendor_name[26] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_27 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_27", "vendor_name[27] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_28 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_28", "vendor_name[28] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_29 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_29", "vendor_name[29] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_30 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_30", "vendor_name[30] (uint8)")
-f.COMPONENT_INFORMATION_vendor_name_31 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_vendor_name_31", "vendor_name[31] (uint8)")
-f.COMPONENT_INFORMATION_model_name_0 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_0", "model_name[0] (uint8)")
-f.COMPONENT_INFORMATION_model_name_1 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_1", "model_name[1] (uint8)")
-f.COMPONENT_INFORMATION_model_name_2 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_2", "model_name[2] (uint8)")
-f.COMPONENT_INFORMATION_model_name_3 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_3", "model_name[3] (uint8)")
-f.COMPONENT_INFORMATION_model_name_4 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_4", "model_name[4] (uint8)")
-f.COMPONENT_INFORMATION_model_name_5 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_5", "model_name[5] (uint8)")
-f.COMPONENT_INFORMATION_model_name_6 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_6", "model_name[6] (uint8)")
-f.COMPONENT_INFORMATION_model_name_7 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_7", "model_name[7] (uint8)")
-f.COMPONENT_INFORMATION_model_name_8 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_8", "model_name[8] (uint8)")
-f.COMPONENT_INFORMATION_model_name_9 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_9", "model_name[9] (uint8)")
-f.COMPONENT_INFORMATION_model_name_10 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_10", "model_name[10] (uint8)")
-f.COMPONENT_INFORMATION_model_name_11 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_11", "model_name[11] (uint8)")
-f.COMPONENT_INFORMATION_model_name_12 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_12", "model_name[12] (uint8)")
-f.COMPONENT_INFORMATION_model_name_13 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_13", "model_name[13] (uint8)")
-f.COMPONENT_INFORMATION_model_name_14 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_14", "model_name[14] (uint8)")
-f.COMPONENT_INFORMATION_model_name_15 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_15", "model_name[15] (uint8)")
-f.COMPONENT_INFORMATION_model_name_16 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_16", "model_name[16] (uint8)")
-f.COMPONENT_INFORMATION_model_name_17 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_17", "model_name[17] (uint8)")
-f.COMPONENT_INFORMATION_model_name_18 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_18", "model_name[18] (uint8)")
-f.COMPONENT_INFORMATION_model_name_19 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_19", "model_name[19] (uint8)")
-f.COMPONENT_INFORMATION_model_name_20 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_20", "model_name[20] (uint8)")
-f.COMPONENT_INFORMATION_model_name_21 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_21", "model_name[21] (uint8)")
-f.COMPONENT_INFORMATION_model_name_22 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_22", "model_name[22] (uint8)")
-f.COMPONENT_INFORMATION_model_name_23 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_23", "model_name[23] (uint8)")
-f.COMPONENT_INFORMATION_model_name_24 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_24", "model_name[24] (uint8)")
-f.COMPONENT_INFORMATION_model_name_25 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_25", "model_name[25] (uint8)")
-f.COMPONENT_INFORMATION_model_name_26 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_26", "model_name[26] (uint8)")
-f.COMPONENT_INFORMATION_model_name_27 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_27", "model_name[27] (uint8)")
-f.COMPONENT_INFORMATION_model_name_28 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_28", "model_name[28] (uint8)")
-f.COMPONENT_INFORMATION_model_name_29 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_29", "model_name[29] (uint8)")
-f.COMPONENT_INFORMATION_model_name_30 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_30", "model_name[30] (uint8)")
-f.COMPONENT_INFORMATION_model_name_31 = ProtoField.uint8("mavlink_proto.COMPONENT_INFORMATION_model_name_31", "model_name[31] (uint8)")
-f.COMPONENT_INFORMATION_firmware_version = ProtoField.uint32("mavlink_proto.COMPONENT_INFORMATION_firmware_version", "firmware_version (uint32)")
-f.COMPONENT_INFORMATION_hardware_version = ProtoField.uint32("mavlink_proto.COMPONENT_INFORMATION_hardware_version", "hardware_version (uint32)")
-f.COMPONENT_INFORMATION_capability_flags = ProtoField.uint32("mavlink_proto.COMPONENT_INFORMATION_capability_flags", "capability_flags (uint32)")
-f.COMPONENT_INFORMATION_component_definition_version = ProtoField.uint16("mavlink_proto.COMPONENT_INFORMATION_component_definition_version", "component_definition_version (uint16)")
-f.COMPONENT_INFORMATION_component_definition_uri = ProtoField.string("mavlink_proto.COMPONENT_INFORMATION_component_definition_uri", "component_definition_uri (string)")
+f.COMPONENT_INFORMATION_general_metadata_file_crc = ProtoField.uint32("mavlink_proto.COMPONENT_INFORMATION_general_metadata_file_crc", "general_metadata_file_crc (uint32)")
+f.COMPONENT_INFORMATION_general_metadata_uri = ProtoField.string("mavlink_proto.COMPONENT_INFORMATION_general_metadata_uri", "general_metadata_uri (string)")
+f.COMPONENT_INFORMATION_peripherals_metadata_file_crc = ProtoField.uint32("mavlink_proto.COMPONENT_INFORMATION_peripherals_metadata_file_crc", "peripherals_metadata_file_crc (uint32)")
+f.COMPONENT_INFORMATION_peripherals_metadata_uri = ProtoField.string("mavlink_proto.COMPONENT_INFORMATION_peripherals_metadata_uri", "peripherals_metadata_uri (string)")
 
 f.PLAY_TUNE_V2_target_system = ProtoField.uint8("mavlink_proto.PLAY_TUNE_V2_target_system", "target_system (uint8)")
 f.PLAY_TUNE_V2_target_component = ProtoField.uint8("mavlink_proto.PLAY_TUNE_V2_target_component", "target_component (uint8)")
@@ -5087,6 +5116,67 @@ f.PLAY_TUNE_V2_tune = ProtoField.string("mavlink_proto.PLAY_TUNE_V2_tune", "tune
 f.SUPPORTED_TUNES_target_system = ProtoField.uint8("mavlink_proto.SUPPORTED_TUNES_target_system", "target_system (uint8)")
 f.SUPPORTED_TUNES_target_component = ProtoField.uint8("mavlink_proto.SUPPORTED_TUNES_target_component", "target_component (uint8)")
 f.SUPPORTED_TUNES_format = ProtoField.uint32("mavlink_proto.SUPPORTED_TUNES_format", "format (uint32)")
+
+f.EVENT_destination_component = ProtoField.uint8("mavlink_proto.EVENT_destination_component", "destination_component (uint8)")
+f.EVENT_destination_system = ProtoField.uint8("mavlink_proto.EVENT_destination_system", "destination_system (uint8)")
+f.EVENT_id = ProtoField.uint32("mavlink_proto.EVENT_id", "id (uint32)")
+f.EVENT_event_time_boot_ms = ProtoField.uint32("mavlink_proto.EVENT_event_time_boot_ms", "event_time_boot_ms (uint32)")
+f.EVENT_sequence = ProtoField.uint16("mavlink_proto.EVENT_sequence", "sequence (uint16)")
+f.EVENT_log_levels = ProtoField.uint8("mavlink_proto.EVENT_log_levels", "log_levels (uint8)")
+f.EVENT_arguments_0 = ProtoField.uint8("mavlink_proto.EVENT_arguments_0", "arguments[0] (uint8)")
+f.EVENT_arguments_1 = ProtoField.uint8("mavlink_proto.EVENT_arguments_1", "arguments[1] (uint8)")
+f.EVENT_arguments_2 = ProtoField.uint8("mavlink_proto.EVENT_arguments_2", "arguments[2] (uint8)")
+f.EVENT_arguments_3 = ProtoField.uint8("mavlink_proto.EVENT_arguments_3", "arguments[3] (uint8)")
+f.EVENT_arguments_4 = ProtoField.uint8("mavlink_proto.EVENT_arguments_4", "arguments[4] (uint8)")
+f.EVENT_arguments_5 = ProtoField.uint8("mavlink_proto.EVENT_arguments_5", "arguments[5] (uint8)")
+f.EVENT_arguments_6 = ProtoField.uint8("mavlink_proto.EVENT_arguments_6", "arguments[6] (uint8)")
+f.EVENT_arguments_7 = ProtoField.uint8("mavlink_proto.EVENT_arguments_7", "arguments[7] (uint8)")
+f.EVENT_arguments_8 = ProtoField.uint8("mavlink_proto.EVENT_arguments_8", "arguments[8] (uint8)")
+f.EVENT_arguments_9 = ProtoField.uint8("mavlink_proto.EVENT_arguments_9", "arguments[9] (uint8)")
+f.EVENT_arguments_10 = ProtoField.uint8("mavlink_proto.EVENT_arguments_10", "arguments[10] (uint8)")
+f.EVENT_arguments_11 = ProtoField.uint8("mavlink_proto.EVENT_arguments_11", "arguments[11] (uint8)")
+f.EVENT_arguments_12 = ProtoField.uint8("mavlink_proto.EVENT_arguments_12", "arguments[12] (uint8)")
+f.EVENT_arguments_13 = ProtoField.uint8("mavlink_proto.EVENT_arguments_13", "arguments[13] (uint8)")
+f.EVENT_arguments_14 = ProtoField.uint8("mavlink_proto.EVENT_arguments_14", "arguments[14] (uint8)")
+f.EVENT_arguments_15 = ProtoField.uint8("mavlink_proto.EVENT_arguments_15", "arguments[15] (uint8)")
+f.EVENT_arguments_16 = ProtoField.uint8("mavlink_proto.EVENT_arguments_16", "arguments[16] (uint8)")
+f.EVENT_arguments_17 = ProtoField.uint8("mavlink_proto.EVENT_arguments_17", "arguments[17] (uint8)")
+f.EVENT_arguments_18 = ProtoField.uint8("mavlink_proto.EVENT_arguments_18", "arguments[18] (uint8)")
+f.EVENT_arguments_19 = ProtoField.uint8("mavlink_proto.EVENT_arguments_19", "arguments[19] (uint8)")
+f.EVENT_arguments_20 = ProtoField.uint8("mavlink_proto.EVENT_arguments_20", "arguments[20] (uint8)")
+f.EVENT_arguments_21 = ProtoField.uint8("mavlink_proto.EVENT_arguments_21", "arguments[21] (uint8)")
+f.EVENT_arguments_22 = ProtoField.uint8("mavlink_proto.EVENT_arguments_22", "arguments[22] (uint8)")
+f.EVENT_arguments_23 = ProtoField.uint8("mavlink_proto.EVENT_arguments_23", "arguments[23] (uint8)")
+f.EVENT_arguments_24 = ProtoField.uint8("mavlink_proto.EVENT_arguments_24", "arguments[24] (uint8)")
+f.EVENT_arguments_25 = ProtoField.uint8("mavlink_proto.EVENT_arguments_25", "arguments[25] (uint8)")
+f.EVENT_arguments_26 = ProtoField.uint8("mavlink_proto.EVENT_arguments_26", "arguments[26] (uint8)")
+f.EVENT_arguments_27 = ProtoField.uint8("mavlink_proto.EVENT_arguments_27", "arguments[27] (uint8)")
+f.EVENT_arguments_28 = ProtoField.uint8("mavlink_proto.EVENT_arguments_28", "arguments[28] (uint8)")
+f.EVENT_arguments_29 = ProtoField.uint8("mavlink_proto.EVENT_arguments_29", "arguments[29] (uint8)")
+f.EVENT_arguments_30 = ProtoField.uint8("mavlink_proto.EVENT_arguments_30", "arguments[30] (uint8)")
+f.EVENT_arguments_31 = ProtoField.uint8("mavlink_proto.EVENT_arguments_31", "arguments[31] (uint8)")
+f.EVENT_arguments_32 = ProtoField.uint8("mavlink_proto.EVENT_arguments_32", "arguments[32] (uint8)")
+f.EVENT_arguments_33 = ProtoField.uint8("mavlink_proto.EVENT_arguments_33", "arguments[33] (uint8)")
+f.EVENT_arguments_34 = ProtoField.uint8("mavlink_proto.EVENT_arguments_34", "arguments[34] (uint8)")
+f.EVENT_arguments_35 = ProtoField.uint8("mavlink_proto.EVENT_arguments_35", "arguments[35] (uint8)")
+f.EVENT_arguments_36 = ProtoField.uint8("mavlink_proto.EVENT_arguments_36", "arguments[36] (uint8)")
+f.EVENT_arguments_37 = ProtoField.uint8("mavlink_proto.EVENT_arguments_37", "arguments[37] (uint8)")
+f.EVENT_arguments_38 = ProtoField.uint8("mavlink_proto.EVENT_arguments_38", "arguments[38] (uint8)")
+f.EVENT_arguments_39 = ProtoField.uint8("mavlink_proto.EVENT_arguments_39", "arguments[39] (uint8)")
+
+f.CURRENT_EVENT_SEQUENCE_sequence = ProtoField.uint16("mavlink_proto.CURRENT_EVENT_SEQUENCE_sequence", "sequence (uint16)")
+f.CURRENT_EVENT_SEQUENCE_flags = ProtoField.uint8("mavlink_proto.CURRENT_EVENT_SEQUENCE_flags", "flags (uint8)")
+
+f.REQUEST_EVENT_target_system = ProtoField.uint8("mavlink_proto.REQUEST_EVENT_target_system", "target_system (uint8)")
+f.REQUEST_EVENT_target_component = ProtoField.uint8("mavlink_proto.REQUEST_EVENT_target_component", "target_component (uint8)")
+f.REQUEST_EVENT_first_sequence = ProtoField.uint16("mavlink_proto.REQUEST_EVENT_first_sequence", "first_sequence (uint16)")
+f.REQUEST_EVENT_last_sequence = ProtoField.uint16("mavlink_proto.REQUEST_EVENT_last_sequence", "last_sequence (uint16)")
+
+f.RESPONSE_EVENT_ERROR_target_system = ProtoField.uint8("mavlink_proto.RESPONSE_EVENT_ERROR_target_system", "target_system (uint8)")
+f.RESPONSE_EVENT_ERROR_target_component = ProtoField.uint8("mavlink_proto.RESPONSE_EVENT_ERROR_target_component", "target_component (uint8)")
+f.RESPONSE_EVENT_ERROR_sequence = ProtoField.uint16("mavlink_proto.RESPONSE_EVENT_ERROR_sequence", "sequence (uint16)")
+f.RESPONSE_EVENT_ERROR_sequence_oldest_available = ProtoField.uint16("mavlink_proto.RESPONSE_EVENT_ERROR_sequence_oldest_available", "sequence_oldest_available (uint16)")
+f.RESPONSE_EVENT_ERROR_reason = ProtoField.uint8("mavlink_proto.RESPONSE_EVENT_ERROR_reason", "reason (uint8)")
 
 f.WHEEL_DISTANCE_time_usec = ProtoField.uint64("mavlink_proto.WHEEL_DISTANCE_time_usec", "time_usec (uint64)")
 f.WHEEL_DISTANCE_count = ProtoField.uint8("mavlink_proto.WHEEL_DISTANCE_count", "count (uint8)")
@@ -5106,6 +5196,15 @@ f.WHEEL_DISTANCE_distance_12 = ProtoField.double("mavlink_proto.WHEEL_DISTANCE_d
 f.WHEEL_DISTANCE_distance_13 = ProtoField.double("mavlink_proto.WHEEL_DISTANCE_distance_13", "distance[13] (double)")
 f.WHEEL_DISTANCE_distance_14 = ProtoField.double("mavlink_proto.WHEEL_DISTANCE_distance_14", "distance[14] (double)")
 f.WHEEL_DISTANCE_distance_15 = ProtoField.double("mavlink_proto.WHEEL_DISTANCE_distance_15", "distance[15] (double)")
+
+f.WINCH_STATUS_time_usec = ProtoField.uint64("mavlink_proto.WINCH_STATUS_time_usec", "time_usec (uint64)")
+f.WINCH_STATUS_line_length = ProtoField.float("mavlink_proto.WINCH_STATUS_line_length", "line_length (float)")
+f.WINCH_STATUS_speed = ProtoField.float("mavlink_proto.WINCH_STATUS_speed", "speed (float)")
+f.WINCH_STATUS_tension = ProtoField.float("mavlink_proto.WINCH_STATUS_tension", "tension (float)")
+f.WINCH_STATUS_voltage = ProtoField.float("mavlink_proto.WINCH_STATUS_voltage", "voltage (float)")
+f.WINCH_STATUS_current = ProtoField.float("mavlink_proto.WINCH_STATUS_current", "current (float)")
+f.WINCH_STATUS_temperature = ProtoField.int16("mavlink_proto.WINCH_STATUS_temperature", "temperature (int16)")
+f.WINCH_STATUS_status = ProtoField.uint32("mavlink_proto.WINCH_STATUS_status", "status (uint32)")
 
 f.OPEN_DRONE_ID_BASIC_ID_target_system = ProtoField.uint8("mavlink_proto.OPEN_DRONE_ID_BASIC_ID_target_system", "target_system (uint8)")
 f.OPEN_DRONE_ID_BASIC_ID_target_component = ProtoField.uint8("mavlink_proto.OPEN_DRONE_ID_BASIC_ID_target_component", "target_component (uint8)")
@@ -5289,13 +5388,16 @@ f.OPEN_DRONE_ID_SYSTEM_id_or_mac_16 = ProtoField.uint8("mavlink_proto.OPEN_DRONE
 f.OPEN_DRONE_ID_SYSTEM_id_or_mac_17 = ProtoField.uint8("mavlink_proto.OPEN_DRONE_ID_SYSTEM_id_or_mac_17", "id_or_mac[17] (uint8)")
 f.OPEN_DRONE_ID_SYSTEM_id_or_mac_18 = ProtoField.uint8("mavlink_proto.OPEN_DRONE_ID_SYSTEM_id_or_mac_18", "id_or_mac[18] (uint8)")
 f.OPEN_DRONE_ID_SYSTEM_id_or_mac_19 = ProtoField.uint8("mavlink_proto.OPEN_DRONE_ID_SYSTEM_id_or_mac_19", "id_or_mac[19] (uint8)")
-f.OPEN_DRONE_ID_SYSTEM_flags = ProtoField.uint8("mavlink_proto.OPEN_DRONE_ID_SYSTEM_flags", "flags (uint8)")
+f.OPEN_DRONE_ID_SYSTEM_operator_location_type = ProtoField.uint8("mavlink_proto.OPEN_DRONE_ID_SYSTEM_operator_location_type", "operator_location_type (uint8)")
+f.OPEN_DRONE_ID_SYSTEM_classification_type = ProtoField.uint8("mavlink_proto.OPEN_DRONE_ID_SYSTEM_classification_type", "classification_type (uint8)")
 f.OPEN_DRONE_ID_SYSTEM_operator_latitude = ProtoField.int32("mavlink_proto.OPEN_DRONE_ID_SYSTEM_operator_latitude", "operator_latitude (int32)")
 f.OPEN_DRONE_ID_SYSTEM_operator_longitude = ProtoField.int32("mavlink_proto.OPEN_DRONE_ID_SYSTEM_operator_longitude", "operator_longitude (int32)")
 f.OPEN_DRONE_ID_SYSTEM_area_count = ProtoField.uint16("mavlink_proto.OPEN_DRONE_ID_SYSTEM_area_count", "area_count (uint16)")
 f.OPEN_DRONE_ID_SYSTEM_area_radius = ProtoField.uint16("mavlink_proto.OPEN_DRONE_ID_SYSTEM_area_radius", "area_radius (uint16)")
 f.OPEN_DRONE_ID_SYSTEM_area_ceiling = ProtoField.float("mavlink_proto.OPEN_DRONE_ID_SYSTEM_area_ceiling", "area_ceiling (float)")
 f.OPEN_DRONE_ID_SYSTEM_area_floor = ProtoField.float("mavlink_proto.OPEN_DRONE_ID_SYSTEM_area_floor", "area_floor (float)")
+f.OPEN_DRONE_ID_SYSTEM_category_eu = ProtoField.uint8("mavlink_proto.OPEN_DRONE_ID_SYSTEM_category_eu", "category_eu (uint8)")
+f.OPEN_DRONE_ID_SYSTEM_class_eu = ProtoField.uint8("mavlink_proto.OPEN_DRONE_ID_SYSTEM_class_eu", "class_eu (uint8)")
 
 f.OPEN_DRONE_ID_OPERATOR_ID_target_system = ProtoField.uint8("mavlink_proto.OPEN_DRONE_ID_OPERATOR_ID_target_system", "target_system (uint8)")
 f.OPEN_DRONE_ID_OPERATOR_ID_target_component = ProtoField.uint8("mavlink_proto.OPEN_DRONE_ID_OPERATOR_ID_target_component", "target_component (uint8)")
@@ -5577,6 +5679,37 @@ f.OPEN_DRONE_ID_MESSAGE_PACK_messages_247 = ProtoField.uint8("mavlink_proto.OPEN
 f.OPEN_DRONE_ID_MESSAGE_PACK_messages_248 = ProtoField.uint8("mavlink_proto.OPEN_DRONE_ID_MESSAGE_PACK_messages_248", "messages[248] (uint8)")
 f.OPEN_DRONE_ID_MESSAGE_PACK_messages_249 = ProtoField.uint8("mavlink_proto.OPEN_DRONE_ID_MESSAGE_PACK_messages_249", "messages[249] (uint8)")
 
+f.HYGROMETER_SENSOR_id = ProtoField.uint8("mavlink_proto.HYGROMETER_SENSOR_id", "id (uint8)")
+f.HYGROMETER_SENSOR_temperature = ProtoField.int16("mavlink_proto.HYGROMETER_SENSOR_temperature", "temperature (int16)")
+f.HYGROMETER_SENSOR_humidity = ProtoField.uint16("mavlink_proto.HYGROMETER_SENSOR_humidity", "humidity (uint16)")
+
+f.HEARTBEAT_type = ProtoField.uint8("mavlink_proto.HEARTBEAT_type", "type (uint8)")
+f.HEARTBEAT_autopilot = ProtoField.uint8("mavlink_proto.HEARTBEAT_autopilot", "autopilot (uint8)")
+f.HEARTBEAT_base_mode = ProtoField.uint8("mavlink_proto.HEARTBEAT_base_mode", "base_mode (uint8)")
+f.HEARTBEAT_custom_mode = ProtoField.uint32("mavlink_proto.HEARTBEAT_custom_mode", "custom_mode (uint32)")
+f.HEARTBEAT_system_status = ProtoField.uint8("mavlink_proto.HEARTBEAT_system_status", "system_status (uint8)")
+f.HEARTBEAT_mavlink_version = ProtoField.uint8("mavlink_proto.HEARTBEAT_mavlink_version", "mavlink_version (uint8)")
+
+f.PROTOCOL_VERSION_version = ProtoField.uint16("mavlink_proto.PROTOCOL_VERSION_version", "version (uint16)")
+f.PROTOCOL_VERSION_min_version = ProtoField.uint16("mavlink_proto.PROTOCOL_VERSION_min_version", "min_version (uint16)")
+f.PROTOCOL_VERSION_max_version = ProtoField.uint16("mavlink_proto.PROTOCOL_VERSION_max_version", "max_version (uint16)")
+f.PROTOCOL_VERSION_spec_version_hash_0 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_spec_version_hash_0", "spec_version_hash[0] (uint8)")
+f.PROTOCOL_VERSION_spec_version_hash_1 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_spec_version_hash_1", "spec_version_hash[1] (uint8)")
+f.PROTOCOL_VERSION_spec_version_hash_2 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_spec_version_hash_2", "spec_version_hash[2] (uint8)")
+f.PROTOCOL_VERSION_spec_version_hash_3 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_spec_version_hash_3", "spec_version_hash[3] (uint8)")
+f.PROTOCOL_VERSION_spec_version_hash_4 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_spec_version_hash_4", "spec_version_hash[4] (uint8)")
+f.PROTOCOL_VERSION_spec_version_hash_5 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_spec_version_hash_5", "spec_version_hash[5] (uint8)")
+f.PROTOCOL_VERSION_spec_version_hash_6 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_spec_version_hash_6", "spec_version_hash[6] (uint8)")
+f.PROTOCOL_VERSION_spec_version_hash_7 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_spec_version_hash_7", "spec_version_hash[7] (uint8)")
+f.PROTOCOL_VERSION_library_version_hash_0 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_library_version_hash_0", "library_version_hash[0] (uint8)")
+f.PROTOCOL_VERSION_library_version_hash_1 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_library_version_hash_1", "library_version_hash[1] (uint8)")
+f.PROTOCOL_VERSION_library_version_hash_2 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_library_version_hash_2", "library_version_hash[2] (uint8)")
+f.PROTOCOL_VERSION_library_version_hash_3 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_library_version_hash_3", "library_version_hash[3] (uint8)")
+f.PROTOCOL_VERSION_library_version_hash_4 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_library_version_hash_4", "library_version_hash[4] (uint8)")
+f.PROTOCOL_VERSION_library_version_hash_5 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_library_version_hash_5", "library_version_hash[5] (uint8)")
+f.PROTOCOL_VERSION_library_version_hash_6 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_library_version_hash_6", "library_version_hash[6] (uint8)")
+f.PROTOCOL_VERSION_library_version_hash_7 = ProtoField.uint8("mavlink_proto.PROTOCOL_VERSION_library_version_hash_7", "library_version_hash[7] (uint8)")
+
 -- dissect payload of message type HIL_GPS_HEADING
 function payload_fns.payload_12916(buffer, tree, msgid, offset, limit)
     local truncated = false
@@ -5773,91 +5906,6 @@ function payload_fns.payload_12916(buffer, tree, msgid, offset, limit)
         truncated = true
     else
         tree:add_le(f.HIL_GPS_HEADING_id, 0)
-        truncated = true
-    end
-    return offset
-end
-
-
--- dissect payload of message type HEARTBEAT
-function payload_fns.payload_0(buffer, tree, msgid, offset, limit)
-    local truncated = false
-    if (truncated) then
-        tree:add_le(f.HEARTBEAT_custom_mode, 0)
-    elseif (offset + 4 <= limit) then
-        tree:add_le(f.HEARTBEAT_custom_mode, buffer(offset, 4))
-        offset = offset + 4
-    elseif (offset < limit) then
-        tree:add_le(f.HEARTBEAT_custom_mode, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.HEARTBEAT_custom_mode, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.HEARTBEAT_type, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.HEARTBEAT_type, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.HEARTBEAT_type, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.HEARTBEAT_type, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.HEARTBEAT_autopilot, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.HEARTBEAT_autopilot, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.HEARTBEAT_autopilot, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.HEARTBEAT_autopilot, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.HEARTBEAT_base_mode, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.HEARTBEAT_base_mode, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.HEARTBEAT_base_mode, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.HEARTBEAT_base_mode, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.HEARTBEAT_system_status, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.HEARTBEAT_system_status, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.HEARTBEAT_system_status, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.HEARTBEAT_system_status, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.HEARTBEAT_mavlink_version, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.HEARTBEAT_mavlink_version, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.HEARTBEAT_mavlink_version, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.HEARTBEAT_mavlink_version, 0)
         truncated = true
     end
     return offset
@@ -6447,6 +6495,91 @@ function payload_fns.payload_11(buffer, tree, msgid, offset, limit)
         truncated = true
     else
         tree:add_le(f.SET_MODE_base_mode, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
+-- dissect payload of message type PARAM_ACK_TRANSACTION
+function payload_fns.payload_19(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.PARAM_ACK_TRANSACTION_param_value, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.PARAM_ACK_TRANSACTION_param_value, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.PARAM_ACK_TRANSACTION_param_value, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PARAM_ACK_TRANSACTION_param_value, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PARAM_ACK_TRANSACTION_target_system, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PARAM_ACK_TRANSACTION_target_system, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PARAM_ACK_TRANSACTION_target_system, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PARAM_ACK_TRANSACTION_target_system, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PARAM_ACK_TRANSACTION_target_component, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PARAM_ACK_TRANSACTION_target_component, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PARAM_ACK_TRANSACTION_target_component, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PARAM_ACK_TRANSACTION_target_component, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PARAM_ACK_TRANSACTION_param_id, 0)
+    elseif (offset + 16 <= limit) then
+        tree:add_le(f.PARAM_ACK_TRANSACTION_param_id, buffer(offset, 16))
+        offset = offset + 16
+    elseif (offset < limit) then
+        tree:add_le(f.PARAM_ACK_TRANSACTION_param_id, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PARAM_ACK_TRANSACTION_param_id, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PARAM_ACK_TRANSACTION_param_type, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PARAM_ACK_TRANSACTION_param_type, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PARAM_ACK_TRANSACTION_param_type, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PARAM_ACK_TRANSACTION_param_type, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PARAM_ACK_TRANSACTION_param_result, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PARAM_ACK_TRANSACTION_param_result, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PARAM_ACK_TRANSACTION_param_result, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PARAM_ACK_TRANSACTION_param_result, 0)
         truncated = true
     end
     return offset
@@ -8662,6 +8795,19 @@ function payload_fns.payload_29(buffer, tree, msgid, offset, limit)
         truncated = true
     else
         tree:add_le(f.SCALED_PRESSURE_temperature, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.SCALED_PRESSURE_temperature_press_diff, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.SCALED_PRESSURE_temperature_press_diff, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.SCALED_PRESSURE_temperature_press_diff, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.SCALED_PRESSURE_temperature_press_diff, 0)
         truncated = true
     end
     return offset
@@ -14115,6 +14261,52 @@ function payload_fns.payload_77(buffer, tree, msgid, offset, limit)
 end
 
 
+-- dissect payload of message type COMMAND_CANCEL
+function payload_fns.payload_80(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.COMMAND_CANCEL_command, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.COMMAND_CANCEL_command, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.COMMAND_CANCEL_command, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.COMMAND_CANCEL_command, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.COMMAND_CANCEL_target_system, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.COMMAND_CANCEL_target_system, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.COMMAND_CANCEL_target_system, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.COMMAND_CANCEL_target_system, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.COMMAND_CANCEL_target_component, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.COMMAND_CANCEL_target_component, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.COMMAND_CANCEL_target_component, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.COMMAND_CANCEL_target_component, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
 -- dissect payload of message type MANUAL_SETPOINT
 function payload_fns.payload_81(buffer, tree, msgid, offset, limit)
     local truncated = false
@@ -14370,6 +14562,45 @@ function payload_fns.payload_82(buffer, tree, msgid, offset, limit)
         truncated = true
     else
         tree:add_le(f.SET_ATTITUDE_TARGET_type_mask, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.SET_ATTITUDE_TARGET_thrust_body_0, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.SET_ATTITUDE_TARGET_thrust_body_0, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.SET_ATTITUDE_TARGET_thrust_body_0, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.SET_ATTITUDE_TARGET_thrust_body_0, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.SET_ATTITUDE_TARGET_thrust_body_1, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.SET_ATTITUDE_TARGET_thrust_body_1, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.SET_ATTITUDE_TARGET_thrust_body_1, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.SET_ATTITUDE_TARGET_thrust_body_1, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.SET_ATTITUDE_TARGET_thrust_body_2, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.SET_ATTITUDE_TARGET_thrust_body_2, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.SET_ATTITUDE_TARGET_thrust_body_2, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.SET_ATTITUDE_TARGET_thrust_body_2, 0)
         truncated = true
     end
     return offset
@@ -18266,6 +18497,19 @@ function payload_fns.payload_107(buffer, tree, msgid, offset, limit)
         truncated = true
     else
         tree:add_le(f.HIL_SENSOR_fields_updated, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.HIL_SENSOR_id, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.HIL_SENSOR_id, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.HIL_SENSOR_id, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.HIL_SENSOR_id, 0)
         truncated = true
     end
     return offset
@@ -22210,6 +22454,19 @@ function payload_fns.payload_113(buffer, tree, msgid, offset, limit)
         tree:add_le(f.HIL_GPS_id, 0)
         truncated = true
     end
+    if (truncated) then
+        tree:add_le(f.HIL_GPS_yaw, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.HIL_GPS_yaw, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.HIL_GPS_yaw, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.HIL_GPS_yaw, 0)
+        truncated = true
+    end
     return offset
 end
 
@@ -25912,6 +26169,71 @@ function payload_fns.payload_124(buffer, tree, msgid, offset, limit)
         truncated = true
     else
         tree:add_le(f.GPS2_RAW_yaw, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GPS2_RAW_alt_ellipsoid, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.GPS2_RAW_alt_ellipsoid, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.GPS2_RAW_alt_ellipsoid, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GPS2_RAW_alt_ellipsoid, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GPS2_RAW_h_acc, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.GPS2_RAW_h_acc, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.GPS2_RAW_h_acc, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GPS2_RAW_h_acc, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GPS2_RAW_v_acc, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.GPS2_RAW_v_acc, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.GPS2_RAW_v_acc, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GPS2_RAW_v_acc, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GPS2_RAW_vel_acc, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.GPS2_RAW_vel_acc, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.GPS2_RAW_vel_acc, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GPS2_RAW_vel_acc, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GPS2_RAW_hdg_acc, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.GPS2_RAW_hdg_acc, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.GPS2_RAW_hdg_acc, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GPS2_RAW_hdg_acc, 0)
         truncated = true
     end
     return offset
@@ -31569,6 +31891,19 @@ function payload_fns.payload_137(buffer, tree, msgid, offset, limit)
         tree:add_le(f.SCALED_PRESSURE2_temperature, 0)
         truncated = true
     end
+    if (truncated) then
+        tree:add_le(f.SCALED_PRESSURE2_temperature_press_diff, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.SCALED_PRESSURE2_temperature_press_diff, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.SCALED_PRESSURE2_temperature_press_diff, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.SCALED_PRESSURE2_temperature_press_diff, 0)
+        truncated = true
+    end
     return offset
 end
 
@@ -35576,6 +35911,19 @@ function payload_fns.payload_143(buffer, tree, msgid, offset, limit)
         tree:add_le(f.SCALED_PRESSURE3_temperature, 0)
         truncated = true
     end
+    if (truncated) then
+        tree:add_le(f.SCALED_PRESSURE3_temperature_press_diff, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.SCALED_PRESSURE3_temperature_press_diff, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.SCALED_PRESSURE3_temperature_press_diff, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.SCALED_PRESSURE3_temperature_press_diff, 0)
+        truncated = true
+    end
     return offset
 end
 
@@ -36453,6 +36801,84 @@ function payload_fns.payload_147(buffer, tree, msgid, offset, limit)
         truncated = true
     else
         tree:add_le(f.BATTERY_STATUS_charge_state, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.BATTERY_STATUS_voltages_ext_0, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.BATTERY_STATUS_voltages_ext_0, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.BATTERY_STATUS_voltages_ext_0, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.BATTERY_STATUS_voltages_ext_0, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.BATTERY_STATUS_voltages_ext_1, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.BATTERY_STATUS_voltages_ext_1, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.BATTERY_STATUS_voltages_ext_1, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.BATTERY_STATUS_voltages_ext_1, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.BATTERY_STATUS_voltages_ext_2, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.BATTERY_STATUS_voltages_ext_2, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.BATTERY_STATUS_voltages_ext_2, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.BATTERY_STATUS_voltages_ext_2, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.BATTERY_STATUS_voltages_ext_3, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.BATTERY_STATUS_voltages_ext_3, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.BATTERY_STATUS_voltages_ext_3, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.BATTERY_STATUS_voltages_ext_3, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.BATTERY_STATUS_mode, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.BATTERY_STATUS_mode, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.BATTERY_STATUS_mode, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.BATTERY_STATUS_mode, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.BATTERY_STATUS_fault_bitmask, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.BATTERY_STATUS_fault_bitmask, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.BATTERY_STATUS_fault_bitmask, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.BATTERY_STATUS_fault_bitmask, 0)
         truncated = true
     end
     return offset
@@ -37410,6 +37836,475 @@ function payload_fns.payload_162(buffer, tree, msgid, offset, limit)
         truncated = true
     else
         tree:add_le(f.FENCE_STATUS_breach_mitigation, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
+-- dissect payload of message type MAG_CAL_REPORT
+function payload_fns.payload_192(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.MAG_CAL_REPORT_fitness, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.MAG_CAL_REPORT_fitness, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.MAG_CAL_REPORT_fitness, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.MAG_CAL_REPORT_fitness, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.MAG_CAL_REPORT_ofs_x, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.MAG_CAL_REPORT_ofs_x, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.MAG_CAL_REPORT_ofs_x, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.MAG_CAL_REPORT_ofs_x, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.MAG_CAL_REPORT_ofs_y, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.MAG_CAL_REPORT_ofs_y, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.MAG_CAL_REPORT_ofs_y, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.MAG_CAL_REPORT_ofs_y, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.MAG_CAL_REPORT_ofs_z, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.MAG_CAL_REPORT_ofs_z, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.MAG_CAL_REPORT_ofs_z, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.MAG_CAL_REPORT_ofs_z, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.MAG_CAL_REPORT_diag_x, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.MAG_CAL_REPORT_diag_x, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.MAG_CAL_REPORT_diag_x, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.MAG_CAL_REPORT_diag_x, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.MAG_CAL_REPORT_diag_y, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.MAG_CAL_REPORT_diag_y, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.MAG_CAL_REPORT_diag_y, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.MAG_CAL_REPORT_diag_y, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.MAG_CAL_REPORT_diag_z, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.MAG_CAL_REPORT_diag_z, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.MAG_CAL_REPORT_diag_z, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.MAG_CAL_REPORT_diag_z, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.MAG_CAL_REPORT_offdiag_x, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.MAG_CAL_REPORT_offdiag_x, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.MAG_CAL_REPORT_offdiag_x, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.MAG_CAL_REPORT_offdiag_x, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.MAG_CAL_REPORT_offdiag_y, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.MAG_CAL_REPORT_offdiag_y, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.MAG_CAL_REPORT_offdiag_y, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.MAG_CAL_REPORT_offdiag_y, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.MAG_CAL_REPORT_offdiag_z, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.MAG_CAL_REPORT_offdiag_z, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.MAG_CAL_REPORT_offdiag_z, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.MAG_CAL_REPORT_offdiag_z, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.MAG_CAL_REPORT_compass_id, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.MAG_CAL_REPORT_compass_id, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.MAG_CAL_REPORT_compass_id, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.MAG_CAL_REPORT_compass_id, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.MAG_CAL_REPORT_cal_mask, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.MAG_CAL_REPORT_cal_mask, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.MAG_CAL_REPORT_cal_mask, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.MAG_CAL_REPORT_cal_mask, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.MAG_CAL_REPORT_cal_status, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.MAG_CAL_REPORT_cal_status, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.MAG_CAL_REPORT_cal_status, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.MAG_CAL_REPORT_cal_status, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.MAG_CAL_REPORT_autosaved, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.MAG_CAL_REPORT_autosaved, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.MAG_CAL_REPORT_autosaved, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.MAG_CAL_REPORT_autosaved, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.MAG_CAL_REPORT_orientation_confidence, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.MAG_CAL_REPORT_orientation_confidence, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.MAG_CAL_REPORT_orientation_confidence, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.MAG_CAL_REPORT_orientation_confidence, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.MAG_CAL_REPORT_old_orientation, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.MAG_CAL_REPORT_old_orientation, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.MAG_CAL_REPORT_old_orientation, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.MAG_CAL_REPORT_old_orientation, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.MAG_CAL_REPORT_new_orientation, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.MAG_CAL_REPORT_new_orientation, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.MAG_CAL_REPORT_new_orientation, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.MAG_CAL_REPORT_new_orientation, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.MAG_CAL_REPORT_scale_factor, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.MAG_CAL_REPORT_scale_factor, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.MAG_CAL_REPORT_scale_factor, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.MAG_CAL_REPORT_scale_factor, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
+-- dissect payload of message type EFI_STATUS
+function payload_fns.payload_225(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.EFI_STATUS_ecu_index, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.EFI_STATUS_ecu_index, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.EFI_STATUS_ecu_index, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EFI_STATUS_ecu_index, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EFI_STATUS_rpm, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.EFI_STATUS_rpm, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.EFI_STATUS_rpm, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EFI_STATUS_rpm, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EFI_STATUS_fuel_consumed, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.EFI_STATUS_fuel_consumed, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.EFI_STATUS_fuel_consumed, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EFI_STATUS_fuel_consumed, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EFI_STATUS_fuel_flow, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.EFI_STATUS_fuel_flow, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.EFI_STATUS_fuel_flow, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EFI_STATUS_fuel_flow, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EFI_STATUS_engine_load, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.EFI_STATUS_engine_load, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.EFI_STATUS_engine_load, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EFI_STATUS_engine_load, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EFI_STATUS_throttle_position, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.EFI_STATUS_throttle_position, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.EFI_STATUS_throttle_position, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EFI_STATUS_throttle_position, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EFI_STATUS_spark_dwell_time, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.EFI_STATUS_spark_dwell_time, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.EFI_STATUS_spark_dwell_time, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EFI_STATUS_spark_dwell_time, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EFI_STATUS_barometric_pressure, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.EFI_STATUS_barometric_pressure, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.EFI_STATUS_barometric_pressure, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EFI_STATUS_barometric_pressure, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EFI_STATUS_intake_manifold_pressure, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.EFI_STATUS_intake_manifold_pressure, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.EFI_STATUS_intake_manifold_pressure, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EFI_STATUS_intake_manifold_pressure, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EFI_STATUS_intake_manifold_temperature, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.EFI_STATUS_intake_manifold_temperature, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.EFI_STATUS_intake_manifold_temperature, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EFI_STATUS_intake_manifold_temperature, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EFI_STATUS_cylinder_head_temperature, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.EFI_STATUS_cylinder_head_temperature, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.EFI_STATUS_cylinder_head_temperature, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EFI_STATUS_cylinder_head_temperature, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EFI_STATUS_ignition_timing, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.EFI_STATUS_ignition_timing, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.EFI_STATUS_ignition_timing, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EFI_STATUS_ignition_timing, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EFI_STATUS_injection_time, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.EFI_STATUS_injection_time, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.EFI_STATUS_injection_time, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EFI_STATUS_injection_time, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EFI_STATUS_exhaust_gas_temperature, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.EFI_STATUS_exhaust_gas_temperature, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.EFI_STATUS_exhaust_gas_temperature, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EFI_STATUS_exhaust_gas_temperature, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EFI_STATUS_throttle_out, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.EFI_STATUS_throttle_out, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.EFI_STATUS_throttle_out, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EFI_STATUS_throttle_out, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EFI_STATUS_pt_compensation, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.EFI_STATUS_pt_compensation, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.EFI_STATUS_pt_compensation, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EFI_STATUS_pt_compensation, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EFI_STATUS_health, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EFI_STATUS_health, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EFI_STATUS_health, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EFI_STATUS_health, 0)
         truncated = true
     end
     return offset
@@ -47565,6 +48460,32 @@ function payload_fns.payload_261(buffer, tree, msgid, offset, limit)
         tree:add_le(f.STORAGE_INFORMATION_status, 0)
         truncated = true
     end
+    if (truncated) then
+        tree:add_le(f.STORAGE_INFORMATION_type, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.STORAGE_INFORMATION_type, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.STORAGE_INFORMATION_type, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.STORAGE_INFORMATION_type, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.STORAGE_INFORMATION_name, 0)
+    elseif (offset + 32 <= limit) then
+        tree:add_le(f.STORAGE_INFORMATION_name, buffer(offset, 32))
+        offset = offset + 32
+    elseif (offset < limit) then
+        tree:add_le(f.STORAGE_INFORMATION_name, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.STORAGE_INFORMATION_name, 0)
+        truncated = true
+    end
     return offset
 end
 
@@ -54925,6 +55846,495 @@ function payload_fns.payload_270(buffer, tree, msgid, offset, limit)
 end
 
 
+-- dissect payload of message type CAMERA_FOV_STATUS
+function payload_fns.payload_271(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.CAMERA_FOV_STATUS_time_boot_ms, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_time_boot_ms, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_time_boot_ms, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_FOV_STATUS_time_boot_ms, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_FOV_STATUS_lat_camera, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_lat_camera, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_lat_camera, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_FOV_STATUS_lat_camera, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_FOV_STATUS_lon_camera, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_lon_camera, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_lon_camera, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_FOV_STATUS_lon_camera, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_FOV_STATUS_alt_camera, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_alt_camera, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_alt_camera, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_FOV_STATUS_alt_camera, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_FOV_STATUS_lat_image, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_lat_image, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_lat_image, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_FOV_STATUS_lat_image, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_FOV_STATUS_lon_image, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_lon_image, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_lon_image, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_FOV_STATUS_lon_image, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_FOV_STATUS_alt_image, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_alt_image, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_alt_image, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_FOV_STATUS_alt_image, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_FOV_STATUS_q_0, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_q_0, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_q_0, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_FOV_STATUS_q_0, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_FOV_STATUS_q_1, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_q_1, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_q_1, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_FOV_STATUS_q_1, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_FOV_STATUS_q_2, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_q_2, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_q_2, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_FOV_STATUS_q_2, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_FOV_STATUS_q_3, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_q_3, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_q_3, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_FOV_STATUS_q_3, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_FOV_STATUS_hfov, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_hfov, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_hfov, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_FOV_STATUS_hfov, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_FOV_STATUS_vfov, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_vfov, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_FOV_STATUS_vfov, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_FOV_STATUS_vfov, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
+-- dissect payload of message type CAMERA_TRACKING_IMAGE_STATUS
+function payload_fns.payload_275(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_point_x, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_point_x, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_point_x, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_point_x, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_point_y, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_point_y, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_point_y, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_point_y, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_radius, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_radius, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_radius, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_radius, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_rec_top_x, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_rec_top_x, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_rec_top_x, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_rec_top_x, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_rec_top_y, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_rec_top_y, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_rec_top_y, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_rec_top_y, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_rec_bottom_x, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_rec_bottom_x, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_rec_bottom_x, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_rec_bottom_x, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_rec_bottom_y, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_rec_bottom_y, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_rec_bottom_y, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_rec_bottom_y, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_tracking_status, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_tracking_status, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_tracking_status, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_tracking_status, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_tracking_mode, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_tracking_mode, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_tracking_mode, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_tracking_mode, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_target_data, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_target_data, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_target_data, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_IMAGE_STATUS_target_data, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
+-- dissect payload of message type CAMERA_TRACKING_GEO_STATUS
+function payload_fns.payload_276(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_lat, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_lat, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_lat, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_lat, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_lon, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_lon, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_lon, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_lon, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_alt, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_alt, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_alt, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_alt, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_h_acc, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_h_acc, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_h_acc, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_h_acc, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_v_acc, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_v_acc, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_v_acc, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_v_acc, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_vel_n, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_vel_n, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_vel_n, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_vel_n, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_vel_e, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_vel_e, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_vel_e, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_vel_e, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_vel_d, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_vel_d, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_vel_d, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_vel_d, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_vel_acc, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_vel_acc, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_vel_acc, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_vel_acc, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_dist, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_dist, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_dist, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_dist, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_hdg, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_hdg, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_hdg, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_hdg, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_hdg_acc, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_hdg_acc, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_hdg_acc, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_hdg_acc, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_tracking_status, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_tracking_status, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_tracking_status, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CAMERA_TRACKING_GEO_STATUS_tracking_status, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
 -- dissect payload of message type GIMBAL_MANAGER_INFORMATION
 function payload_fns.payload_280(buffer, tree, msgid, offset, limit)
     local truncated = false
@@ -54955,81 +56365,81 @@ function payload_fns.payload_280(buffer, tree, msgid, offset, limit)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_tilt_max, 0)
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_roll_min, 0)
     elseif (offset + 4 <= limit) then
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_tilt_max, buffer(offset, 4))
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_roll_min, buffer(offset, 4))
         offset = offset + 4
     elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_tilt_max, buffer(offset, limit - offset))
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_roll_min, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_tilt_max, 0)
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_roll_min, 0)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_tilt_min, 0)
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_roll_max, 0)
     elseif (offset + 4 <= limit) then
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_tilt_min, buffer(offset, 4))
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_roll_max, buffer(offset, 4))
         offset = offset + 4
     elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_tilt_min, buffer(offset, limit - offset))
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_roll_max, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_tilt_min, 0)
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_roll_max, 0)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_tilt_rate_max, 0)
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pitch_min, 0)
     elseif (offset + 4 <= limit) then
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_tilt_rate_max, buffer(offset, 4))
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pitch_min, buffer(offset, 4))
         offset = offset + 4
     elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_tilt_rate_max, buffer(offset, limit - offset))
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pitch_min, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_tilt_rate_max, 0)
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pitch_min, 0)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pan_max, 0)
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pitch_max, 0)
     elseif (offset + 4 <= limit) then
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pan_max, buffer(offset, 4))
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pitch_max, buffer(offset, 4))
         offset = offset + 4
     elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pan_max, buffer(offset, limit - offset))
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pitch_max, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pan_max, 0)
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pitch_max, 0)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pan_min, 0)
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_yaw_min, 0)
     elseif (offset + 4 <= limit) then
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pan_min, buffer(offset, 4))
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_yaw_min, buffer(offset, 4))
         offset = offset + 4
     elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pan_min, buffer(offset, limit - offset))
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_yaw_min, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pan_min, 0)
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_yaw_min, 0)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pan_rate_max, 0)
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_yaw_max, 0)
     elseif (offset + 4 <= limit) then
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pan_rate_max, buffer(offset, 4))
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_yaw_max, buffer(offset, 4))
         offset = offset + 4
     elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pan_rate_max, buffer(offset, limit - offset))
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_yaw_max, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_pan_rate_max, 0)
+        tree:add_le(f.GIMBAL_MANAGER_INFORMATION_yaw_max, 0)
         truncated = true
     end
     if (truncated) then
@@ -55089,6 +56499,58 @@ function payload_fns.payload_281(buffer, tree, msgid, offset, limit)
         truncated = true
     else
         tree:add_le(f.GIMBAL_MANAGER_STATUS_gimbal_device_id, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_STATUS_primary_control_sysid, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_STATUS_primary_control_sysid, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_STATUS_primary_control_sysid, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_STATUS_primary_control_sysid, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_STATUS_primary_control_compid, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_STATUS_primary_control_compid, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_STATUS_primary_control_compid, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_STATUS_primary_control_compid, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_STATUS_secondary_control_sysid, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_STATUS_secondary_control_sysid, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_STATUS_secondary_control_sysid, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_STATUS_secondary_control_sysid, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_STATUS_secondary_control_compid, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_STATUS_secondary_control_compid, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_STATUS_secondary_control_compid, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_STATUS_secondary_control_compid, 0)
         truncated = true
     end
     return offset
@@ -55249,6 +56711,19 @@ end
 function payload_fns.payload_283(buffer, tree, msgid, offset, limit)
     local truncated = false
     if (truncated) then
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_uid, 0)
+    elseif (offset + 8 <= limit) then
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_uid, buffer(offset, 8))
+        offset = offset + 8
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_uid, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_uid, 0)
+        truncated = true
+    end
+    if (truncated) then
         tree:add_le(f.GIMBAL_DEVICE_INFORMATION_time_boot_ms, 0)
     elseif (offset + 4 <= limit) then
         tree:add_le(f.GIMBAL_DEVICE_INFORMATION_time_boot_ms, buffer(offset, 4))
@@ -55275,81 +56750,94 @@ function payload_fns.payload_283(buffer, tree, msgid, offset, limit)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_tilt_max, 0)
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_hardware_version, 0)
     elseif (offset + 4 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_tilt_max, buffer(offset, 4))
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_hardware_version, buffer(offset, 4))
         offset = offset + 4
     elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_tilt_max, buffer(offset, limit - offset))
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_hardware_version, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_tilt_max, 0)
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_hardware_version, 0)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_tilt_min, 0)
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_roll_min, 0)
     elseif (offset + 4 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_tilt_min, buffer(offset, 4))
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_roll_min, buffer(offset, 4))
         offset = offset + 4
     elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_tilt_min, buffer(offset, limit - offset))
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_roll_min, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_tilt_min, 0)
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_roll_min, 0)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_tilt_rate_max, 0)
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_roll_max, 0)
     elseif (offset + 4 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_tilt_rate_max, buffer(offset, 4))
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_roll_max, buffer(offset, 4))
         offset = offset + 4
     elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_tilt_rate_max, buffer(offset, limit - offset))
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_roll_max, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_tilt_rate_max, 0)
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_roll_max, 0)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pan_max, 0)
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pitch_min, 0)
     elseif (offset + 4 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pan_max, buffer(offset, 4))
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pitch_min, buffer(offset, 4))
         offset = offset + 4
     elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pan_max, buffer(offset, limit - offset))
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pitch_min, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pan_max, 0)
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pitch_min, 0)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pan_min, 0)
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pitch_max, 0)
     elseif (offset + 4 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pan_min, buffer(offset, 4))
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pitch_max, buffer(offset, 4))
         offset = offset + 4
     elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pan_min, buffer(offset, limit - offset))
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pitch_max, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pan_min, 0)
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pitch_max, 0)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pan_rate_max, 0)
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_yaw_min, 0)
     elseif (offset + 4 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pan_rate_max, buffer(offset, 4))
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_yaw_min, buffer(offset, 4))
         offset = offset + 4
     elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pan_rate_max, buffer(offset, limit - offset))
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_yaw_min, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_pan_rate_max, 0)
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_yaw_min, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_yaw_max, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_yaw_max, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_yaw_max, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_yaw_max, 0)
         truncated = true
     end
     if (truncated) then
@@ -55366,835 +56854,55 @@ function payload_fns.payload_283(buffer, tree, msgid, offset, limit)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_0, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_0, buffer(offset, 1))
-        offset = offset + 1
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_custom_cap_flags, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_custom_cap_flags, buffer(offset, 2))
+        offset = offset + 2
     elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_0, buffer(offset, limit - offset))
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_custom_cap_flags, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_0, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_1, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_1, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_1, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_1, 0)
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_custom_cap_flags, 0)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_2, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_2, buffer(offset, 1))
-        offset = offset + 1
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name, 0)
+    elseif (offset + 32 <= limit) then
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name, buffer(offset, 32))
+        offset = offset + 32
     elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_2, buffer(offset, limit - offset))
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_2, 0)
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name, 0)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_3, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_3, buffer(offset, 1))
-        offset = offset + 1
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name, 0)
+    elseif (offset + 32 <= limit) then
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name, buffer(offset, 32))
+        offset = offset + 32
     elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_3, buffer(offset, limit - offset))
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_3, 0)
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name, 0)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_4, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_4, buffer(offset, 1))
-        offset = offset + 1
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_custom_name, 0)
+    elseif (offset + 32 <= limit) then
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_custom_name, buffer(offset, 32))
+        offset = offset + 32
     elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_4, buffer(offset, limit - offset))
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_custom_name, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_4, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_5, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_5, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_5, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_5, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_6, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_6, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_6, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_6, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_7, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_7, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_7, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_7, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_8, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_8, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_8, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_8, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_9, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_9, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_9, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_9, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_10, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_10, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_10, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_10, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_11, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_11, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_11, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_11, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_12, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_12, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_12, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_12, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_13, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_13, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_13, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_13, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_14, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_14, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_14, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_14, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_15, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_15, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_15, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_15, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_16, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_16, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_16, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_16, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_17, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_17, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_17, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_17, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_18, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_18, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_18, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_18, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_19, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_19, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_19, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_19, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_20, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_20, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_20, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_20, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_21, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_21, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_21, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_21, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_22, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_22, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_22, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_22, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_23, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_23, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_23, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_23, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_24, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_24, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_24, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_24, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_25, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_25, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_25, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_25, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_26, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_26, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_26, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_26, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_27, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_27, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_27, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_27, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_28, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_28, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_28, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_28, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_29, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_29, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_29, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_29, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_30, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_30, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_30, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_30, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_31, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_31, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_31, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_vendor_name_31, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_0, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_0, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_0, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_0, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_1, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_1, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_1, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_1, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_2, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_2, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_2, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_2, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_3, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_3, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_3, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_3, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_4, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_4, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_4, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_4, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_5, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_5, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_5, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_5, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_6, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_6, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_6, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_6, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_7, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_7, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_7, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_7, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_8, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_8, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_8, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_8, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_9, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_9, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_9, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_9, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_10, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_10, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_10, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_10, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_11, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_11, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_11, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_11, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_12, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_12, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_12, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_12, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_13, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_13, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_13, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_13, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_14, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_14, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_14, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_14, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_15, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_15, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_15, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_15, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_16, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_16, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_16, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_16, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_17, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_17, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_17, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_17, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_18, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_18, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_18, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_18, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_19, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_19, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_19, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_19, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_20, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_20, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_20, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_20, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_21, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_21, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_21, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_21, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_22, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_22, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_22, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_22, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_23, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_23, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_23, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_23, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_24, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_24, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_24, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_24, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_25, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_25, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_25, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_25, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_26, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_26, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_26, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_26, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_27, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_27, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_27, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_27, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_28, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_28, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_28, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_28, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_29, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_29, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_29, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_29, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_30, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_30, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_30, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_30, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_31, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_31, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_31, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_model_name_31, 0)
+        tree:add_le(f.GIMBAL_DEVICE_INFORMATION_custom_name, 0)
         truncated = true
     end
     return offset
@@ -56471,6 +57179,32 @@ function payload_fns.payload_285(buffer, tree, msgid, offset, limit)
         tree:add_le(f.GIMBAL_DEVICE_ATTITUDE_STATUS_flags, 0)
         truncated = true
     end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_DEVICE_ATTITUDE_STATUS_target_system, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.GIMBAL_DEVICE_ATTITUDE_STATUS_target_system, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_DEVICE_ATTITUDE_STATUS_target_system, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_DEVICE_ATTITUDE_STATUS_target_system, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_DEVICE_ATTITUDE_STATUS_target_component, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.GIMBAL_DEVICE_ATTITUDE_STATUS_target_component, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_DEVICE_ATTITUDE_STATUS_target_component, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_DEVICE_ATTITUDE_STATUS_target_component, 0)
+        truncated = true
+    end
     return offset
 end
 
@@ -56622,6 +57356,19 @@ function payload_fns.payload_286(buffer, tree, msgid, offset, limit)
         truncated = true
     end
     if (truncated) then
+        tree:add_le(f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_estimator_status, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_estimator_status, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_estimator_status, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_estimator_status, 0)
+        truncated = true
+    end
+    if (truncated) then
         tree:add_le(f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_target_system, 0)
     elseif (offset + 1 <= limit) then
         tree:add_le(f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_target_system, buffer(offset, 1))
@@ -56645,6 +57392,671 @@ function payload_fns.payload_286(buffer, tree, msgid, offset, limit)
         truncated = true
     else
         tree:add_le(f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_target_component, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_landed_state, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_landed_state, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_landed_state, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.AUTOPILOT_STATE_FOR_GIMBAL_DEVICE_landed_state, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
+-- dissect payload of message type GIMBAL_MANAGER_SET_PITCHYAW
+function payload_fns.payload_287(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_flags, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_flags, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_flags, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_flags, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_pitch, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_pitch, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_pitch, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_pitch, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_yaw, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_yaw, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_yaw, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_yaw, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_pitch_rate, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_pitch_rate, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_pitch_rate, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_pitch_rate, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_yaw_rate, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_yaw_rate, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_yaw_rate, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_yaw_rate, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_target_system, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_target_system, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_target_system, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_target_system, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_target_component, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_target_component, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_target_component, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_target_component, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_gimbal_device_id, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_gimbal_device_id, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_gimbal_device_id, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_SET_PITCHYAW_gimbal_device_id, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
+-- dissect payload of message type GIMBAL_MANAGER_SET_MANUAL_CONTROL
+function payload_fns.payload_288(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_flags, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_flags, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_flags, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_flags, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_pitch, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_pitch, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_pitch, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_pitch, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_yaw, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_yaw, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_yaw, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_yaw, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_pitch_rate, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_pitch_rate, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_pitch_rate, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_pitch_rate, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_yaw_rate, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_yaw_rate, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_yaw_rate, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_yaw_rate, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_target_system, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_target_system, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_target_system, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_target_system, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_target_component, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_target_component, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_target_component, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_target_component, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_gimbal_device_id, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_gimbal_device_id, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_gimbal_device_id, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GIMBAL_MANAGER_SET_MANUAL_CONTROL_gimbal_device_id, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
+-- dissect payload of message type ESC_INFO
+function payload_fns.payload_290(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.ESC_INFO_time_usec, 0)
+    elseif (offset + 8 <= limit) then
+        tree:add_le(f.ESC_INFO_time_usec, buffer(offset, 8))
+        offset = offset + 8
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_INFO_time_usec, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_INFO_time_usec, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_INFO_error_count_0, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.ESC_INFO_error_count_0, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_INFO_error_count_0, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_INFO_error_count_0, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_INFO_error_count_1, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.ESC_INFO_error_count_1, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_INFO_error_count_1, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_INFO_error_count_1, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_INFO_error_count_2, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.ESC_INFO_error_count_2, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_INFO_error_count_2, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_INFO_error_count_2, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_INFO_error_count_3, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.ESC_INFO_error_count_3, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_INFO_error_count_3, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_INFO_error_count_3, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_INFO_counter, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.ESC_INFO_counter, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_INFO_counter, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_INFO_counter, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_INFO_failure_flags_0, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.ESC_INFO_failure_flags_0, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_INFO_failure_flags_0, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_INFO_failure_flags_0, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_INFO_failure_flags_1, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.ESC_INFO_failure_flags_1, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_INFO_failure_flags_1, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_INFO_failure_flags_1, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_INFO_failure_flags_2, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.ESC_INFO_failure_flags_2, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_INFO_failure_flags_2, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_INFO_failure_flags_2, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_INFO_failure_flags_3, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.ESC_INFO_failure_flags_3, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_INFO_failure_flags_3, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_INFO_failure_flags_3, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_INFO_index, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.ESC_INFO_index, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_INFO_index, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_INFO_index, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_INFO_count, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.ESC_INFO_count, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_INFO_count, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_INFO_count, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_INFO_connection_type, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.ESC_INFO_connection_type, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_INFO_connection_type, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_INFO_connection_type, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_INFO_info, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.ESC_INFO_info, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_INFO_info, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_INFO_info, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_INFO_temperature_0, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.ESC_INFO_temperature_0, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_INFO_temperature_0, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_INFO_temperature_0, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_INFO_temperature_1, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.ESC_INFO_temperature_1, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_INFO_temperature_1, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_INFO_temperature_1, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_INFO_temperature_2, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.ESC_INFO_temperature_2, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_INFO_temperature_2, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_INFO_temperature_2, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_INFO_temperature_3, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.ESC_INFO_temperature_3, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_INFO_temperature_3, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_INFO_temperature_3, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
+-- dissect payload of message type ESC_STATUS
+function payload_fns.payload_291(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.ESC_STATUS_time_usec, 0)
+    elseif (offset + 8 <= limit) then
+        tree:add_le(f.ESC_STATUS_time_usec, buffer(offset, 8))
+        offset = offset + 8
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_STATUS_time_usec, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_STATUS_time_usec, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_STATUS_rpm_0, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.ESC_STATUS_rpm_0, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_STATUS_rpm_0, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_STATUS_rpm_0, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_STATUS_rpm_1, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.ESC_STATUS_rpm_1, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_STATUS_rpm_1, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_STATUS_rpm_1, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_STATUS_rpm_2, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.ESC_STATUS_rpm_2, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_STATUS_rpm_2, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_STATUS_rpm_2, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_STATUS_rpm_3, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.ESC_STATUS_rpm_3, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_STATUS_rpm_3, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_STATUS_rpm_3, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_STATUS_voltage_0, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.ESC_STATUS_voltage_0, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_STATUS_voltage_0, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_STATUS_voltage_0, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_STATUS_voltage_1, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.ESC_STATUS_voltage_1, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_STATUS_voltage_1, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_STATUS_voltage_1, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_STATUS_voltage_2, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.ESC_STATUS_voltage_2, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_STATUS_voltage_2, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_STATUS_voltage_2, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_STATUS_voltage_3, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.ESC_STATUS_voltage_3, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_STATUS_voltage_3, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_STATUS_voltage_3, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_STATUS_current_0, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.ESC_STATUS_current_0, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_STATUS_current_0, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_STATUS_current_0, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_STATUS_current_1, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.ESC_STATUS_current_1, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_STATUS_current_1, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_STATUS_current_1, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_STATUS_current_2, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.ESC_STATUS_current_2, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_STATUS_current_2, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_STATUS_current_2, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_STATUS_current_3, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.ESC_STATUS_current_3, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_STATUS_current_3, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_STATUS_current_3, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.ESC_STATUS_index, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.ESC_STATUS_index, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.ESC_STATUS_index, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.ESC_STATUS_index, 0)
         truncated = true
     end
     return offset
@@ -56704,260 +58116,6 @@ function payload_fns.payload_299(buffer, tree, msgid, offset, limit)
         truncated = true
     else
         tree:add_le(f.WIFI_CONFIG_AP_response, 0)
-        truncated = true
-    end
-    return offset
-end
-
-
--- dissect payload of message type PROTOCOL_VERSION
-function payload_fns.payload_300(buffer, tree, msgid, offset, limit)
-    local truncated = false
-    if (truncated) then
-        tree:add_le(f.PROTOCOL_VERSION_version, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.PROTOCOL_VERSION_version, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.PROTOCOL_VERSION_version, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.PROTOCOL_VERSION_version, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.PROTOCOL_VERSION_min_version, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.PROTOCOL_VERSION_min_version, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.PROTOCOL_VERSION_min_version, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.PROTOCOL_VERSION_min_version, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.PROTOCOL_VERSION_max_version, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.PROTOCOL_VERSION_max_version, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.PROTOCOL_VERSION_max_version, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.PROTOCOL_VERSION_max_version, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_0, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_0, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_0, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_0, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_1, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_1, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_1, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_1, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_2, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_2, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_2, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_2, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_3, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_3, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_3, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_3, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_4, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_4, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_4, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_4, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_5, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_5, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_5, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_5, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_6, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_6, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_6, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_6, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_7, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_7, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_7, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_7, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_0, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_0, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_0, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_0, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_1, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_1, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_1, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_1, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_2, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_2, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_2, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_2, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_3, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_3, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_3, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_3, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_4, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_4, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_4, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_4, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_5, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_5, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_5, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_5, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_6, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_6, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_6, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_6, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_7, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_7, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_7, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_7, 0)
         truncated = true
     end
     return offset
@@ -60900,32 +62058,6 @@ end
 function payload_fns.payload_334(buffer, tree, msgid, offset, limit)
     local truncated = false
     if (truncated) then
-        tree:add_le(f.CELLULAR_STATUS_cid, 0)
-    elseif (offset + 4 <= limit) then
-        tree:add_le(f.CELLULAR_STATUS_cid, buffer(offset, 4))
-        offset = offset + 4
-    elseif (offset < limit) then
-        tree:add_le(f.CELLULAR_STATUS_cid, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.CELLULAR_STATUS_cid, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.CELLULAR_STATUS_status, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.CELLULAR_STATUS_status, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.CELLULAR_STATUS_status, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.CELLULAR_STATUS_status, 0)
-        truncated = true
-    end
-    if (truncated) then
         tree:add_le(f.CELLULAR_STATUS_mcc, 0)
     elseif (offset + 2 <= limit) then
         tree:add_le(f.CELLULAR_STATUS_mcc, buffer(offset, 2))
@@ -60962,6 +62094,32 @@ function payload_fns.payload_334(buffer, tree, msgid, offset, limit)
         truncated = true
     else
         tree:add_le(f.CELLULAR_STATUS_lac, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CELLULAR_STATUS_status, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.CELLULAR_STATUS_status, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.CELLULAR_STATUS_status, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CELLULAR_STATUS_status, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CELLULAR_STATUS_failure_reason, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.CELLULAR_STATUS_failure_reason, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.CELLULAR_STATUS_failure_reason, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CELLULAR_STATUS_failure_reason, 0)
         truncated = true
     end
     if (truncated) then
@@ -61099,6 +62257,117 @@ function payload_fns.payload_335(buffer, tree, msgid, offset, limit)
         truncated = true
     else
         tree:add_le(f.ISBD_LINK_STATUS_rx_session_pending, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
+-- dissect payload of message type CELLULAR_CONFIG
+function payload_fns.payload_336(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.CELLULAR_CONFIG_enable_lte, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.CELLULAR_CONFIG_enable_lte, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.CELLULAR_CONFIG_enable_lte, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CELLULAR_CONFIG_enable_lte, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CELLULAR_CONFIG_enable_pin, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.CELLULAR_CONFIG_enable_pin, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.CELLULAR_CONFIG_enable_pin, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CELLULAR_CONFIG_enable_pin, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CELLULAR_CONFIG_pin, 0)
+    elseif (offset + 16 <= limit) then
+        tree:add_le(f.CELLULAR_CONFIG_pin, buffer(offset, 16))
+        offset = offset + 16
+    elseif (offset < limit) then
+        tree:add_le(f.CELLULAR_CONFIG_pin, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CELLULAR_CONFIG_pin, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CELLULAR_CONFIG_new_pin, 0)
+    elseif (offset + 16 <= limit) then
+        tree:add_le(f.CELLULAR_CONFIG_new_pin, buffer(offset, 16))
+        offset = offset + 16
+    elseif (offset < limit) then
+        tree:add_le(f.CELLULAR_CONFIG_new_pin, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CELLULAR_CONFIG_new_pin, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CELLULAR_CONFIG_apn, 0)
+    elseif (offset + 32 <= limit) then
+        tree:add_le(f.CELLULAR_CONFIG_apn, buffer(offset, 32))
+        offset = offset + 32
+    elseif (offset < limit) then
+        tree:add_le(f.CELLULAR_CONFIG_apn, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CELLULAR_CONFIG_apn, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CELLULAR_CONFIG_puk, 0)
+    elseif (offset + 16 <= limit) then
+        tree:add_le(f.CELLULAR_CONFIG_puk, buffer(offset, 16))
+        offset = offset + 16
+    elseif (offset < limit) then
+        tree:add_le(f.CELLULAR_CONFIG_puk, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CELLULAR_CONFIG_puk, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CELLULAR_CONFIG_roaming, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.CELLULAR_CONFIG_roaming, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.CELLULAR_CONFIG_roaming, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CELLULAR_CONFIG_roaming, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CELLULAR_CONFIG_response, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.CELLULAR_CONFIG_response, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.CELLULAR_CONFIG_response, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CELLULAR_CONFIG_response, 0)
         truncated = true
     end
     return offset
@@ -62515,19 +63784,6 @@ function payload_fns.payload_370(buffer, tree, msgid, offset, limit)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.SMART_BATTERY_INFO_serial_number, 0)
-    elseif (offset + 4 <= limit) then
-        tree:add_le(f.SMART_BATTERY_INFO_serial_number, buffer(offset, 4))
-        offset = offset + 4
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_INFO_serial_number, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_INFO_serial_number, 0)
-        truncated = true
-    end
-    if (truncated) then
         tree:add_le(f.SMART_BATTERY_INFO_cycle_count, 0)
     elseif (offset + 2 <= limit) then
         tree:add_le(f.SMART_BATTERY_INFO_cycle_count, buffer(offset, 2))
@@ -62606,6 +63862,45 @@ function payload_fns.payload_370(buffer, tree, msgid, offset, limit)
         truncated = true
     end
     if (truncated) then
+        tree:add_le(f.SMART_BATTERY_INFO_battery_function, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.SMART_BATTERY_INFO_battery_function, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.SMART_BATTERY_INFO_battery_function, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.SMART_BATTERY_INFO_battery_function, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.SMART_BATTERY_INFO_type, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.SMART_BATTERY_INFO_type, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.SMART_BATTERY_INFO_type, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.SMART_BATTERY_INFO_type, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.SMART_BATTERY_INFO_serial_number, 0)
+    elseif (offset + 16 <= limit) then
+        tree:add_le(f.SMART_BATTERY_INFO_serial_number, buffer(offset, 16))
+        offset = offset + 16
+    elseif (offset < limit) then
+        tree:add_le(f.SMART_BATTERY_INFO_serial_number, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.SMART_BATTERY_INFO_serial_number, 0)
+        truncated = true
+    end
+    if (truncated) then
         tree:add_le(f.SMART_BATTERY_INFO_device_name, 0)
     elseif (offset + 50 <= limit) then
         tree:add_le(f.SMART_BATTERY_INFO_device_name, buffer(offset, 50))
@@ -62618,310 +63913,69 @@ function payload_fns.payload_370(buffer, tree, msgid, offset, limit)
         tree:add_le(f.SMART_BATTERY_INFO_device_name, 0)
         truncated = true
     end
-    return offset
-end
-
-
--- dissect payload of message type SMART_BATTERY_STATUS
-function payload_fns.payload_371(buffer, tree, msgid, offset, limit)
-    local truncated = false
     if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_fault_bitmask, 0)
+        tree:add_le(f.SMART_BATTERY_INFO_charging_maximum_voltage, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.SMART_BATTERY_INFO_charging_maximum_voltage, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.SMART_BATTERY_INFO_charging_maximum_voltage, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.SMART_BATTERY_INFO_charging_maximum_voltage, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.SMART_BATTERY_INFO_cells_in_series, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.SMART_BATTERY_INFO_cells_in_series, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.SMART_BATTERY_INFO_cells_in_series, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.SMART_BATTERY_INFO_cells_in_series, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.SMART_BATTERY_INFO_discharge_maximum_current, 0)
     elseif (offset + 4 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_fault_bitmask, buffer(offset, 4))
+        tree:add_le(f.SMART_BATTERY_INFO_discharge_maximum_current, buffer(offset, 4))
         offset = offset + 4
     elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_fault_bitmask, buffer(offset, limit - offset))
+        tree:add_le(f.SMART_BATTERY_INFO_discharge_maximum_current, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.SMART_BATTERY_STATUS_fault_bitmask, 0)
+        tree:add_le(f.SMART_BATTERY_INFO_discharge_maximum_current, 0)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_time_remaining, 0)
+        tree:add_le(f.SMART_BATTERY_INFO_discharge_maximum_burst_current, 0)
     elseif (offset + 4 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_time_remaining, buffer(offset, 4))
+        tree:add_le(f.SMART_BATTERY_INFO_discharge_maximum_burst_current, buffer(offset, 4))
         offset = offset + 4
     elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_time_remaining, buffer(offset, limit - offset))
+        tree:add_le(f.SMART_BATTERY_INFO_discharge_maximum_burst_current, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.SMART_BATTERY_STATUS_time_remaining, 0)
+        tree:add_le(f.SMART_BATTERY_INFO_discharge_maximum_burst_current, 0)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_id, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_id, buffer(offset, 2))
-        offset = offset + 2
+        tree:add_le(f.SMART_BATTERY_INFO_manufacture_date, 0)
+    elseif (offset + 11 <= limit) then
+        tree:add_le(f.SMART_BATTERY_INFO_manufacture_date, buffer(offset, 11))
+        offset = offset + 11
     elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_id, buffer(offset, limit - offset))
+        tree:add_le(f.SMART_BATTERY_INFO_manufacture_date, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.SMART_BATTERY_STATUS_id, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_capacity_remaining, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_capacity_remaining, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_capacity_remaining, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_capacity_remaining, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_current, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_current, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_current, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_current, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_temperature, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_temperature, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_temperature, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_temperature, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_cell_offset, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_cell_offset, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_cell_offset, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_cell_offset, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_0, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_0, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_0, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_0, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_1, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_1, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_1, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_1, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_2, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_2, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_2, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_2, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_3, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_3, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_3, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_3, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_4, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_4, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_4, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_4, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_5, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_5, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_5, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_5, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_6, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_6, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_6, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_6, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_7, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_7, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_7, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_7, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_8, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_8, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_8, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_8, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_9, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_9, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_9, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_9, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_10, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_10, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_10, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_10, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_11, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_11, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_11, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_11, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_12, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_12, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_12, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_12, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_13, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_13, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_13, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_13, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_14, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_14, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_14, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_14, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_15, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_15, buffer(offset, 2))
-        offset = offset + 2
-    elseif (offset < limit) then
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_15, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.SMART_BATTERY_STATUS_voltages_15, 0)
+        tree:add_le(f.SMART_BATTERY_INFO_manufacture_date, 0)
         truncated = true
     end
     return offset
@@ -63007,6 +64061,32 @@ function payload_fns.payload_373(buffer, tree, msgid, offset, limit)
         truncated = true
     else
         tree:add_le(f.GENERATOR_STATUS_bat_current_setpoint, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GENERATOR_STATUS_runtime, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.GENERATOR_STATUS_runtime, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.GENERATOR_STATUS_runtime, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GENERATOR_STATUS_runtime, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.GENERATOR_STATUS_time_until_maintenance, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.GENERATOR_STATUS_time_until_maintenance, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.GENERATOR_STATUS_time_until_maintenance, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.GENERATOR_STATUS_time_until_maintenance, 0)
         truncated = true
     end
     if (truncated) then
@@ -66516,900 +67596,55 @@ function payload_fns.payload_395(buffer, tree, msgid, offset, limit)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_firmware_version, 0)
+        tree:add_le(f.COMPONENT_INFORMATION_general_metadata_file_crc, 0)
     elseif (offset + 4 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_firmware_version, buffer(offset, 4))
+        tree:add_le(f.COMPONENT_INFORMATION_general_metadata_file_crc, buffer(offset, 4))
         offset = offset + 4
     elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_firmware_version, buffer(offset, limit - offset))
+        tree:add_le(f.COMPONENT_INFORMATION_general_metadata_file_crc, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.COMPONENT_INFORMATION_firmware_version, 0)
+        tree:add_le(f.COMPONENT_INFORMATION_general_metadata_file_crc, 0)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_hardware_version, 0)
+        tree:add_le(f.COMPONENT_INFORMATION_peripherals_metadata_file_crc, 0)
     elseif (offset + 4 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_hardware_version, buffer(offset, 4))
+        tree:add_le(f.COMPONENT_INFORMATION_peripherals_metadata_file_crc, buffer(offset, 4))
         offset = offset + 4
     elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_hardware_version, buffer(offset, limit - offset))
+        tree:add_le(f.COMPONENT_INFORMATION_peripherals_metadata_file_crc, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.COMPONENT_INFORMATION_hardware_version, 0)
+        tree:add_le(f.COMPONENT_INFORMATION_peripherals_metadata_file_crc, 0)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_capability_flags, 0)
-    elseif (offset + 4 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_capability_flags, buffer(offset, 4))
-        offset = offset + 4
+        tree:add_le(f.COMPONENT_INFORMATION_general_metadata_uri, 0)
+    elseif (offset + 100 <= limit) then
+        tree:add_le(f.COMPONENT_INFORMATION_general_metadata_uri, buffer(offset, 100))
+        offset = offset + 100
     elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_capability_flags, buffer(offset, limit - offset))
+        tree:add_le(f.COMPONENT_INFORMATION_general_metadata_uri, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.COMPONENT_INFORMATION_capability_flags, 0)
+        tree:add_le(f.COMPONENT_INFORMATION_general_metadata_uri, 0)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_component_definition_version, 0)
-    elseif (offset + 2 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_component_definition_version, buffer(offset, 2))
-        offset = offset + 2
+        tree:add_le(f.COMPONENT_INFORMATION_peripherals_metadata_uri, 0)
+    elseif (offset + 100 <= limit) then
+        tree:add_le(f.COMPONENT_INFORMATION_peripherals_metadata_uri, buffer(offset, 100))
+        offset = offset + 100
     elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_component_definition_version, buffer(offset, limit - offset))
+        tree:add_le(f.COMPONENT_INFORMATION_peripherals_metadata_uri, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.COMPONENT_INFORMATION_component_definition_version, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_0, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_0, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_0, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_0, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_1, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_1, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_1, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_1, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_2, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_2, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_2, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_2, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_3, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_3, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_3, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_3, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_4, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_4, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_4, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_4, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_5, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_5, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_5, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_5, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_6, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_6, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_6, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_6, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_7, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_7, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_7, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_7, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_8, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_8, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_8, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_8, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_9, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_9, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_9, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_9, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_10, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_10, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_10, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_10, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_11, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_11, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_11, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_11, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_12, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_12, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_12, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_12, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_13, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_13, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_13, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_13, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_14, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_14, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_14, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_14, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_15, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_15, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_15, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_15, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_16, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_16, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_16, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_16, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_17, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_17, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_17, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_17, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_18, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_18, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_18, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_18, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_19, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_19, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_19, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_19, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_20, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_20, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_20, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_20, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_21, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_21, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_21, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_21, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_22, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_22, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_22, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_22, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_23, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_23, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_23, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_23, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_24, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_24, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_24, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_24, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_25, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_25, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_25, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_25, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_26, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_26, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_26, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_26, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_27, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_27, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_27, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_27, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_28, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_28, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_28, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_28, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_29, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_29, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_29, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_29, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_30, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_30, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_30, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_30, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_31, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_31, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_31, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_vendor_name_31, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_0, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_0, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_0, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_0, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_1, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_1, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_1, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_1, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_2, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_2, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_2, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_2, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_3, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_3, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_3, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_3, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_4, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_4, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_4, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_4, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_5, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_5, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_5, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_5, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_6, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_6, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_6, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_6, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_7, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_7, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_7, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_7, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_8, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_8, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_8, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_8, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_9, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_9, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_9, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_9, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_10, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_10, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_10, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_10, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_11, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_11, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_11, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_11, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_12, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_12, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_12, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_12, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_13, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_13, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_13, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_13, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_14, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_14, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_14, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_14, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_15, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_15, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_15, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_15, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_16, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_16, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_16, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_16, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_17, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_17, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_17, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_17, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_18, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_18, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_18, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_18, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_19, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_19, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_19, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_19, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_20, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_20, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_20, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_20, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_21, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_21, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_21, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_21, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_22, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_22, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_22, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_22, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_23, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_23, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_23, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_23, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_24, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_24, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_24, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_24, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_25, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_25, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_25, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_25, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_26, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_26, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_26, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_26, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_27, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_27, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_27, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_27, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_28, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_28, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_28, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_28, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_29, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_29, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_29, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_29, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_30, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_30, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_30, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_30, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_31, 0)
-    elseif (offset + 1 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_31, buffer(offset, 1))
-        offset = offset + 1
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_31, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_model_name_31, 0)
-        truncated = true
-    end
-    if (truncated) then
-        tree:add_le(f.COMPONENT_INFORMATION_component_definition_uri, 0)
-    elseif (offset + 140 <= limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_component_definition_uri, buffer(offset, 140))
-        offset = offset + 140
-    elseif (offset < limit) then
-        tree:add_le(f.COMPONENT_INFORMATION_component_definition_uri, buffer(offset, limit - offset))
-        offset = limit
-        truncated = true
-    else
-        tree:add_le(f.COMPONENT_INFORMATION_component_definition_uri, 0)
+        tree:add_le(f.COMPONENT_INFORMATION_peripherals_metadata_uri, 0)
         truncated = true
     end
     return offset
@@ -67515,6 +67750,775 @@ function payload_fns.payload_401(buffer, tree, msgid, offset, limit)
         truncated = true
     else
         tree:add_le(f.SUPPORTED_TUNES_target_component, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
+-- dissect payload of message type EVENT
+function payload_fns.payload_410(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.EVENT_id, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.EVENT_id, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_id, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_id, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_event_time_boot_ms, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.EVENT_event_time_boot_ms, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_event_time_boot_ms, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_event_time_boot_ms, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_sequence, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.EVENT_sequence, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_sequence, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_sequence, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_destination_component, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_destination_component, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_destination_component, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_destination_component, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_destination_system, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_destination_system, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_destination_system, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_destination_system, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_log_levels, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_log_levels, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_log_levels, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_log_levels, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_0, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_0, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_0, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_0, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_1, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_1, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_1, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_1, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_2, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_2, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_2, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_2, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_3, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_3, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_3, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_3, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_4, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_4, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_4, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_4, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_5, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_5, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_5, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_5, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_6, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_6, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_6, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_6, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_7, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_7, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_7, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_7, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_8, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_8, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_8, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_8, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_9, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_9, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_9, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_9, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_10, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_10, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_10, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_10, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_11, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_11, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_11, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_11, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_12, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_12, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_12, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_12, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_13, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_13, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_13, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_13, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_14, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_14, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_14, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_14, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_15, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_15, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_15, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_15, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_16, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_16, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_16, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_16, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_17, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_17, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_17, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_17, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_18, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_18, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_18, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_18, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_19, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_19, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_19, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_19, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_20, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_20, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_20, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_20, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_21, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_21, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_21, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_21, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_22, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_22, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_22, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_22, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_23, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_23, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_23, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_23, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_24, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_24, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_24, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_24, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_25, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_25, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_25, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_25, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_26, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_26, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_26, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_26, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_27, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_27, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_27, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_27, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_28, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_28, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_28, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_28, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_29, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_29, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_29, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_29, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_30, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_30, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_30, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_30, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_31, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_31, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_31, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_31, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_32, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_32, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_32, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_32, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_33, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_33, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_33, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_33, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_34, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_34, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_34, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_34, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_35, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_35, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_35, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_35, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_36, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_36, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_36, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_36, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_37, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_37, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_37, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_37, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_38, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_38, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_38, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_38, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.EVENT_arguments_39, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.EVENT_arguments_39, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.EVENT_arguments_39, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.EVENT_arguments_39, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
+-- dissect payload of message type CURRENT_EVENT_SEQUENCE
+function payload_fns.payload_411(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.CURRENT_EVENT_SEQUENCE_sequence, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.CURRENT_EVENT_SEQUENCE_sequence, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.CURRENT_EVENT_SEQUENCE_sequence, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CURRENT_EVENT_SEQUENCE_sequence, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.CURRENT_EVENT_SEQUENCE_flags, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.CURRENT_EVENT_SEQUENCE_flags, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.CURRENT_EVENT_SEQUENCE_flags, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.CURRENT_EVENT_SEQUENCE_flags, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
+-- dissect payload of message type REQUEST_EVENT
+function payload_fns.payload_412(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.REQUEST_EVENT_first_sequence, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.REQUEST_EVENT_first_sequence, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.REQUEST_EVENT_first_sequence, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.REQUEST_EVENT_first_sequence, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.REQUEST_EVENT_last_sequence, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.REQUEST_EVENT_last_sequence, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.REQUEST_EVENT_last_sequence, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.REQUEST_EVENT_last_sequence, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.REQUEST_EVENT_target_system, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.REQUEST_EVENT_target_system, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.REQUEST_EVENT_target_system, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.REQUEST_EVENT_target_system, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.REQUEST_EVENT_target_component, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.REQUEST_EVENT_target_component, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.REQUEST_EVENT_target_component, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.REQUEST_EVENT_target_component, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
+-- dissect payload of message type RESPONSE_EVENT_ERROR
+function payload_fns.payload_413(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.RESPONSE_EVENT_ERROR_sequence, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.RESPONSE_EVENT_ERROR_sequence, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.RESPONSE_EVENT_ERROR_sequence, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.RESPONSE_EVENT_ERROR_sequence, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.RESPONSE_EVENT_ERROR_sequence_oldest_available, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.RESPONSE_EVENT_ERROR_sequence_oldest_available, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.RESPONSE_EVENT_ERROR_sequence_oldest_available, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.RESPONSE_EVENT_ERROR_sequence_oldest_available, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.RESPONSE_EVENT_ERROR_target_system, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.RESPONSE_EVENT_ERROR_target_system, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.RESPONSE_EVENT_ERROR_target_system, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.RESPONSE_EVENT_ERROR_target_system, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.RESPONSE_EVENT_ERROR_target_component, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.RESPONSE_EVENT_ERROR_target_component, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.RESPONSE_EVENT_ERROR_target_component, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.RESPONSE_EVENT_ERROR_target_component, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.RESPONSE_EVENT_ERROR_reason, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.RESPONSE_EVENT_ERROR_reason, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.RESPONSE_EVENT_ERROR_reason, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.RESPONSE_EVENT_ERROR_reason, 0)
         truncated = true
     end
     return offset
@@ -67756,6 +68760,117 @@ function payload_fns.payload_9000(buffer, tree, msgid, offset, limit)
         truncated = true
     else
         tree:add_le(f.WHEEL_DISTANCE_count, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
+-- dissect payload of message type WINCH_STATUS
+function payload_fns.payload_9005(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.WINCH_STATUS_time_usec, 0)
+    elseif (offset + 8 <= limit) then
+        tree:add_le(f.WINCH_STATUS_time_usec, buffer(offset, 8))
+        offset = offset + 8
+    elseif (offset < limit) then
+        tree:add_le(f.WINCH_STATUS_time_usec, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.WINCH_STATUS_time_usec, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.WINCH_STATUS_line_length, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.WINCH_STATUS_line_length, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.WINCH_STATUS_line_length, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.WINCH_STATUS_line_length, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.WINCH_STATUS_speed, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.WINCH_STATUS_speed, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.WINCH_STATUS_speed, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.WINCH_STATUS_speed, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.WINCH_STATUS_tension, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.WINCH_STATUS_tension, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.WINCH_STATUS_tension, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.WINCH_STATUS_tension, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.WINCH_STATUS_voltage, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.WINCH_STATUS_voltage, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.WINCH_STATUS_voltage, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.WINCH_STATUS_voltage, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.WINCH_STATUS_current, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.WINCH_STATUS_current, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.WINCH_STATUS_current, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.WINCH_STATUS_current, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.WINCH_STATUS_status, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.WINCH_STATUS_status, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.WINCH_STATUS_status, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.WINCH_STATUS_status, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.WINCH_STATUS_temperature, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.WINCH_STATUS_temperature, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.WINCH_STATUS_temperature, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.WINCH_STATUS_temperature, 0)
         truncated = true
     end
     return offset
@@ -70186,16 +71301,55 @@ function payload_fns.payload_12904(buffer, tree, msgid, offset, limit)
         truncated = true
     end
     if (truncated) then
-        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_flags, 0)
+        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_operator_location_type, 0)
     elseif (offset + 1 <= limit) then
-        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_flags, buffer(offset, 1))
+        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_operator_location_type, buffer(offset, 1))
         offset = offset + 1
     elseif (offset < limit) then
-        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_flags, buffer(offset, limit - offset))
+        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_operator_location_type, buffer(offset, limit - offset))
         offset = limit
         truncated = true
     else
-        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_flags, 0)
+        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_operator_location_type, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_classification_type, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_classification_type, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_classification_type, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_classification_type, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_category_eu, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_category_eu, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_category_eu, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_category_eu, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_class_eu, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_class_eu, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_class_eu, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.OPEN_DRONE_ID_SYSTEM_class_eu, 0)
         truncated = true
     end
     return offset
@@ -73824,6 +74978,391 @@ function payload_fns.payload_12915(buffer, tree, msgid, offset, limit)
         truncated = true
     else
         tree:add_le(f.OPEN_DRONE_ID_MESSAGE_PACK_messages_249, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
+-- dissect payload of message type HYGROMETER_SENSOR
+function payload_fns.payload_12920(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.HYGROMETER_SENSOR_temperature, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.HYGROMETER_SENSOR_temperature, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.HYGROMETER_SENSOR_temperature, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.HYGROMETER_SENSOR_temperature, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.HYGROMETER_SENSOR_humidity, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.HYGROMETER_SENSOR_humidity, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.HYGROMETER_SENSOR_humidity, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.HYGROMETER_SENSOR_humidity, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.HYGROMETER_SENSOR_id, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.HYGROMETER_SENSOR_id, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.HYGROMETER_SENSOR_id, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.HYGROMETER_SENSOR_id, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
+-- dissect payload of message type HEARTBEAT
+function payload_fns.payload_0(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.HEARTBEAT_custom_mode, 0)
+    elseif (offset + 4 <= limit) then
+        tree:add_le(f.HEARTBEAT_custom_mode, buffer(offset, 4))
+        offset = offset + 4
+    elseif (offset < limit) then
+        tree:add_le(f.HEARTBEAT_custom_mode, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.HEARTBEAT_custom_mode, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.HEARTBEAT_type, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.HEARTBEAT_type, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.HEARTBEAT_type, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.HEARTBEAT_type, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.HEARTBEAT_autopilot, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.HEARTBEAT_autopilot, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.HEARTBEAT_autopilot, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.HEARTBEAT_autopilot, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.HEARTBEAT_base_mode, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.HEARTBEAT_base_mode, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.HEARTBEAT_base_mode, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.HEARTBEAT_base_mode, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.HEARTBEAT_system_status, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.HEARTBEAT_system_status, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.HEARTBEAT_system_status, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.HEARTBEAT_system_status, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.HEARTBEAT_mavlink_version, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.HEARTBEAT_mavlink_version, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.HEARTBEAT_mavlink_version, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.HEARTBEAT_mavlink_version, 0)
+        truncated = true
+    end
+    return offset
+end
+
+
+-- dissect payload of message type PROTOCOL_VERSION
+function payload_fns.payload_300(buffer, tree, msgid, offset, limit)
+    local truncated = false
+    if (truncated) then
+        tree:add_le(f.PROTOCOL_VERSION_version, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.PROTOCOL_VERSION_version, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.PROTOCOL_VERSION_version, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PROTOCOL_VERSION_version, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PROTOCOL_VERSION_min_version, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.PROTOCOL_VERSION_min_version, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.PROTOCOL_VERSION_min_version, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PROTOCOL_VERSION_min_version, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PROTOCOL_VERSION_max_version, 0)
+    elseif (offset + 2 <= limit) then
+        tree:add_le(f.PROTOCOL_VERSION_max_version, buffer(offset, 2))
+        offset = offset + 2
+    elseif (offset < limit) then
+        tree:add_le(f.PROTOCOL_VERSION_max_version, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PROTOCOL_VERSION_max_version, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_0, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_0, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_0, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_0, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_1, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_1, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_1, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_1, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_2, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_2, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_2, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_2, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_3, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_3, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_3, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_3, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_4, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_4, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_4, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_4, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_5, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_5, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_5, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_5, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_6, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_6, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_6, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_6, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_7, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_7, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_7, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PROTOCOL_VERSION_spec_version_hash_7, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_0, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_0, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_0, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_0, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_1, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_1, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_1, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_1, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_2, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_2, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_2, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_2, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_3, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_3, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_3, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_3, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_4, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_4, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_4, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_4, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_5, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_5, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_5, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_5, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_6, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_6, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_6, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_6, 0)
+        truncated = true
+    end
+    if (truncated) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_7, 0)
+    elseif (offset + 1 <= limit) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_7, buffer(offset, 1))
+        offset = offset + 1
+    elseif (offset < limit) then
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_7, buffer(offset, limit - offset))
+        offset = limit
+        truncated = true
+    else
+        tree:add_le(f.PROTOCOL_VERSION_library_version_hash_7, 0)
         truncated = true
     end
     return offset

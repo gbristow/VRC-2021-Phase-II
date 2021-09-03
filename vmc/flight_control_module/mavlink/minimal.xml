@@ -176,6 +176,12 @@
       <entry value="35" name="MAV_TYPE_DECAROTOR">
         <description>Decarotor</description>
       </entry>
+      <entry value="36" name="MAV_TYPE_BATTERY">
+        <description>Battery</description>
+      </entry>
+      <entry value="37" name="MAV_TYPE_PARACHUTE">
+        <description>Parachute</description>
+      </entry>
     </enum>
     <enum name="MAV_MODE_FLAG" bitmask="true">
       <description>These flags encode the MAV mode.</description>
@@ -578,6 +584,9 @@
       <entry value="160" name="MAV_COMP_ID_FLARM">
         <description>FLARM collision alert component.</description>
       </entry>
+      <entry value="161" name="MAV_COMP_ID_PARACHUTE">
+        <description>Parachute component.</description>
+      </entry>
       <entry value="171" name="MAV_COMP_ID_GIMBAL2">
         <description>Gimbal #2.</description>
       </entry>
@@ -593,13 +602,27 @@
       <entry value="175" name="MAV_COMP_ID_GIMBAL6">
         <description>Gimbal #6.</description>
       </entry>
+      <entry value="180" name="MAV_COMP_ID_BATTERY">
+        <description>Battery #1.</description>
+      </entry>
+      <entry value="181" name="MAV_COMP_ID_BATTERY2">
+        <description>Battery #2.</description>
+      </entry>
       <entry value="190" name="MAV_COMP_ID_MISSIONPLANNER">
         <description>Component that can generate/supply a mission flight plan (e.g. GCS or developer API).</description>
       </entry>
       <entry value="191" name="MAV_COMP_ID_ONBOARD_COMPUTER">
         <description>Component that lives on the onboard computer (companion computer) and has some generic functionalities, such as settings system parameters and monitoring the status of some processes that don't directly speak mavlink and so on.</description>
       </entry>
-      <!-- Component ids from 192-194 are reserved for any future mavlink components related to the mission computer. -->
+      <entry value="192" name="MAV_COMP_ID_ONBOARD_COMPUTER2">
+        <description>Component that lives on the onboard computer (companion computer) and has some generic functionalities, such as settings system parameters and monitoring the status of some processes that don't directly speak mavlink and so on.</description>
+      </entry>
+      <entry value="193" name="MAV_COMP_ID_ONBOARD_COMPUTER3">
+        <description>Component that lives on the onboard computer (companion computer) and has some generic functionalities, such as settings system parameters and monitoring the status of some processes that don't directly speak mavlink and so on.</description>
+      </entry>
+      <entry value="194" name="MAV_COMP_ID_ONBOARD_COMPUTER4">
+        <description>Component that lives on the onboard computer (companion computer) and has some generic functionalities, such as settings system parameters and monitoring the status of some processes that don't directly speak mavlink and so on.</description>
+      </entry>
       <entry value="195" name="MAV_COMP_ID_PATHPLANNER">
         <description>Component that finds an optimal path between points based on a certain constraint (e.g. minimum snap, shortest path, cost, etc.).</description>
       </entry>
@@ -660,6 +683,16 @@
       <field type="uint32_t" name="custom_mode">A bitfield for use for autopilot-specific flags</field>
       <field type="uint8_t" name="system_status" enum="MAV_STATE">System status flag.</field>
       <field type="uint8_t_mavlink_version" name="mavlink_version">MAVLink version, not writable by user, gets added by protocol because of magic data type: uint8_t_mavlink_version</field>
+    </message>
+    <message id="300" name="PROTOCOL_VERSION">
+      <wip/>
+      <!-- This message is work-in-progress and it can therefore change. It should NOT be used in stable production environments. -->
+      <description>Version and capability of protocol version. This message can be requested with MAV_CMD_REQUEST_MESSAGE and is used as part of the handshaking to establish which MAVLink version should be used on the network. Every node should respond to a request for PROTOCOL_VERSION to enable the handshaking. Library implementers should consider adding this into the default decoding state machine to allow the protocol core to respond directly.</description>
+      <field type="uint16_t" name="version">Currently active MAVLink version number * 100: v1.0 is 100, v2.0 is 200, etc.</field>
+      <field type="uint16_t" name="min_version">Minimum MAVLink version supported</field>
+      <field type="uint16_t" name="max_version">Maximum MAVLink version supported (set to the same value as version by default)</field>
+      <field type="uint8_t[8]" name="spec_version_hash">The first 8 bytes (not characters printed in hex!) of the git hash.</field>
+      <field type="uint8_t[8]" name="library_version_hash">The first 8 bytes (not characters printed in hex!) of the git hash.</field>
     </message>
   </messages>
 </mavlink>
