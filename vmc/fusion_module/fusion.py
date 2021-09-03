@@ -3,8 +3,6 @@ import os
 import threading
 import time
 from math import atan2, pi
-
-
 from typing import Any
 
 import numpy as np
