@@ -8,8 +8,8 @@ RUN apt update
 
 RUN apt install software-properties-common -y
 
-RUN add-apt-repository deb https://repo.download.nvidia.com/jetson/common 32.6 main
-RUN add-apt-repository deb https://repo.download.nvidia.com/jetson/<platform> 32.6 main
+RUN add-apt-repository "deb https://repo.download.nvidia.com/jetson/common 32.6 main"
+RUN add-apt-repository "deb https://repo.download.nvidia.com/jetson/t210 32.6 main"
 
 RUN apt install libnvvpi1 vpi1-dev vpi1-cross-aarch64-l4t -y
 
