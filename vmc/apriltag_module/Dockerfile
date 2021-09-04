@@ -13,7 +13,7 @@ RUN apt-key adv --fetch-key http://repo.download.nvidia.com/jetson/jetson-ota-pu
 RUN add-apt-repository "deb https://repo.download.nvidia.com/jetson/common r32.6 main"
 RUN add-apt-repository "deb https://repo.download.nvidia.com/jetson/t210 r32.6 main"
 
-RUN apt install libnvvpi1 vpi1-dev vpi1-cross-aarch64-l4t -y
+RUN apt install libnvvpi1 vpi1-dev -y
 
 WORKDIR /app
 
