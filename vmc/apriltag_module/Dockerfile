@@ -13,11 +13,14 @@ RUN apt-key adv --fetch-key http://repo.download.nvidia.com/jetson/jetson-ota-pu
 RUN add-apt-repository "deb https://repo.download.nvidia.com/jetson/common r32.6 main"
 RUN add-apt-repository "deb https://repo.download.nvidia.com/jetson/t210 r32.6 main"
 
-RUN apt install libnvvpi1 vpi1-dev -y
+#RUN apt install libnvvpi1 vpi1-dev -y
 
 WORKDIR /app
 
 COPY . .
+
+COPY /opt/nvidia/vpi/include/vpi /opt/nvidia/vpi/include/vpi
+COPY /opt/nvidia/vpi1/include/vpi /opt/nvidia/vpi1/include/vpi
 
 WORKDIR /app/c/
 RUN g++ -I/usr/include/opencv4/ -I/usr/local/cuda-10.2/include -I/opt/nvidia/vpi/include/vpi  -I/opt/nvidia/vpi1/include/vpi -L./lib_aarch64_jetpack44 -L/usr/local/cuda-10.2/lib64  -L/opt/nvidia/vpi1/lib64 -L/opt/nvidia/vpi/lib vrcapriltags.cpp  -lapril_tagging -lcudart -lcuda -lcublas -lopencv_core -lopencv_videoio -lopencv_imgproc -lopencv_highgui -lnvvpi
