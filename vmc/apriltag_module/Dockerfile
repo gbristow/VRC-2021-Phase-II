@@ -8,6 +8,8 @@ RUN apt update
 
 RUN apt install software-properties-common -y
 
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0D296FFB880FB004
+
 RUN add-apt-repository "deb https://repo.download.nvidia.com/jetson/common r32.6 main"
 RUN add-apt-repository "deb https://repo.download.nvidia.com/jetson/t210 r32.6 main"
 
