@@ -2,7 +2,7 @@ FROM nvcr.io/nvidia/l4t-ml:r32.6.1-py3
 
 RUN apt-get update -y
 RUN apt-get install -y \
-    python3-pip g++
+    python3-pip libnvvpi1 vpi1-dev vpi1-cross-aarch64-l4t
 
 WORKDIR /app
 
