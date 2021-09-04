@@ -64,7 +64,8 @@ class Fusion(object):
             "vrc/vio/orientation/eul":self.fuse_att_euler,
             "vrc/vio/heading":self.fuse_att_heading,
             "vrc/vio/velocity/ned":self.fuse_vel,
-            f"{self.topic_prefix}/pos/ned":self.local_to_geo
+            f"{self.topic_prefix}/pos/ned":self.local_to_geo,
+            # "vrc/apriltag/selected/pos/ned"
         }
 
         self.primary_topic = None
@@ -110,9 +111,9 @@ class Fusion(object):
 
         try:
             ned = msg
-            lla = pymap3d.enu2geodetic( float(ned["e"])/100, # East   | Y
-                                        float(ned["n"])/100, # North  | X
-                                    -1 * float(ned["d"])/100, # Up     | Z
+            lla = pymap3d.enu2geodetic( float(ned["e"])/100, # type: ignore # East   | Y 
+                                        float(ned["n"])/100, # type: ignore # North  | X
+                                    -1 * float(ned["d"])/100, # type: ignore # Up     | Z
                                         origin[0], # Origin lat
                                         origin[1], # Origin lon
                                         origin[2], # Origin alt

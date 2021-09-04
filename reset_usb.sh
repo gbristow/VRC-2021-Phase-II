@@ -28,7 +28,7 @@ done
 # This is a pretty violent process, so need a second for the USB
 # devices to re-register
 echo "Finishing..."
-sleep 2
+sleep 5
 
 # Device IDs will likely change after reset, so just count the number of entries
 lsusbafter="$(lsusb | wc -l)"

@@ -2,7 +2,7 @@
 
 ## Setup
 
-Before you run the setup script, ensure that you are able to 
+Before you run the setup script, ensure that you are able to
 connect to the following domains. Some schools or networks may block these:
 
 ```bash
@@ -35,7 +35,7 @@ chmod +x setup.sh # Make the setup script executable
 ./setup.sh # Run the setup script
 ```
 
-Please note, this setup script WILL take a while the first time 
+Please note, this setup script WILL take a while the first time
 (depending on your download speed),
 and you may need to re-enter your `sudo` password a few times.
 
@@ -52,7 +52,7 @@ To stop the VRC software, run:
 
 ```bash
 # Stop the Docker Compose stack
-sudo docker-compose down 
+sudo docker-compose down
 ```
 
 If you ever need to update the VRC software, run:
@@ -63,6 +63,14 @@ git pull
 # Re-run the setup script
 ./setup.sh
 ```
+
+Additionally, if you have problems with the VIO module not connecting to the T265 camera,
+try the following in order:
+
+1. Run the command `rs-enumerate-devices`. This seems to help `librealsense` pick up the camera.
+2. Run the script `reset_usb.sh` (you may need to do `chmod +x reset_usb.sh` first). This resets all the USB devices.
+3. Unplug the T265 camera and plug it back in.
+4. Restart the Jetson.
 
 ## MQTT Topics
 
@@ -124,9 +132,9 @@ This is a list of topics you can subscribe to, to obtain telemetry information.
 This is a list of topics you can send data to, to make things happen on the drone:
 
 - vrc/pcc/set_base_color
-  - "wrgb": A list of 4 `int`s between 0 and 255 to set the base color of the LEDs. Example: `[0, 128, 255]`.
+  - "wrgb": A list of 4 `int`s between 0 and 255 to set the base color of the LEDs. Example: `[255, 0, 128, 255]`.
 - vrc/pcc/set_temp_color
-  - "wrgb": A list of 4 `int`s between 0 and 255 to set a temporary color of the LEDs. Example: `[0, 128, 255]`.
+  - "wrgb": A list of 4 `int`s between 0 and 255 to set a temporary color of the LEDs. Example: `[255, 0, 128, 255]`.
   - "time": Optional `float` for the number of seconds the color should be set for. Default is `0.5`.
 - vrc/pcc/set_servo_open_close
   - "servo": ID of the servo to open or close as a `int`.
