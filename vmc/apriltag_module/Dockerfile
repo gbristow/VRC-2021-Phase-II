@@ -17,4 +17,4 @@ COPY . .
 
 #CMD ["python3", "vrcapriltag.py"]
 
-CMD ["./vrcapriltag"]
+CMD ["./c/vrcapriltag"]

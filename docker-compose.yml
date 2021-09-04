@@ -47,6 +47,8 @@ services:
     restart: unless-stopped
     volumes:
       - /tmp/argus_socket:/tmp/argus_socket
+      - /opt/nvidia/vpi/include/vpi:/opt/nvidia/vpi/include/vpi  
+      - /opt/nvidia/vpi1/include/vpi:/opt/nvidia/vpi/include/vpi
 
   fusion:
     depends_on:
