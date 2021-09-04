@@ -14,4 +14,6 @@ RUN python3 -m pip install pip wheel --upgrade && \
 
 COPY . .
 
-CMD ["python3", "vrcapriltag.py"]
+#CMD ["python3", "vrcapriltag.py"]
+
+CMD ["./vrcapriltag"]
