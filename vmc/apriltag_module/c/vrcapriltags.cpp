@@ -18,12 +18,12 @@
 
 #include <string.h> // for basename(3) that doesn't modify its argument
 #include <unistd.h> // for getopt
-#include <vpi/Image.h>
-#include <vpi/LensDistortionModels.h>
-#include <vpi/Status.h>
-#include <vpi/Stream.h>
-#include <vpi/algo/ConvertImageFormat.h>
-#include <vpi/algo/Remap.h>
+#include "vpi/Image.h"
+#include "vpi/LensDistortionModels.h"
+#include "vpi/Status.h"
+#include "vpi/Stream.h"
+#include "vpi/algo/ConvertImageFormat.h"
+#include "vpi/algo/Remap.h"
 
  #include <sstream>
 
