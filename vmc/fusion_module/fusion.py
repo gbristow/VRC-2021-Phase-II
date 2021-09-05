@@ -368,6 +368,7 @@ class Fusion(object):
 
             except Exception as e:
                 logger.exception(f"{fore.RED}FUS: Error creating hil_gps_message {str(e)}{style.RESET}") #type: ignore
+                time.sleep(1)
                 #raise e
                 continue
 
