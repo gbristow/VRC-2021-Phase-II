@@ -75,6 +75,8 @@ class Fusion(object):
 
         self.local_copy = {}
 
+        self.init=False
+
         logger.debug(f"{fore.LIGHT_CYAN_1} FUS: Object created! {style.RESET}") #type: ignore
 
     def on_message(
@@ -176,6 +178,8 @@ class Fusion(object):
         
         '''
         try:
+
+            self.init=True
 
             vmc_vel_update = {
                     "Vn": msg["n"],
@@ -330,7 +334,8 @@ class Fusion(object):
         '''
 
         time.sleep(10)
-
+        while not self.init:
+            time.sleep(1)
         while True:
             time.sleep(.1)
             try:
