@@ -50,6 +50,7 @@ services:
       - /opt/nvidia/vpi/include/vpi:/opt/nvidia/vpi/include/vpi  
       - /usr/include/opencv4/:/usr/include/opencv4/
       - /usr/local/cuda-10.2/include:/usr/local/cuda-10.2/include
+      - /usr/lib/aarch64-linux-gnu:/usr/lib/aarch64-linux-gnu
 #      - /opt/nvidia/vpi1/include/vpi:/opt/nvidia/vpi/include/vpi
 
   fusion:
