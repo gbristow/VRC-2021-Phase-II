@@ -8,12 +8,17 @@ RUN apt-get install -y \
 
 WORKDIR /app
 
+COPY . .
+
+WORKDIR /app/c/
+RUN g++ -I/usr/include/opencv4/ -I/usr/local/cuda-10.2/include -I/opt/nvidia/vpi/include/vpi  -I/opt/nvidia/vpi1/include/vpi -L./lib_aarch64_jetpack44 -L/usr/local/cuda-10.2/lib64  -L/opt/nvidia/vpi1/lib64 -L/opt/nvidia/vpi/lib vrcapriltags.cpp  -lapril_tagging -lcudart -lcuda -lcublas -lopencv_core -lopencv_videoio -lopencv_imgproc -lopencv_highgui -lnvvpi
+
+WORKDIR /app
+
 COPY python/requirements.txt requirements.txt
 
 RUN python3 -m pip install pip wheel --upgrade && \
     python3 -m pip install -r requirements.txt
-
-COPY . .
 
 #CMD ["python3", "vrcapriltag.py"]
 
