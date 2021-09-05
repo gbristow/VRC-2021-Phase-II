@@ -47,13 +47,6 @@ services:
     restart: unless-stopped
     volumes:
       - /tmp/argus_socket:/tmp/argus_socket
-      # - /opt:/opt
-      # - /usr:/usr
-      # - /opt/nvidia/vpi/include/vpi:/opt/nvidia/vpi/include/vpi  
-      # - /usr/include/opencv4/:/usr/include/opencv4/
-      # - /usr/local/cuda-10.2/include:/usr/local/cuda-10.2/include
-      # - /usr/lib/aarch64-linux-gnu:/usr/lib/aarch64-linux-gnu
-      # - /opt/nvidia/vpi1/:/opt/nvidia/vpi/
     runtime: "nvidia"
 
   fusion:
