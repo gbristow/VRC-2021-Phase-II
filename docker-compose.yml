@@ -55,7 +55,7 @@ services:
       # - /usr/lib/aarch64-linux-gnu:/usr/lib/aarch64-linux-gnu
       # - /opt/nvidia/vpi1/:/opt/nvidia/vpi/
     runtime:
-      - nvidia
+      - "nvidia"
 
   fusion:
     depends_on:
