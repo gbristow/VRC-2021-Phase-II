@@ -48,6 +48,8 @@ services:
     volumes:
       - /tmp/argus_socket:/tmp/argus_socket
       - /opt/nvidia/vpi/include/vpi:/opt/nvidia/vpi/include/vpi  
+      - /usr/include/opencv4/:/usr/include/opencv4/
+      - /usr/local/cuda-10.2/include:/usr/local/cuda-10.2/include
 #      - /opt/nvidia/vpi1/include/vpi:/opt/nvidia/vpi/include/vpi
 
   fusion:
