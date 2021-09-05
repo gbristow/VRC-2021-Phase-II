@@ -127,7 +127,7 @@ struct AprilTagsImpl {
 int main() {
 
     //############################################# SETUP VIDEO CAPTURE ##################################################################################################
-    cv::VideoCapture capture("nvarguscamerasrc ! video/x-raw(memory:NVMM), width=1280, height=720,format=NV12, framerate=60/1 ! nvvidconv ! video/x-raw,format=BGRx !  videoconvert ! videorate ! video/x-raw,format=BGR,framerate=10/1 ! appsink", cv::CAP_GSTREAMER);
+    cv::VideoCapture capture("nvarguscamerasrc ! video/x-raw(memory:NVMM), width=1280, height=720,format=NV12, framerate=60/1 ! nvvidconv ! video/x-raw,format=BGRx !  videoconvert ! videorate ! video/x-raw,format=BGR,framerate=5/1 ! appsink", cv::CAP_GSTREAMER);
     std::cout<<"made it past cap device"<<std::endl;
     int width = 1280;
     int height = 720;
