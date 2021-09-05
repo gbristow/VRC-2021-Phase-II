@@ -14,7 +14,7 @@
 #include <chrono>
 
 #include <opencv2/imgproc/imgproc.hpp>
-#include <vpi/OpenCVInterop.hpp>
+#include "vpi/OpenCVInterop.hpp"
 
 #include <string.h> // for basename(3) that doesn't modify its argument
 #include <unistd.h> // for getopt
