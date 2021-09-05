@@ -17,4 +17,4 @@ COPY . .
 
 #CMD ["python3", "vrcapriltag.py"]
 
-CMD ["./start_module.sh"]
+CMD ["/bin/bash", "./start_module.sh"]
