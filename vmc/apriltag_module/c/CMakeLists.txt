@@ -12,7 +12,7 @@ include_directories("../libraries/json/include")
 
 
 
-link_directories("../libraries/lib_aarch64_jetpack44")
+link_directories("./libraries/lib_aarch64_jetpack44")
 link_directories("/usr/local/cuda-10.2/lib64")
 link_directories("/opt/nvidia/vpi1/lib64")
 
