@@ -47,7 +47,10 @@ int main() {
 
 
         /////////////////////////// RUN THE APRILTAG DETECTOR ///////////////////////////////////////////////
-
+        
+        //convert the frame to rgba
+        cv::cvtColor(frame, img_rgba8, cv::COLOR_BGR2RGBA);
+        
         //send the frame to GPU memory and run the detections
         uint32_t num_detections = process_frame(impl_);
 

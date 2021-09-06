@@ -1,10 +1,8 @@
 #include "apriltags.hpp"
 
-uint32_t process_frame(AprilTagsImpl* impl_)
+uint32_t process_frame(cv::Mat img_rgba8, AprilTagsImpl* impl_)
 {
-        //convert the frame to rgba
-        cv::cvtColor(frame, img_rgba8, cv::COLOR_BGR2RGBA);
-        
+
         //copy the image to cuda mem
         const cudaError_t cuda_error =
                 cudaMemcpy(impl_->input_image_buffer,
