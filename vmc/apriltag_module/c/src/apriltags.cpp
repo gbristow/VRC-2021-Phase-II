@@ -1,6 +1,6 @@
 #include "apriltags.hpp"
 
-uint32_t process_frame(AprilTagsImpl impl_)
+uint32_t process_frame(AprilTagsImpl* impl_)
 {
         //convert the frame to rgba
         cv::cvtColor(frame, img_rgba8, cv::COLOR_BGR2RGBA);
