@@ -20,6 +20,8 @@
   
  #include <iostream>
  #include <sstream>
+
+ #include "cam_properties.hpp"
   
  #define CHECK_STATUS(STMT)                                    \
      do                                                        \
@@ -53,6 +55,6 @@ VPIWarpMap map            = {};
 // Initialize the fisheye lens model with the coefficients given by calibration procedure.
 VPIFisheyeLensDistortionModel distModel = {};
 
-void setup_vpi(void);
+void setup_vpi(cv::Mat img_rgba8);
 
 void undistort_frame(cv::Mat frame);

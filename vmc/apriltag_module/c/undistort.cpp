@@ -1,6 +1,6 @@
 #include "undistort.hpp"
 
-void setup_vpi()
+void setup_vpi(cv::Mat img_rgba8)
 {
     camMatrix(0,0) = (double)fx;
     camMatrix(1,1) = (double)fy;
