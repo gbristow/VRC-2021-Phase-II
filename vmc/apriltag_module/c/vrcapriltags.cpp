@@ -27,10 +27,10 @@
 
 #include <sstream>
 
-// #include "libraries/json/include/nlohmann/json.hpp"
+#include "libraries/json/include/nlohmann/json.hpp"
 
-// // for convenience
-// using json = nlohmann::json;
+// for convenience
+using json = nlohmann::json;
 
 
  #define CHECK_STATUS(STMT)                                    \
