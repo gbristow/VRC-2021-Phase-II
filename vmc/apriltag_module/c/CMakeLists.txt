@@ -8,18 +8,18 @@ add_subdirectory(./libraries/json)
 include_directories("/usr/include/opencv4/")
 include_directories("/usr/local/cuda-10.2/include")
 include_directories("/opt/nvidia/vpi1/include")
-include_directories("./libraries/json/include")
+include_directories("../libraries/json/include")
 
 
 
-link_directories("./libraries/lib_aarch64_jetpack44")
+link_directories("../libraries/lib_aarch64_jetpack44")
 link_directories("/usr/local/cuda-10.2/lib64")
 link_directories("/opt/nvidia/vpi1/lib64")
 
 
 link_libraries(april_tagging cudart cuda cublas opencv_core opencv_videoio opencv_imgproc opencv_highgui nvvpi)
 
-set(SOURCE_FILES vrcapriltags.cpp undistort.cpp cam_properties.cpp)
+set(SOURCE_FILES vrcapriltags.cpp apriltags.cpp undistort.cpp cam_properties.cpp)
 
 add_executable (vrcapriltags ${SOURCE_FILES})
 target_link_libraries(vrcapriltags PRIVATE nlohmann_json::nlohmann_json)

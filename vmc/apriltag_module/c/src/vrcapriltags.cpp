@@ -22,20 +22,18 @@ int main() {
     cv::Mat frame;
     cv::Mat img_rgba8;
 
+    //capture a frame and hand it to VPI to initialize it
     capture.read(frame);
     cv::cvtColor(frame, img_rgba8, cv::COLOR_BGR2RGBA);
-
     setup_vpi(img_rgba8);
-    
+
+    //create the apriltag handler
     auto *impl_ = new AprilTagsImpl();
     impl_->initialize(img_rgba8.cols, img_rgba8.rows,
                       img_rgba8.total() * img_rgba8.elemSize(),  img_rgba8.step,
                       fx,fy,ppx,ppy, //camera params
                       0.174, //tag edge length
                       6); //max number of tags 
-
-
-
 
     //################################################################### MAIN LOOP ##########################################################################################
     while (capture.isOpened())
@@ -50,38 +48,9 @@ int main() {
 
         /////////////////////////// RUN THE APRILTAG DETECTOR ///////////////////////////////////////////////
 
-        //convert the frame to rgba
-        cv::cvtColor(frame, img_rgba8, cv::COLOR_BGR2RGBA);
-        
-        //copy the image to cuda mem
-        const cudaError_t cuda_error =
-                cudaMemcpy(impl_->input_image_buffer,
-                           (uchar4 *)img_rgba8.ptr<unsigned char>(0),
-                           impl_->input_image_buffer_size,
-                           cudaMemcpyHostToDevice);
-        
-        if (cuda_error != cudaSuccess) {
-            throw std::runtime_error(
-                    "Could not memcpy to device CUDA memory (error code " +
-                    std::to_string(cuda_error) + ")");
-        }
+        //send the frame to GPU memory and run the detections
+        uint32_t num_detections = process_frame(impl_);
 
-        //run the detector
-        uint32_t num_detections;
-        const int error = nvAprilTagsDetect(
-            impl_->april_tags_handle,
-            &(impl_->input_image), 
-            impl_->tags.data(),
-            &num_detections, 
-            impl_->max_tags, 
-            impl_->main_stream
-        );
-
-    
-        if (error != 0) {
-            throw std::runtime_error("Failed to run AprilTags detector (error code " +
-                                     std::to_string(error) + ")");
-        }
         //handle the detections
         for (int i = 0; i < num_detections; i++) {
             const nvAprilTagsID_t &detection = impl_->tags[i];
