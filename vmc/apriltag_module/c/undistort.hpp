@@ -21,7 +21,7 @@
  #include <iostream>
  #include <sstream>
 
-#ifndef CAM_PROPERTIES
+#ifndef CAM_PROPERTIES_HPP
 #include "cam_properties.hpp"
 #endif
   

@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include "cam_properties.hpp"
+
 #include "apriltags.hpp"
 #include "undistort.hpp"
 
