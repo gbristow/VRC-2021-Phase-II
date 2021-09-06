@@ -1,8 +1,9 @@
-#include "apriltags.hpp"
-#include "undistort.hpp"
 #include <string.h> // for basename(3) that doesn't modify its argument
 #include <unistd.h> // for getopt
 #include <sstream>
+
+#include "apriltags.hpp"
+#include "undistort.hpp"
 
 #include <nlohmann/json.hpp>
 
