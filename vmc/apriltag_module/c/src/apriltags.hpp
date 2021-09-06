@@ -90,4 +90,4 @@ struct AprilTagsImpl {
     }
 };
 
-uint32_t process_frame(AprilTagsImpl impl_);
+uint32_t process_frame(AprilTagsImpl* impl_);
