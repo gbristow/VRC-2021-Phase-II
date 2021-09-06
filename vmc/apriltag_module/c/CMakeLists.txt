@@ -7,10 +7,6 @@ set(CMAKE_CXX_STANDARD 11)
 
 add_subdirectory(./libraries/json)
 
-add_library(json ...)
-
-target_link_libraries(json PRIVATE nlohmann_json::nlohmann_json)
-
 include_directories("/usr/include/opencv4/")
 include_directories("/usr/local/cuda-10.2/include")
 include_directories("/opt/nvidia/vpi1/include")
@@ -28,3 +24,4 @@ link_libraries(april_tagging cudart cuda cublas opencv_core opencv_videoio openc
 set(SOURCE_FILES vrcapriltags.cpp)
 
 add_executable (vrcapriltags ${SOURCE_FILES})
+target_link_libraries(vrcapriltags PRIVATE nlohmann_json::nlohmann_json)
