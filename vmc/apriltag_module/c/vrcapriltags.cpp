@@ -25,7 +25,12 @@
 #include "vpi/algo/ConvertImageFormat.h"
 #include "vpi/algo/Remap.h"
 
- #include <sstream>
+#include <sstream>
+
+#include "libraries/json/include/nlohmann/json.hpp"
+
+// for convenience
+using json = nlohmann::json;
 
 
  #define CHECK_STATUS(STMT)                                    \
