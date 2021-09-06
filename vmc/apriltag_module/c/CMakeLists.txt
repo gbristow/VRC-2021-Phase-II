@@ -19,7 +19,7 @@ link_directories("/usr/local/cuda-10.2/lib64")
 link_directories("/opt/nvidia/vpi1/lib64")
 
 
-link_libraries(april_tagging cudart cuda cublas opencv_core opencv_videoio opencv_imgproc opencv_highgui nvvpi json)
+link_libraries(april_tagging cudart cuda cublas opencv_core opencv_videoio opencv_imgproc opencv_highgui nvvpi)
 
 set(SOURCE_FILES vrcapriltags.cpp)
 
