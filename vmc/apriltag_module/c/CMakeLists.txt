@@ -3,7 +3,7 @@ project (vrcapriltags)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(CMAKE_CXX_COMPILER "g++")
+# set(CMAKE_CXX_COMPILER "g++")
 
 add_subdirectory(./libraries/json)
 
