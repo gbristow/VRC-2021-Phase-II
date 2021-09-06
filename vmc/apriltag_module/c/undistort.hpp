@@ -42,20 +42,20 @@
 //###################################################################### V P I ####################################################################
 
 // VPI objects that will be used
-VPIStream stream = NULL;
-VPIPayload remap = NULL;
-VPIImage tmpIn = NULL, tmpOut = NULL;
-VPIImage vimg = nullptr;
+extern VPIStream stream;
+extern VPIPayload remap;
+extern VPIImage tmpIn,tmpOut;
+extern VPIImage vimg;
 
 // Camera intrinsic parameters, initially identity (will be estimated by calibration process).
 using Mat3     = cv::Matx<double, 3, 3>;
-Mat3 camMatrix = Mat3::eye();
+extern Mat3 camMatrix;
 
 // Allocate a dense map.
-VPIWarpMap map            = {};
+extern VPIWarpMap map;
 
 // Initialize the fisheye lens model with the coefficients given by calibration procedure.
-VPIFisheyeLensDistortionModel distModel = {};
+extern VPIFisheyeLensDistortionModel distModel;
 
 void setup_vpi(cv::Mat img_rgba8);
 

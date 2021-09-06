@@ -1,5 +1,23 @@
 #include "undistort.hpp"
 
+
+// VPI objects that will be used
+extern VPIStream stream = NULL;
+extern VPIPayload remap = NULL;
+extern VPIImage tmpIn = NULL, tmpOut = NULL;
+extern VPIImage vimg = nullptr;
+
+// Camera intrinsic parameters, initially identity (will be estimated by calibration process).
+using Mat3     = cv::Matx<double, 3, 3>;
+extern Mat3 camMatrix = Mat3::eye();
+
+// Allocate a dense map.
+extern VPIWarpMap map            = {};
+
+// Initialize the fisheye lens model with the coefficients given by calibration procedure.
+extern VPIFisheyeLensDistortionModel distModel = {};
+
+
 void setup_vpi(cv::Mat img_rgba8)
 {
     camMatrix(0,0) = (double)fx;
