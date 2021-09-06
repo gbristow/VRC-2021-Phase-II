@@ -7,7 +7,7 @@
 #endif
 
 #include <iostream>
-#include "libraries/nvapriltags/nvAprilTags.h"
+#include "../libraries/nvapriltags/nvAprilTags.h"
 #include "cuda.h"
 #include "cuda_runtime.h"
 #include <opencv2/opencv.hpp>
