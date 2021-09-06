@@ -2,6 +2,7 @@
 #include <unistd.h> // for getopt
 #include <sstream>
 
+#include "cam_properties.hpp"
 #include "apriltags.hpp"
 #include "undistort.hpp"
 
@@ -16,19 +17,14 @@ int main() {
     //############################################# SETUP VIDEO CAPTURE ##################################################################################################
     cv::VideoCapture capture("nvarguscamerasrc ! video/x-raw(memory:NVMM), width=1280, height=720,format=NV12, framerate=60/1 ! nvvidconv ! video/x-raw,format=BGRx !  videoconvert ! videorate ! video/x-raw,format=BGR,framerate=5/1 ! appsink", cv::CAP_GSTREAMER);
     std::cout<<"made it past cap device"<<std::endl;
-    int width = 1280;
-    int height = 720;
-
-    float fx = 784.0756786399139;
-    float fy = 784.9009527658286;
-    float ppx = 677.124825443364;
-    float ppy = 385.33983488708003;
 
     cv::Mat frame;
     cv::Mat img_rgba8;
 
     capture.read(frame);
     cv::cvtColor(frame, img_rgba8, cv::COLOR_BGR2RGBA);
+
+    setup_vpi(img_rgba8);
     
     auto *impl_ = new AprilTagsImpl();
     impl_->initialize(img_rgba8.cols, img_rgba8.rows,
@@ -47,6 +43,7 @@ int main() {
         auto start = std::chrono::system_clock::now();
 
         capture.read(frame);
+
         undistort_frame(frame);
 
 
@@ -55,7 +52,6 @@ int main() {
         //convert the frame to rgba
         cv::cvtColor(frame, img_rgba8, cv::COLOR_BGR2RGBA);
         
-
         //copy the image to cuda mem
         const cudaError_t cuda_error =
                 cudaMemcpy(impl_->input_image_buffer,

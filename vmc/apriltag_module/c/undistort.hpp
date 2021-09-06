@@ -21,7 +21,9 @@
  #include <iostream>
  #include <sstream>
 
- #include "cam_properties.hpp"
+#ifndef CAM_PROPERTIES
+#include "cam_properties.hpp"
+#endif
   
  #define CHECK_STATUS(STMT)                                    \
      do                                                        \
