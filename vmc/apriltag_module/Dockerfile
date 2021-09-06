@@ -17,8 +17,6 @@ RUN python3 -m pip install pip wheel --upgrade && \
 
 WORKDIR /app/c
 
-RUN mkdir build
-
 WORKDIR /app/c/build
 
 RUN cmake ..
