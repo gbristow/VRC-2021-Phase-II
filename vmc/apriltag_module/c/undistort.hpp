@@ -1,3 +1,13 @@
+#include <opencv2/core/version.hpp>
+
+#if CV_MAJOR_VERSION >= 3
+#    include <opencv2/imgcodecs.hpp>
+#else
+#    include <opencv2/highgui/highgui.hpp>
+#endif
+
+#include <opencv2/opencv.hpp>
+
 #include "vpi/OpenCVInterop.hpp"
 #include "vpi/Image.h"
 #include "vpi/LensDistortionModels.h"
