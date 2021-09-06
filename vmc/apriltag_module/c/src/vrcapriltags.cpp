@@ -52,7 +52,7 @@ int main() {
         cv::cvtColor(frame, img_rgba8, cv::COLOR_BGR2RGBA);
         
         //send the frame to GPU memory and run the detections
-        uint32_t num_detections = process_frame(impl_);
+        uint32_t num_detections = process_frame(img_rgba8, impl_);
 
         //handle the detections
         for (int i = 0; i < num_detections; i++) {
