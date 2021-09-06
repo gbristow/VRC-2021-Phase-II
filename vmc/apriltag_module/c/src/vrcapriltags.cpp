@@ -12,6 +12,24 @@
 // for convenience
 using json = nlohmann::json;
 
+json jsonify_tag(nvAprilTagsID_t detection)
+{
+    // create an empty structure (null)
+    json j; 
+
+    json["id"] = detection.id;
+
+    json["pos"]["x"] = detection.translation[0];
+    json["pos"]["y"] = detection.translation[1];
+    json["pos"]["z"] = detection.translation[2];
+
+    json["rotation"] = {{detection.translation[0],detection.translation[3],detection.translation[6]},
+                        {detection.translation[1],detection.translation[4],detection.translation[7]},
+                        {detection.translation[2],detection.translation[5],detection.translation[8]}};
+
+    return j;
+}
+
 
 int main() {
 
@@ -41,13 +59,12 @@ int main() {
 
         auto start = std::chrono::system_clock::now();
 
+        //capture a frame
         capture.read(frame);
 
+        //undistort it
         undistort_frame(frame);
 
-
-        /////////////////////////// RUN THE APRILTAG DETECTOR ///////////////////////////////////////////////
-        
         //convert the frame to rgba
         cv::cvtColor(frame, img_rgba8, cv::COLOR_BGR2RGBA);
         
@@ -58,10 +75,14 @@ int main() {
         for (int i = 0; i < num_detections; i++) {
             const nvAprilTagsID_t &detection = impl_->tags[i];
 
-            printf("ID: %d\n", detection.id);
-            printf("X dist: %f\n", detection.translation[0]);
-            printf("Y dist: %f\n", detection.translation[1]);
-            printf("Z dist: %f\n", detection.translation[2]);
+            json j = jsonify_tag(detection);
+
+            std::cout << j.dump(4) << std::endl;
+
+            // printf("ID: %d\n", detection.id);
+            // printf("X dist: %f\n", detection.translation[0]);
+            // printf("Y dist: %f\n", detection.translation[1]);
+            // printf("Z dist: %f\n", detection.translation[2]);
             
             // corners
             for (auto corner : detection.corners) {
@@ -71,6 +92,8 @@ int main() {
             }
         }
         auto end = std::chrono::system_clock::now();
+        
+        
         int fps = int(1000 / ( std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() + 1));
         cv::putText(frame, "FPS: "+ std::to_string(fps), cv::Point(100,100),
                     cv::FONT_HERSHEY_PLAIN, 5, cv::Scalar(0xFF, 0xFF, 0), 2);        
