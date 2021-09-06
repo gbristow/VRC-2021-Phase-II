@@ -17,13 +17,13 @@ json jsonify_tag(nvAprilTagsID_t detection)
     // create an empty structure (null)
     json j; 
 
-    json["id"] = detection.id;
+    j["id"] = detection.id;
 
-    json["pos"]["x"] = detection.translation[0];
-    json["pos"]["y"] = detection.translation[1];
-    json["pos"]["z"] = detection.translation[2];
+    j["pos"]["x"] = detection.translation[0];
+    j["pos"]["y"] = detection.translation[1];
+    j["pos"]["z"] = detection.translation[2];
 
-    json["rotation"] = {{detection.translation[0],detection.translation[3],detection.translation[6]},
+    j["rotation"] = {{detection.translation[0],detection.translation[3],detection.translation[6]},
                         {detection.translation[1],detection.translation[4],detection.translation[7]},
                         {detection.translation[2],detection.translation[5],detection.translation[8]}};
 
