@@ -23,3 +23,4 @@ set(SOURCE_FILES src/vrcapriltags.cpp src/apriltags.cpp src/undistort.cpp src/ca
 
 add_executable (vrcapriltags ${SOURCE_FILES})
 target_link_libraries(vrcapriltags PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(vrcapriltags ${PAHO_CPP_LIB})

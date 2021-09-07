@@ -9,6 +9,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include "mqtt/client.h"
+
 // for convenience
 using json = nlohmann::json;
 
