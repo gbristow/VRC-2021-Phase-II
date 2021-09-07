@@ -34,6 +34,23 @@ json jsonify_tag(nvAprilTagsID_t detection)
 
 
 int main() {
+    //############################################# SETUP MQTT ####################################################################################
+    const std::string SERVER_ADDRESS { "tcp://127.0.0.1:18830" };
+    const std::string CLIENT_ID { "nvapriltags" };
+    const std::string TOPIC { "vrc/apriltags/raw" };
+
+    const int QOS = 0;
+    mqtt::client client(SERVER_ADDRESS, CLIENT_ID);
+
+    try {
+		std::cout << "\nConnecting..." << std::endl;
+		client.connect(connOpts);
+		std::cout << "...OK" << std::endl;
+    }
+    catch (const mqtt::exception& exc) {
+		std::cerr << exc.what() << std::endl;
+		return 1;
+	}
 
     //############################################# SETUP VIDEO CAPTURE ##################################################################################################
     cv::VideoCapture capture("nvarguscamerasrc ! video/x-raw(memory:NVMM), width=1280, height=720,format=NV12, framerate=60/1 ! nvvidconv ! video/x-raw,format=BGRx !  videoconvert ! videorate ! video/x-raw,format=BGR,framerate=5/1 ! appsink", cv::CAP_GSTREAMER);
@@ -73,27 +90,32 @@ int main() {
         //send the frame to GPU memory and run the detections
         uint32_t num_detections = process_frame(img_rgba8, impl_);
 
+        std::string payload = "[";
+        
         //handle the detections
         for (int i = 0; i < num_detections; i++) {
             const nvAprilTagsID_t &detection = impl_->tags[i];
 
             json j = jsonify_tag(detection);
 
-            std::cout << j.dump(4) << std::endl;
+            //std::cout << j.dump(4) << std::endl;
 
-            // printf("ID: %d\n", detection.id);
-            // printf("X dist: %f\n", detection.translation[0]);
-            // printf("Y dist: %f\n", detection.translation[1]);
-            // printf("Z dist: %f\n", detection.translation[2]);
-            
-            // corners
-            for (auto corner : detection.corners) {
-               float x = corner.x;
-               float y = corner.y;
-               //printf("x: %f, y: %f\n", x,y);
+            payload.append(j.dump(4));
+            if (i < num_detections - 1)
+            {
+                payload.append(",");
             }
+            
         }
+
+        payload.append("]");
+        
         auto end = std::chrono::system_clock::now();
+
+        if (num_detections > 0) 
+        {
+		    client.publish(TOPIC, payload, strlen(payload)+1);        
+        }
         
         
         int fps = int(1000 / ( std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() + 1));
