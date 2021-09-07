@@ -42,6 +42,10 @@ int main() {
     const int QOS = 0;
     mqtt::client client(SERVER_ADDRESS, CLIENT_ID);
 
+    mqtt::connect_options connOpts;
+	connOpts.set_keep_alive_interval(20);
+	connOpts.set_clean_session(true);
+
     try {
 		std::cout << "\nConnecting..." << std::endl;
 		client.connect(connOpts);
@@ -109,7 +113,7 @@ int main() {
         }
 
         payload.append("]");
-        
+
         auto end = std::chrono::system_clock::now();
 
         if (num_detections > 0) 
