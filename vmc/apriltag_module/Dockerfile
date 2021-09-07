@@ -32,7 +32,7 @@ RUN git clone https://github.com/eclipse/paho.mqtt.cpp
 WORKDIR /app/paho.mqtt.cpp
 
 RUN cmake -Bbuild -H. -DPAHO_BUILD_STATIC=ON \
-    -DPAHO_BUILD_DOCUMENTATION=TRUE -DPAHO_BUILD_SAMPLES=TRUE
+    -DPAHO_BUILD_DOCUMENTATION=FALSE -DPAHO_BUILD_SAMPLES=FALSE
 RUN cmake --build build/ --target install
 RUN ldconfig
 
