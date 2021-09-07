@@ -26,6 +26,8 @@ RUN cmake -Bbuild -H. -DPAHO_ENABLE_TESTING=OFF -DPAHO_BUILD_STATIC=ON \
 RUN cmake --build build/ --target install
 RUN ldconfig
 
+WORKDIR /app
+
 RUN git clone https://github.com/eclipse/paho.mqtt.cpp
 WORKDIR /app/paho.mqtt.cpp
 
