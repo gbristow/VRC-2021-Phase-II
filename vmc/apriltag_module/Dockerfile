@@ -4,7 +4,8 @@ ENV OPENBLAS_CORETYPE=ARMV8
 
 RUN apt-get update -y
 RUN apt-get install -y \
-    python3-pip
+    python3-pip -y \
+    libssl-dev
 
 WORKDIR /app
 
