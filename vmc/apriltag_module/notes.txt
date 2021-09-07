@@ -1,3 +1,9 @@
+change apt sources for 32.6
+
+apt dist-upgrade
+
+apt install libnvvpi1 vpi1-dev
+
 had to modify /etc/nvidia-container-runtime/host-files-for-container.d with two files, one for opencv stuff and one for vpi stuff:
 
 vpi:
@@ -5,6 +11,7 @@ vpi:
 dir, /opt/nvidia/vpi1/lib64/
 lib, /usr/lib/aarch64-linux-gnu/libEGL.so
 lib, /usr/local/cuda-10.2/targets/aarch64-linux/lib/libcudart.so.10.2
+lib, /usr/local/cuda-10.2/targets/aarch64-linux/lib/libcufft.so.10
 lib, /usr/lib/aarch64-linux-gnu/libopencv_imgcodecs.so.4.1
 dir, /opt/nvidia/vpi1/include/vpi/
 dir, /opt/nvidia/vpi1/include/vpi/detail/
