@@ -35,7 +35,7 @@ json jsonify_tag(nvAprilTagsID_t detection)
 
 int main() {
     //############################################# SETUP MQTT ####################################################################################
-    const std::string SERVER_ADDRESS { "tcp://127.0.0.1:18830" };
+    const std::string SERVER_ADDRESS { "tcp://mqtt:18830" };
     const std::string CLIENT_ID { "nvapriltags" };
     const std::string TOPIC { "vrc/apriltags/raw" };
 
