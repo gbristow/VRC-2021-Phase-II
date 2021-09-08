@@ -17,10 +17,10 @@ link_directories("./libraries/lib_aarch64_jetpack44")
 link_directories("/usr/local/cuda-10.2/lib64")
 link_directories("/opt/nvidia/vpi1/lib64")
 
-link_libraries(april_tagging cudart cuda cublas opencv_core opencv_videoio opencv_imgproc opencv_highgui nvvpi)
+link_libraries(april_tagging cudart cuda cublas opencv_core opencv_videoio opencv_imgproc opencv_highgui nvvpi paho-mqttpp3)
 
 set(SOURCE_FILES src/vrcapriltags.cpp src/apriltags.cpp src/undistort.cpp src/cam_properties.cpp)
 
 add_executable (vrcapriltags ${SOURCE_FILES})
 target_link_libraries(vrcapriltags PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(vrcapriltags paho-mqttpp3)
+# target_link_libraries(vrcapriltags paho-mqttpp3)
