@@ -215,6 +215,15 @@ class VRCAprilTag(object):
         setproctitle("AprilTagVPS_main")
 
         subprocess.Popen("./vrcapriltags", cwd="./c/build",shell=True)
+        threads = []
+        mqtt_thread = threading.Thread(
+            target=self.run_mqtt, args=(), daemon=True, name="apriltag_mqtt_thread"
+        )
+        threads.append(mqtt_thread)
+
+        for thread in threads:
+            thread.start()
+            logger.debug(f"{fore.GREEN}AT: starting thread: {thread.name}{style.RESET}")  # type: ignore
 
         while True:
             time.sleep(0.1)
