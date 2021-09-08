@@ -102,7 +102,7 @@ int main() {
 
             json j = jsonify_tag(detection);
 
-            payload.append(j.dump(4));
+            payload.append(j.dump());
             if (i < num_detections - 1)
             {
                 payload.append(",");
