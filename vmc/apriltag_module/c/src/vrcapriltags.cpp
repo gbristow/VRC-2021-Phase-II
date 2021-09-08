@@ -12,7 +12,7 @@
 #include "mqtt/client.h"
 
 // for convenience
-using json = nlohmann::json;
+using json = nlohmann::basic_json<std::map, std::vector, std::string, bool, std::int64_t, std::uint64_t, float>;
 
 json jsonify_tag(nvAprilTagsID_t detection)
 {
@@ -25,7 +25,7 @@ json jsonify_tag(nvAprilTagsID_t detection)
     j["pos"]["y"] = detection.translation[1];
     j["pos"]["z"] = detection.translation[2];
 
-    j["rotation"] = {{detection.translation[0],detection.translation[3],detection.translation[6]},
+    j["rotation"] = {   {detection.translation[0],detection.translation[3],detection.translation[6]},
                         {detection.translation[1],detection.translation[4],detection.translation[7]},
                         {detection.translation[2],detection.translation[5],detection.translation[8]}};
 

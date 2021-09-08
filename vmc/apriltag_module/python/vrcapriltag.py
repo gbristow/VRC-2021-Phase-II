@@ -28,6 +28,32 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 warnings.simplefilter("ignore", np.RankWarning)
 
 
+# [{
+#     "id": 0,
+#     "pos": {
+#         "x": -0.13743756711483002,
+#         "y": 0.4211849272251129,
+#         "z": 1.3003984689712524
+#     },
+#     "rotation": [
+#         [
+#             -0.13743756711483002,
+#             0.0,
+#             1.2087525853803817e+33
+#         ],
+#         [
+#             0.4211849272251129,
+#             8.485234427182443e+26,
+#             5.126427060631045e-11
+#         ],
+#         [
+#             1.3003984689712524,
+#             8.481069890240363e+26,
+#             0.0
+#         ]
+#     ]
+# }]
+
 class VRCAprilTag(object):
     def __init__(self):
         self.default_config: dict = {
