@@ -25,9 +25,9 @@ json jsonify_tag(nvAprilTagsID_t detection)
     j["pos"]["y"] = detection.translation[1];
     j["pos"]["z"] = detection.translation[2];
 
-    j["rotation"] = {   {detection.translation[0],detection.translation[3],detection.translation[6]},
-                        {detection.translation[1],detection.translation[4],detection.translation[7]},
-                        {detection.translation[2],detection.translation[5],detection.translation[8]}};
+    j["rotation"] = {   {detection.orientation[0],detection.orientation[3],detection.orientation[6]},
+                        {detection.orientation[1],detection.orientation[4],detection.orientation[7]},
+                        {detection.orientation[2],detection.orientation[5],detection.orientation[8]}};
 
     return j;
 }
@@ -106,7 +106,7 @@ int main() {
 
             for(int g = 0; g<9; g++)
             {
-                std::cout << detection.translation[g] <<std::endl;
+                std::cout << detection.orientation[g] <<std::endl;
             }
             
             std::cout<<std::endl;
