@@ -136,7 +136,7 @@ class VRCAprilTag(object):
         self.tm["H_aeroBody_cam"] = H_aeroBody_cam
 
         for tag in self.default_config["tag_truth"]:  # type: ignore
-            name = "tag" + tag
+            name = "tag_" + tag
             tag_dat = self.default_config["tag_truth"][tag]  # type: ignore
             rmat = t3d.euler.euler2mat(tag_dat["rpy"][0], tag_dat["rpy"][1], tag_dat["rpy"][2], axes="rxyz")  # type: ignore
             tag_tf = t3d.affines.compose(tag_dat["xyz"], rmat, [1, 1, 1])  # type: ignore
