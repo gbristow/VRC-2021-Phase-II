@@ -117,7 +117,7 @@ int main() {
         if (num_detections > 0) 
         {
             const char * const_payload = payload.c_str();
-		    client.publish(TOPIC, const_payload, strlen(const_payload)+1);        
+		    client.publish(TOPIC, const_payload, strlen(const_payload));        
         }
         
         
