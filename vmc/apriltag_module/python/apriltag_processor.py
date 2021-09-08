@@ -59,11 +59,7 @@ class VRCAprilTag(object):
         self.default_config: dict = {
             "cam": {
                 "pos": [13, 0, 8.5],  # cm from FC
-                "rpy": [
-                    0,
-                    0,
-                    -pi / 2,
-                ],  # cam x = body -y; cam y = body x, cam z = body z
+                "rpy": [0, 0, -pi / 2,],  # cam x = body -y; cam y = body x, cam z = body z
             },
             "tag_truth": {"0": {"rpy": [0, 0, 0], "xyz": [0, 0, 0]}},
             "AT_UPDATE_FREQ": 5,
@@ -99,8 +95,7 @@ class VRCAprilTag(object):
         self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage
     ) -> None:
         try:
-            logger.debug(f"{msg.topic}: {str(msg.payload)}")
-
+            #logger.debug(f"{msg.topic}: {str(msg.payload)}")
             if msg.topic in self.topic_map:
                 payload = json.loads(msg.payload)
                 self.topic_map[msg.topic](payload)
@@ -152,10 +147,10 @@ class VRCAprilTag(object):
         for tag in tags:
             id, distance, pos, heading = self.handle_tag(tag)
 
-            print(f"tag_id: {id}")
-            print(f"tag_dist: {distance}")
-            print(f"pos: {pos}")
-            print(f"heading: {heading}")
+            logger.debug(f"tag_id: {id}")
+            logger.debug(f"tag_dist: {distance}")
+            logger.debug(f"pos: {pos}")
+            logger.debug(f"heading: {heading}")
     
 
     def horizontal_dist_to_tag(self, tag: dict)->float:
