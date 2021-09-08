@@ -104,6 +104,19 @@ int main() {
 
             //std::cout << j.dump(4) << std::endl;
 
+            std::vector<float> numlist = {{detection.translation[0],detection.translation[3],detection.translation[6]},
+                        {detection.translation[1],detection.translation[4],detection.translation[7]},
+                        {detection.translation[2],detection.translation[5],detection.translation[8]}};
+
+            for(int g = 0; g<9; g++)
+            {
+                std::cout << numlist[g] <<std::endl;
+            }
+            
+            std::cout<<std::endl;
+            std::cout<<std::endl;
+            std::cout<<std::endl;
+
             payload.append(j.dump(4));
             if (i < num_detections - 1)
             {
