@@ -102,17 +102,6 @@ int main() {
 
             json j = jsonify_tag(detection);
 
-            //std::cout << j.dump(4) << std::endl;
-
-            for(int g = 0; g<9; g++)
-            {
-                std::cout << detection.orientation[g] <<std::endl;
-            }
-            
-            std::cout<<std::endl;
-            std::cout<<std::endl;
-            std::cout<<std::endl;
-
             payload.append(j.dump(4));
             if (i < num_detections - 1)
             {
