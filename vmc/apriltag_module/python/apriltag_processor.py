@@ -214,7 +214,7 @@ class VRCAprilTag(object):
         # tells the os what to name this process, for debugging
         setproctitle("AprilTagVPS_main")
 
-        subprocess.Popen('../c/build/vrcapriltags', shell=True)
+        subprocess.Popen("./vrcapriltags", cwd="./c/build",shell=True)
 
         while True:
             time.sleep(0.1)
