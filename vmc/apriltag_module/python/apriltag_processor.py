@@ -173,7 +173,7 @@ class VRCAprilTag(object):
         tag_id = tag["id"]
 
         # if we have a location definition for the visible tag
-        if str(tag.tag_id) in self.default_config["tag_truth"].keys():
+        if str(tag["id"]) in self.default_config["tag_truth"].keys():
             tag_rot = np.asarray(tag["rotation"])
             rpy = t3d.euler.mat2euler(tag_rot)
             R = t3d.euler.euler2mat(0, 0, rpy[2], axes="rxyz")
