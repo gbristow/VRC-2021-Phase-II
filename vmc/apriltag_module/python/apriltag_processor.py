@@ -22,8 +22,6 @@ from typing import Dict, List, Union, Any
 
 import paho.mqtt.client as mqtt
 
-from numba import jit
-
 # find the file path to this file
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
@@ -192,7 +190,6 @@ class VRCAprilTag(object):
         self.mqtt_client.publish(f"{self.topic_prefix}/selected", json.dumps(apriltag_position))
 
 
-    @jit
     def world_angle_to_tag(self, pos, tag_id) -> Union[float,None] :
         '''
         returns the angle with respect to "north" in the "world frame"
@@ -207,18 +204,15 @@ class VRCAprilTag(object):
 
             return deg
 
-    @jit
     def horizontal_dist_to_tag(self, tag: dict)->float:
         """
         returns the scalar distance in the x-y plane to a tag in centimeters
         """
         return float(np.linalg.norm([tag["pos"]["x"] * 100, tag["pos"]["y"] * 100]))
 
-    @jit
     def vertical_dist_to_tag(self, tag: dict) -> float:
         return tag["pos"]["z"] * 100
 
-    @jit
     def handle_tag(self, tag):
         """
         Calculates the distance, position, and heading of the drone in NED frame

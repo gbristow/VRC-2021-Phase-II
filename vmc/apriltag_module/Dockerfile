@@ -1,6 +1,6 @@
 FROM nvcr.io/nvidia/l4t-ml:r32.6.1-py3
 
-ENV OPENBLAS_CORETYPE=ARMV8
+ENV OPENBLAS_CORETYPE=CORTEXA57
 
 RUN apt-get update -y
 RUN apt-get install -y \
