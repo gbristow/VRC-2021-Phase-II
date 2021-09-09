@@ -146,6 +146,8 @@ class VRCAprilTag(object):
 
         min_dist = 1000000
 
+        closest_tag = None
+
         for index, tag in enumerate(payload):
             
             id, horizontal_distance, vertical_distance, angle, pos, heading = self.handle_tag(tag)
@@ -156,19 +158,38 @@ class VRCAprilTag(object):
                 "vertical_dist": vertical_distance
             }
 
-            if pos:
+            # add some more info if we had the truth data for the tag
+            if pos.any(): #type: ignore
                 tag["angle_to_tag"] = angle
                 tag["pos"] = {
-                    "x": pos[0],
-                    "y": pos[1],
-                    "z": pos[2]
+                    "x": pos[0],  #type: ignore
+                    "y": pos[1],  #type: ignore
+                    "z": pos[2]   #type: ignore
                 }
                 tag["heading"] = heading
+                if horizontal_distance < min_dist:
+                    min_dist = horizontal_distance
+                    closest_tag = index
             
 
             tag_list.append(tag) 
 
+            
+
         self.mqtt_client.publish(f"{self.topic_prefix}/visible_tags", json.dumps(tag_list))
+
+        apriltag_position = {
+            "tag_id": tag_list[closest_tag]["id"], #type: ignore
+            "pos": {
+                "x": tag_list[closest_tag]["pos"]["x"], #type: ignore
+                "y": tag_list[closest_tag]["pos"]["y"], #type: ignore
+                "z": tag_list[closest_tag]["pos"]["z"], #type: ignore
+            },
+            "heading": tag_list[closest_tag]["heading"] #type: ignore
+
+        }
+
+        self.mqtt_client.publish(f"{self.topic_prefix}/selected", json.dumps(apriltag_position))
 
 
     
