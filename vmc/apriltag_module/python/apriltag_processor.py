@@ -144,13 +144,23 @@ class VRCAprilTag(object):
     def on_apriltag_message(self, payload):
         tags = payload
 
+        tag_list = []
+
         for tag in tags:
             id, distance, pos, heading = self.handle_tag(tag)
 
-            logger.debug(f"tag_id: {id}")
-            logger.debug(f"tag_dist: {distance}")
-            logger.debug(f"pos: {pos}")
-            logger.debug(f"heading: {heading}")
+            tag = {
+                "id":id,
+                "horizontal_dist": distance,
+                "pos": pos,
+                "heading":heading
+            }
+
+            tag_list.append(tag) 
+
+        self.mqtt_client.publish(f"{self.topic_prefix}/visible_tags", json.dumps(tag_list))
+
+
     
 
     def horizontal_dist_to_tag(self, tag: dict)->float:
