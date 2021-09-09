@@ -122,8 +122,8 @@ int main() {
         
         
         int fps = int(1000 / ( std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() + 1));
-        cv::putText(frame, "FPS: "+ std::to_string(fps), cv::Point(100,100),
-                    cv::FONT_HERSHEY_PLAIN, 5, cv::Scalar(0xFF, 0xFF, 0), 2);        
+        // cv::putText(frame, "FPS: "+ std::to_string(fps), cv::Point(100,100),
+        //             cv::FONT_HERSHEY_PLAIN, 5, cv::Scalar(0xFF, 0xFF, 0), 2);        
         
         //std::cout<<"num_detections: "<<num_detections<<std::endl;
 

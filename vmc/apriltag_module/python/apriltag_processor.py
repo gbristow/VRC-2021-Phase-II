@@ -220,8 +220,8 @@ class VRCAprilTag(object):
         T, R, Z, S = t3d.affines.decompose44(H)
 
         R_t = np.transpose(R)
-        H_rot = t3d.compose([0,0,0], R_t, [1, 1, 1],)
-        H_tran = t3d.compose([-1*T[0], -1*T[1], -1*T[2]], np.eye(3), [1, 1, 1],)
+        H_rot = t3d.affines.compose([0,0,0], R_t, [1, 1, 1],)
+        H_tran = t3d.affines.compose([-1*T[0], -1*T[1], -1*T[2]], np.eye(3), [1, 1, 1],)
 
         return H_rot.dot(H_tran)
 
