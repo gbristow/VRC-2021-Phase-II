@@ -58,7 +58,7 @@ class VRCAprilTag(object):
     def __init__(self):
         self.default_config: dict = {
             "cam": {
-                "pos": [13, 0, 8.5],  # cm from FC
+                "pos": [13, 0, 8.5],  # cm from FC forward, right, down
                 "rpy": [0, 0, -pi / 2,],  # cam x = body -y; cam y = body x, cam z = body z
             },
             "tag_truth": {"0": {"rpy": [0, 0, 0], "xyz": [0, 0, 0]}},
@@ -171,12 +171,9 @@ class VRCAprilTag(object):
                     min_dist = horizontal_distance
                     closest_tag = index
             
-
             tag_list.append(tag) 
 
-            
-
-        self.mqtt_client.publish(f"{self.topic_prefix}/visible_tags", json.dumps(tag_list))
+        #self.mqtt_client.publish(f"{self.topic_prefix}/visible_tags", json.dumps(tag_list))
 
         apriltag_position = {
             "tag_id": tag_list[closest_tag]["id"], #type: ignore
@@ -186,10 +183,9 @@ class VRCAprilTag(object):
                 "z": tag_list[closest_tag]["pos"]["z"], #type: ignore
             },
             "heading": tag_list[closest_tag]["heading"] #type: ignore
-
         }
 
-        self.mqtt_client.publish(f"{self.topic_prefix}/selected", json.dumps(apriltag_position))
+        #self.mqtt_client.publish(f"{self.topic_prefix}/selected", json.dumps(apriltag_position))
 
 
     
@@ -200,7 +196,7 @@ class VRCAprilTag(object):
         if tag_id in self.default_config["tag_truth"].keys():
             del_x = self.default_config["tag_truth"][tag_id]["xyz"][0] - pos[0]
             del_y = self.default_config["tag_truth"][tag_id]["xyz"][1] - pos[1]
-            deg = degrees(atan2(del_y, del_x))
+            deg = degrees(atan2(del_y, del_x)) # TODO - i think plus pi/2 bc this is respect to +x
 
             if deg < 0.0: 
                 deg += 360.0
@@ -271,6 +267,7 @@ class VRCAprilTag(object):
         setproctitle("AprilTagVPS_main")
 
         subprocess.Popen("./vrcapriltags", cwd="./c/build",shell=True)
+
         threads = []
         mqtt_thread = threading.Thread(
             target=self.run_mqtt, args=(), daemon=True, name="apriltag_mqtt_thread"
