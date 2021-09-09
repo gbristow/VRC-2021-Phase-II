@@ -152,7 +152,11 @@ class VRCAprilTag(object):
             tag = {
                 "id":id,
                 "horizontal_dist": distance,
-                "pos": pos,
+                "pos":{
+                    "x":pos[0],
+                    "y":pos[1],
+                    "z":pos[2]
+                },
                 "heading":heading
             }
 
