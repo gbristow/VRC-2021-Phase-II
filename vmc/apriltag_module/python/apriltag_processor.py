@@ -148,8 +148,6 @@ class VRCAprilTag(object):
 
         closest_tag = None
 
-        return
-
         for index, tag in enumerate(payload):
             
             id, horizontal_distance, vertical_distance, angle, pos, heading = self.handle_tag(tag)
@@ -213,6 +211,22 @@ class VRCAprilTag(object):
     def vertical_dist_to_tag(self, tag: dict) -> float:
         return tag["pos"]["z"] * 100
 
+    def H_inv(self, H: t3d.affines) -> t3d.affines:
+        """
+        a method to efficiently compute the inverse of a homogeneous transformation matrix
+        for reference: http://vr.cs.uiuc.edu/node81.html
+        """
+
+        T, R, Z, S = t3d.affines.decompose44(H)
+
+        R_t = np.transpose(R)
+        H_rot = t3d.compose([0,0,0], R_t, [1, 1, 1],)
+        H_tran = t3d.compose([-1*T[0], -1*T[1], -1*T[2]], np.eye(3), [1, 1, 1],)
+
+        return H_rot.dot(H_tran)
+
+
+
     def handle_tag(self, tag):
         """
         Calculates the distance, position, and heading of the drone in NED frame
@@ -242,7 +256,8 @@ class VRCAprilTag(object):
             H_to_from = "H_" + name + "_cam"
             self.tm[H_to_from] = H_tag_cam
 
-            H_cam_tag = np.linalg.inv(H_tag_cam)
+            # H_cam_tag = np.linalg.inv(H_tag_cam)
+            H_cam_tag = self.H_inv(H_tag_cam)
 
             H_cam_aeroRef = self.tm["H_" + name + "_aeroRef"].dot(H_cam_tag)
 
