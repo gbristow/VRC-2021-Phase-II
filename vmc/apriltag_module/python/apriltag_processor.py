@@ -150,7 +150,7 @@ class VRCAprilTag(object):
 
         closest_tag = None
 
-        pass
+        return
 
         for index, tag in enumerate(payload):
             
