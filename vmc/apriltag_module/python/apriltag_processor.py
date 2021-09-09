@@ -150,6 +150,8 @@ class VRCAprilTag(object):
 
         closest_tag = None
 
+        pass
+
         for index, tag in enumerate(payload):
             
             id, horizontal_distance, vertical_distance, angle, pos, heading = self.handle_tag(tag)
