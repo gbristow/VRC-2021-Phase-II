@@ -256,8 +256,8 @@ class VRCAprilTag(object):
             H_to_from = "H_" + name + "_cam"
             self.tm[H_to_from] = H_tag_cam
 
-            # H_cam_tag = np.linalg.inv(H_tag_cam)
-            H_cam_tag = self.H_inv(H_tag_cam)
+            H_cam_tag = np.linalg.inv(H_tag_cam)
+            #H_cam_tag = self.H_inv(H_tag_cam)
 
             H_cam_aeroRef = self.tm["H_" + name + "_aeroRef"].dot(H_cam_tag)
 
