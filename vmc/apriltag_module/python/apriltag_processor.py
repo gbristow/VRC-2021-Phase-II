@@ -2,7 +2,7 @@
 import time
 import threading
 import os
-from math import pi, cos, sin
+from math import pi, cos, sin, atan2, degrees
 import json
 import socket
 import warnings
@@ -142,22 +142,22 @@ class VRCAprilTag(object):
             self.tm[H_to_from] = np.eye(4)
 
     def on_apriltag_message(self, payload):
-        tags = payload
-
         tag_list = []
 
-        for tag in tags:
-            id, distance, pos, heading = self.handle_tag(tag)
+        for tag in payload:
+            
+            id, distance, angle, pos, heading = self.handle_tag(tag)
 
             tag = {
-                "id":id,
+                "id": id,
+                "angle_to_tag": angle,
                 "horizontal_dist": distance,
                 "pos":{
-                    "x":pos[0],
-                    "y":pos[1],
-                    "z":pos[2]
+                    "x": pos[0],
+                    "y": pos[1],
+                    "z": pos[2]
                 },
-                "heading":heading
+                "heading": heading
             }
 
             tag_list.append(tag) 
@@ -166,6 +166,20 @@ class VRCAprilTag(object):
 
 
     
+    def world_angle_to_tag(self, pos, tag_id) -> Union[float,None] :
+        '''
+        returns the angle with respect to "north" in the "world frame"
+        '''
+        if tag_id in self.default_config["tag_truth"].keys():
+            del_x = self.default_config["tag_truth"][tag_id]["xyz"][0] - pos[0]
+            del_y = self.default_config["tag_truth"][tag_id]["xyz"][1] - pos[1]
+            deg = degrees(atan2(del_y, del_x))
+
+            if deg < 0.0: 
+                deg += 360.0
+
+            return deg
+
 
     def horizontal_dist_to_tag(self, tag: dict)->float:
         """
@@ -215,9 +229,11 @@ class VRCAprilTag(object):
 
             heading = np.rad2deg(heading)
 
-            return tag_id, distance, pos, heading
+            angle = self.world_angle_to_tag(pos, tag["id"])
+
+            return tag_id, distance, angle, pos, heading
         else:
-            return tag_id, distance, None, None
+            return tag_id, distance, None, None, None
 
     def main(self):
         # tells the os what to name this process, for debugging
