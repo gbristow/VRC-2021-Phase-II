@@ -23,7 +23,7 @@ RUN git checkout v1.3.8
 
 RUN cmake -Bbuild -H. -DPAHO_ENABLE_TESTING=OFF -DPAHO_BUILD_STATIC=ON \
     -DPAHO_WITH_SSL=ON -DPAHO_HIGH_PERFORMANCE=ON
-RUN cmake --build build/ --target install
+RUN cmake --build build/ --target install --parallel 4
 RUN ldconfig
 
 WORKDIR /app
@@ -33,7 +33,7 @@ WORKDIR /app/paho.mqtt.cpp
 
 RUN cmake -Bbuild -H. -DPAHO_BUILD_STATIC=ON \
     -DPAHO_BUILD_DOCUMENTATION=FALSE -DPAHO_BUILD_SAMPLES=FALSE
-RUN cmake --build build/ --target install
+RUN cmake --build build/ --target install --parallel 4
 RUN ldconfig
 
 
