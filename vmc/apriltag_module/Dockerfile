@@ -44,7 +44,7 @@ WORKDIR /app/c/build
 
 RUN cmake ..
 
-RUN make
+RUN make -j4
 
 #RUN g++ -std=c++11 -I/usr/include/opencv4/ -I/usr/local/cuda-10.2/include -I/opt/nvidia/vpi1/include/ -I./libraries/json/inlcude  -L./libraries/lib_aarch64_jetpack44 -L/usr/local/cuda-10.2/lib64  -L/opt/nvidia/vpi1/lib64 -L/opt/nvidia/vpi/lib vrcapriltags.cpp  -lapril_tagging -lcudart -lcuda -lcublas -lopencv_core -lopencv_videoio -lopencv_imgproc -lopencv_highgui -lnvvpi
 
