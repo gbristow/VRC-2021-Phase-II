@@ -144,21 +144,27 @@ class VRCAprilTag(object):
     def on_apriltag_message(self, payload):
         tag_list = []
 
-        for tag in payload:
+        min_dist = 1000000
+
+        for index, tag in enumerate(payload):
             
-            id, distance, angle, pos, heading = self.handle_tag(tag)
+            id, horizontal_distance, vertical_distance, angle, pos, heading = self.handle_tag(tag)
 
             tag = {
                 "id": id,
-                "angle_to_tag": angle,
-                "horizontal_dist": distance,
-                "pos":{
+                "horizontal_dist": horizontal_distance,
+                "vertical_dist": vertical_distance
+            }
+
+            if pos:
+                tag["angle_to_tag"] = angle
+                tag["pos"] = {
                     "x": pos[0],
                     "y": pos[1],
                     "z": pos[2]
-                },
-                "heading": heading
-            }
+                }
+                tag["heading"] = heading
+            
 
             tag_list.append(tag) 
 
@@ -187,12 +193,16 @@ class VRCAprilTag(object):
         """
         return float(np.linalg.norm([tag["pos"]["x"] * 100, tag["pos"]["y"] * 100]))
 
+    def vertical_dist_to_tag(self, tag: dict) -> float:
+        return tag["pos"]["z"] * 100
+
     def handle_tag(self, tag):
         """
         Calculates the distance, position, and heading of the drone in NED frame
         based on the tag detections.
         """
-        distance = self.horizontal_dist_to_tag(tag)
+        horizontal_distance = self.horizontal_dist_to_tag(tag)
+        vertical_distance = self.vertical_dist_to_tag(tag)
         tag_id = tag["id"]
 
         # if we have a location definition for the visible tag
@@ -231,9 +241,9 @@ class VRCAprilTag(object):
 
             angle = self.world_angle_to_tag(pos, tag["id"])
 
-            return tag_id, distance, angle, pos, heading
+            return tag_id, horizontal_distance, vertical_distance, angle, pos, heading
         else:
-            return tag_id, distance, None, None, None
+            return tag_id, horizontal_distance, vertical_distance, None, None, None
 
     def main(self):
         # tells the os what to name this process, for debugging
