@@ -192,9 +192,9 @@ class VRCAprilTag(object):
         '''
         returns the angle with respect to "north" in the "world frame"
         '''
-        if tag_id in self.default_config["tag_truth"].keys():
-            del_x = self.default_config["tag_truth"][tag_id]["xyz"][0] - pos[0]
-            del_y = self.default_config["tag_truth"][tag_id]["xyz"][1] - pos[1]
+        if str(tag_id) in self.default_config["tag_truth"].keys():
+            del_x = self.default_config["tag_truth"][str(tag_id)]["xyz"][0] - pos[0]
+            del_y = self.default_config["tag_truth"][str(tag_id)]["xyz"][1] - pos[1]
             deg = degrees(atan2(del_y, del_x)) # TODO - i think plus pi/2 bc this is respect to +x
 
             if deg < 0.0: 
