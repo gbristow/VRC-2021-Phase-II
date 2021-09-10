@@ -178,9 +178,9 @@ class VRCAprilTag(object):
         apriltag_position = {
             "tag_id": tag_list[closest_tag]["id"], #type: ignore
             "pos": {
-                "x": tag_list[closest_tag]["pos"]["x"], #type: ignore
-                "y": tag_list[closest_tag]["pos"]["y"], #type: ignore
-                "z": tag_list[closest_tag]["pos"]["z"], #type: ignore
+                "n": tag_list[closest_tag]["pos"]["x"], #type: ignore
+                "e": tag_list[closest_tag]["pos"]["y"], #type: ignore
+                "d": tag_list[closest_tag]["pos"]["z"], #type: ignore
             },
             "heading": tag_list[closest_tag]["heading"] #type: ignore
         }
