@@ -23,7 +23,7 @@ from typing import Dict, List, Union, Any
 import paho.mqtt.client as mqtt
 
 # find the file path to this file
-__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+#__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
 warnings.simplefilter("ignore", np.RankWarning)
 

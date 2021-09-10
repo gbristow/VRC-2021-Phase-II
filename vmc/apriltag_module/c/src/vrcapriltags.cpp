@@ -37,7 +37,8 @@ int main() {
     //############################################# SETUP MQTT ####################################################################################
     const std::string SERVER_ADDRESS { "tcp://mqtt:18830" };
     const std::string CLIENT_ID { "nvapriltags" };
-    const std::string TOPIC { "vrc/apriltags/raw" };
+    const std::string TAG_TOPIC { "vrc/apriltags/raw" };
+    const std::string FPS_TOPIC { "vrc/apriltags/fps" };
 
     const int QOS = 0;
     mqtt::client client(SERVER_ADDRESS, CLIENT_ID);
@@ -117,17 +118,15 @@ int main() {
         if (num_detections > 0) 
         {
             const char * const_payload = payload.c_str();
-		    client.publish(TOPIC, const_payload, strlen(const_payload));        
+		    client.publish(TAG_TOPIC, const_payload, strlen(const_payload));        
         }
         
         
         int fps = int(1000 / ( std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() + 1));
-        // cv::putText(frame, "FPS: "+ std::to_string(fps), cv::Point(100,100),
-        //             cv::FONT_HERSHEY_PLAIN, 5, cv::Scalar(0xFF, 0xFF, 0), 2);        
-        
-        //std::cout<<"num_detections: "<<num_detections<<std::endl;
 
-        //std::cout<<"FPS: "<<std::to_string(fps)<<std::endl;
+        std::string fps_str = std::to_string(fps);
+        const char * const_fps_str = fps_str.c_str();
+        client.publish(FPS_TOPIC, const_fps_str, strlen(const_fps_str));
     }
     delete(impl_);
     return 0;
