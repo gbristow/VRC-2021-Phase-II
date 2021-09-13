@@ -65,7 +65,7 @@ class Fusion(object):
             "vrc/vio/heading":self.fuse_att_heading,
             "vrc/vio/velocity/ned":self.fuse_vel,
             f"{self.topic_prefix}/pos/ned":self.local_to_geo,
-            "vrc/apriltags/selected/pos": self.on_apriltag_message
+            #"vrc/apriltags/selected/pos": self.on_apriltag_message
         }
 
         self.primary_topic = None
@@ -366,7 +366,7 @@ class Fusion(object):
                             "vd": int(self.local_copy["vel"]["Vd"]),
                             "cog": int(self.local_copy["course"]["course"] * 100),
                             "satellites_visible": int(self.config["hil_gps_constants"]["satellites_visible"]),
-                            "heading": int(self.local_copy["heading"]["heading"] * 100)
+                            "heading": int(self.local_copy["heading"] * 100)
                         }
                     }
                     self.mqtt_client.publish(
