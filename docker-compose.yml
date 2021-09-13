@@ -2,7 +2,7 @@ version: '3'
 
 services:
   mavp2p:
-    build: vmc/mavp2p
+    image: ghcr.io/bellflight/vrc_mavp2p:latest
     command: serial:/dev/ttyTHS1:500000 tcps:0.0.0.0:5790 udpc:127.0.0.1:14541 udpc:127.0.0.1:14542 --print-errors
     restart: unless-stopped
     devices:
@@ -21,14 +21,14 @@ services:
     depends_on:
       - mqtt
       - mavp2p
-    build: vmc/flight_control_module
+    image: ghcr.io/bellflight/vrc_flight_control_module:latest
     network_mode: "host"
     restart: unless-stopped
 
   pcc:
     depends_on:
       - mqtt
-    build: vmc/peripheral_control_module
+    image: ghcr.io/bellflight/vrc_peripheral_control_module:latest
     restart: unless-stopped
     devices:
     - "/dev/ttyACM0:/dev/ttyACM0"
@@ -36,7 +36,7 @@ services:
   vio:
     depends_on:
       - mqtt
-    build: vmc/vio_module
+    image: ghcr.io/bellflight/vrc_vio_module:latest
     privileged: true
     restart: unless-stopped
 
@@ -53,7 +53,7 @@ services:
       - mqtt
       - vio
       - apriltag
-    build: vmc/fusion_module
+    image: ghcr.io/bellflight/vrc_fusion_module:latest
     restart: unless-stopped
 
   # sandbox:
