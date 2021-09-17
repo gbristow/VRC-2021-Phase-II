@@ -137,6 +137,10 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# PyQt
+.qt_for_python
+
 .vscode/
 custom_mavlink/build/
 custom_mavlink/target/
+GUI/settings.json
