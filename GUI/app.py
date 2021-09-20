@@ -62,11 +62,11 @@ class MainWidget(QtWidgets.QWidget):
         servo_1_groupbox.setLayout(servo_1_layout)
 
         servo_1_open_button = QtWidgets.QPushButton("Open")
-        servo_1_open_button.clicked.connect(lambda: self.set_servo(1, "open"))
+        servo_1_open_button.clicked.connect(lambda: self.set_servo(0, "open"))
         servo_1_layout.addWidget(servo_1_open_button)
 
         servo_1_close_button = QtWidgets.QPushButton("Close")
-        servo_1_close_button.clicked.connect(lambda: self.set_servo(1, "close"))
+        servo_1_close_button.clicked.connect(lambda: self.set_servo(0, "close"))
         servo_1_layout.addWidget(servo_1_close_button)
 
         servos_layout.addWidget(servo_1_groupbox)
@@ -76,11 +76,11 @@ class MainWidget(QtWidgets.QWidget):
         servo_2_groupbox.setLayout(servo_2_layout)
 
         servo_2_open_button = QtWidgets.QPushButton("Open")
-        servo_2_open_button.clicked.connect(lambda: self.set_servo(2, "open"))
+        servo_2_open_button.clicked.connect(lambda: self.set_servo(1, "open"))
         servo_2_layout.addWidget(servo_2_open_button)
 
         servo_2_close_button = QtWidgets.QPushButton("Close")
-        servo_2_close_button.clicked.connect(lambda: self.set_servo(2, "close"))
+        servo_2_close_button.clicked.connect(lambda: self.set_servo(1, "close"))
         servo_2_layout.addWidget(servo_2_close_button)
 
         servos_layout.addWidget(servo_2_groupbox)
@@ -90,11 +90,11 @@ class MainWidget(QtWidgets.QWidget):
         servo_3_groupbox.setLayout(servo_3_layout)
 
         servo_3_open_button = QtWidgets.QPushButton("Open")
-        servo_3_open_button.clicked.connect(lambda: self.set_servo(3, "open"))
+        servo_3_open_button.clicked.connect(lambda: self.set_servo(2, "open"))
         servo_3_layout.addWidget(servo_3_open_button)
 
         servo_3_close_button = QtWidgets.QPushButton("Close")
-        servo_3_close_button.clicked.connect(lambda: self.set_servo(3, "close"))
+        servo_3_close_button.clicked.connect(lambda: self.set_servo(2, "close"))
         servo_3_layout.addWidget(servo_3_close_button)
 
         servos_layout.addWidget(servo_3_groupbox)
@@ -104,11 +104,11 @@ class MainWidget(QtWidgets.QWidget):
         servo_4_groupbox.setLayout(servo_4_layout)
 
         servo_4_open_button = QtWidgets.QPushButton("Open")
-        servo_4_open_button.clicked.connect(lambda: self.set_servo(4, "open"))
+        servo_4_open_button.clicked.connect(lambda: self.set_servo(3, "open"))
         servo_4_layout.addWidget(servo_4_open_button)
 
         servo_4_close_button = QtWidgets.QPushButton("Close")
-        servo_4_close_button.clicked.connect(lambda: self.set_servo(4, "close"))
+        servo_4_close_button.clicked.connect(lambda: self.set_servo(3, "close"))
         servo_4_layout.addWidget(servo_4_close_button)
 
         servos_layout.addWidget(servo_4_groupbox)
