@@ -40,7 +40,7 @@ class MainWidget(QtWidgets.QWidget):
         led_layout.addWidget(green_led_button)
 
         blue_led_button = QtWidgets.QPushButton("Blue")
-        blue_led_button.setStyleSheet("background-color: blue")
+        blue_led_button.setStyleSheet("background-color: blue; color: white")
         blue_led_button.clicked.connect(lambda: self.set_led((255, 0, 0, 255)))
         led_layout.addWidget(blue_led_button)
 
@@ -56,6 +56,18 @@ class MainWidget(QtWidgets.QWidget):
         servos_groupbox = QtWidgets.QGroupBox("Servos")
         servos_layout = QtWidgets.QVBoxLayout()
         servos_groupbox.setLayout(servos_layout)
+
+        servo_all_layout = QtWidgets.QHBoxLayout()
+
+        servo_all_open_button = QtWidgets.QPushButton("Open all")
+        servo_all_open_button.clicked.connect(lambda: self.set_servo_all("open"))
+        servo_all_layout.addWidget(servo_all_open_button)
+
+        servo_all_close_button = QtWidgets.QPushButton("Close all")
+        servo_all_close_button.clicked.connect(lambda: self.set_servo_all("close"))
+        servo_all_layout.addWidget(servo_all_close_button)
+
+        servos_layout.addLayout(servo_all_layout)
 
         servo_1_groupbox = QtWidgets.QGroupBox("Servo 1")
         servo_1_layout = QtWidgets.QHBoxLayout()
@@ -201,6 +213,10 @@ class MainWidget(QtWidgets.QWidget):
             "vrc/pcc/set_servo_open_close", {"servo": number, "action": action}
         )
 
+    def set_servo_all(self, action: str) -> None:
+        for i in range(4):
+            self.set_servo(i, action)
+            
     def set_led(self, color: Tuple[int, int, int, int]) -> None:
         self.publish_message("vrc/pcc/set_base_color", {"wrgb": color})
 
