@@ -56,8 +56,9 @@ echo "--- Copying MAVLink dialect"
 python3 -m pip install -r "$basedir/../vmc/flight_control_module/requirements.txt"
 
 mkdir -p "$basedir/target"
-cp "$basedir/build/.tmpvenv/lib/python3.8/site-packages/pymavlink/message_definitions/v1.0/common.xml" "$basedir/target/common.xml"
-cp "$basedir/build/.tmpvenv/lib/python3.8/site-packages/pymavlink/message_definitions/v1.0/minimal.xml" "$basedir/target/minimal.xml"
+py=$(ls "$basedir/build/.tmpvenv/lib/")
+cp "$basedir/build/.tmpvenv/lib/$py/site-packages/pymavlink/message_definitions/v1.0/common.xml" "$basedir/target/common.xml"
+cp "$basedir/build/.tmpvenv/lib/$py/site-packages/pymavlink/message_definitions/v1.0/minimal.xml" "$basedir/target/minimal.xml"
 cp "$basedir/bell.xml" "$basedir/target/bell.xml"
 
 # generate Python code
