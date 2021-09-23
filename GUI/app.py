@@ -456,11 +456,6 @@ class MQTTViewWidget(QtWidgets.QWidget):
 
         # secondary data store to maintain dict of topics and the last message recieved
         self.topic_payloads: Dict[str, Any] = {}
-        # secondary data store to store the number of messages seen for a topic.
-        # also include all of the subpaths, and the  number of messages combined for
-        # sub items. So "vrc/pcc/servo" would
-        # include "vrc/", "vrc/pcc" and "vrc/pcc/servo"
-        self.topic_counts: Dict[str, int] = {}
 
         # data structure to hold timers to blink item
         self.topic_timer: Dict[str, QtCore.QTimer] = {}
@@ -472,7 +467,6 @@ class MQTTViewWidget(QtWidgets.QWidget):
         """
         Build the layout
         """
-
         layout = QtWidgets.QHBoxLayout()
         self.setLayout(layout)
 
@@ -497,7 +491,6 @@ class MQTTViewWidget(QtWidgets.QWidget):
         Gets the child QTreeWidgetItem of a QTreeWidgetItem matching the given name.
         If one does not exists, creates and returns a new one.
         """
-
         # try to find matching item in parent
         for i in range(parent.childCount()):
             child = parent.child(i)
@@ -514,7 +507,6 @@ class MQTTViewWidget(QtWidgets.QWidget):
         Gets a list of parent QTreeWidgetItems of a QTreeWidgetItem.
         The list will be in order from top down, and include the original item.
         """
-
         parents = [item]
 
         parent = item.parent()
@@ -543,12 +535,17 @@ class MQTTViewWidget(QtWidgets.QWidget):
             # build the topic name to this part
             partial_topic = "/".join(topic_parts[: i + 1])
 
-            # increment the count
-            if partial_topic not in self.topic_counts:
-                self.topic_counts[partial_topic] = 0
+            # get the existing count
+            count = item.text(1)
+            if not count:
+                # empty
+                count = 0
+            else:
+                count = int(count)
 
-            self.topic_counts[partial_topic] += 1
-            item.setText(1, str(self.topic_counts[partial_topic]))
+            # increment the count
+            count += 1
+            item.setText(1, str(count))
 
             # blink background to show update for every item in tree
             self.blink_item(item, partial_topic)
@@ -565,7 +562,6 @@ class MQTTViewWidget(QtWidgets.QWidget):
         """
         When an item is clicked, get the topic for it, and connect it to the data view
         """
-
         # get the selected item
         item = self.tree_widget.currentItem()
         # rebuild the topic name
@@ -584,7 +580,6 @@ class MQTTViewWidget(QtWidgets.QWidget):
         """
         Display data from a topic to the data view
         """
-
         # get the last known data for the topic
         if topic not in self.topic_payloads:
             payload = ""
@@ -601,27 +596,22 @@ class MQTTViewWidget(QtWidgets.QWidget):
         # set the data
         self.data_view.setText(payload)
 
-    def set_item_background(
-        self, item: QtWidgets.QTreeWidgetItem, color: QtGui.QColor
-    ) -> None:
-        """
-        Set the background color of an item
-        """
-        item.setBackground(0, color)
-
     def blink_item(self, item: QtWidgets.QTreeWidgetItem, topic: str) -> None:
         """
         Blink the background color of an item
         """
-        self.set_item_background(item, QtGui.QColor(220, 220, 220))
-
-        if topic in self.topic_timer:
+        if topic in self.topic_timer and self.topic_timer[topic].isActive():
+            # if a timer already exists to clear the background, delete it
             timer = self.topic_timer[topic]
             timer.stop()
             timer.deleteLater()
+        else:
+            # otherwise, set background to grey
+            item.setBackground(0, QtGui.QColor(220, 220, 220))
 
+        # start new timer to clear background
         timer = QtCore.QTimer()
-        timer.timeout.connect(lambda: self.set_item_background(item, QtGui.QColor(255, 255, 255)))  # type: ignore
+        timer.timeout.connect(lambda: item.setBackground(0, QtGui.QColor(255, 255, 255)))  # type: ignore
         timer.setSingleShot(True)
         timer.start(100)
 
