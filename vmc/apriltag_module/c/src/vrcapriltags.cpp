@@ -84,49 +84,51 @@ int main() {
         auto start = std::chrono::system_clock::now();
 
         //capture a frame
-        capture.read(frame);
+        bool result = capture.read(frame);
+        if (result)
+        {
+            //undistort it
+            undistort_frame(frame);
 
-        //undistort it
-        undistort_frame(frame);
+            //convert the frame to rgba
+            cv::cvtColor(frame, img_rgba8, cv::COLOR_BGR2RGBA);
+            
+            //send the frame to GPU memory and run the detections
+            uint32_t num_detections = process_frame(img_rgba8, impl_);
 
-        //convert the frame to rgba
-        cv::cvtColor(frame, img_rgba8, cv::COLOR_BGR2RGBA);
-        
-        //send the frame to GPU memory and run the detections
-        uint32_t num_detections = process_frame(img_rgba8, impl_);
+            std::string payload = "[";
+            
+            //handle the detections
+            for (int i = 0; i < num_detections; i++) {
+                const nvAprilTagsID_t &detection = impl_->tags[i];
 
-        std::string payload = "[";
-        
-        //handle the detections
-        for (int i = 0; i < num_detections; i++) {
-            const nvAprilTagsID_t &detection = impl_->tags[i];
+                json j = jsonify_tag(detection);
 
-            json j = jsonify_tag(detection);
+                payload.append(j.dump());
+                if (i < num_detections - 1)
+                {
+                    payload.append(",");
+                }
+                
+            }
 
-            payload.append(j.dump());
-            if (i < num_detections - 1)
+            payload.append("]");
+
+            auto end = std::chrono::system_clock::now();
+
+            if (num_detections > 0) 
             {
-                payload.append(",");
+                const char * const_payload = payload.c_str();
+                client.publish(TAG_TOPIC, const_payload, strlen(const_payload));        
             }
             
+            
+            int fps = int(1000 / ( std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() + 1));
+
+            std::string fps_str = std::to_string(fps);
+            const char * const_fps_str = fps_str.c_str();
+            client.publish(FPS_TOPIC, const_fps_str, strlen(const_fps_str));
         }
-
-        payload.append("]");
-
-        auto end = std::chrono::system_clock::now();
-
-        if (num_detections > 0) 
-        {
-            const char * const_payload = payload.c_str();
-		    client.publish(TAG_TOPIC, const_payload, strlen(const_payload));        
-        }
-        
-        
-        int fps = int(1000 / ( std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() + 1));
-
-        std::string fps_str = std::to_string(fps);
-        const char * const_fps_str = fps_str.c_str();
-        client.publish(FPS_TOPIC, const_fps_str, strlen(const_fps_str));
     }
     delete(impl_);
     return 0;
