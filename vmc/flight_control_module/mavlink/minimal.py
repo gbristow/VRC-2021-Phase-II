@@ -274,8 +274,8 @@ MAV_AUTOPILOT_RESERVED = 1 # Reserved for future use.
 enums['MAV_AUTOPILOT'][1] = EnumEntry('MAV_AUTOPILOT_RESERVED', '''Reserved for future use.''')
 MAV_AUTOPILOT_SLUGS = 2 # SLUGS autopilot, http://slugsuav.soe.ucsc.edu
 enums['MAV_AUTOPILOT'][2] = EnumEntry('MAV_AUTOPILOT_SLUGS', '''SLUGS autopilot, http://slugsuav.soe.ucsc.edu''')
-MAV_AUTOPILOT_ARDUPILOTMEGA = 3 # ArduPilot - Plane/Copter/Rover/Sub/Tracker, http://ardupilot.org
-enums['MAV_AUTOPILOT'][3] = EnumEntry('MAV_AUTOPILOT_ARDUPILOTMEGA', '''ArduPilot - Plane/Copter/Rover/Sub/Tracker, http://ardupilot.org''')
+MAV_AUTOPILOT_ARDUPILOTMEGA = 3 # ArduPilot - Plane/Copter/Rover/Sub/Tracker, https://ardupilot.org
+enums['MAV_AUTOPILOT'][3] = EnumEntry('MAV_AUTOPILOT_ARDUPILOTMEGA', '''ArduPilot - Plane/Copter/Rover/Sub/Tracker, https://ardupilot.org''')
 MAV_AUTOPILOT_OPENPILOT = 4 # OpenPilot, http://openpilot.org
 enums['MAV_AUTOPILOT'][4] = EnumEntry('MAV_AUTOPILOT_OPENPILOT', '''OpenPilot, http://openpilot.org''')
 MAV_AUTOPILOT_GENERIC_WAYPOINTS_ONLY = 5 # Generic autopilot only supporting simple waypoints
@@ -384,8 +384,12 @@ MAV_TYPE_FLARM = 32 # FLARM collision avoidance system
 enums['MAV_TYPE'][32] = EnumEntry('MAV_TYPE_FLARM', '''FLARM collision avoidance system''')
 MAV_TYPE_SERVO = 33 # Servo
 enums['MAV_TYPE'][33] = EnumEntry('MAV_TYPE_SERVO', '''Servo''')
-MAV_TYPE_ENUM_END = 34 # 
-enums['MAV_TYPE'][34] = EnumEntry('MAV_TYPE_ENUM_END', '''''')
+MAV_TYPE_ODID = 34 # Open Drone ID. See https://mavlink.io/en/services/opendroneid.html.
+enums['MAV_TYPE'][34] = EnumEntry('MAV_TYPE_ODID', '''Open Drone ID. See https://mavlink.io/en/services/opendroneid.html.''')
+MAV_TYPE_DECAROTOR = 35 # Decarotor
+enums['MAV_TYPE'][35] = EnumEntry('MAV_TYPE_DECAROTOR', '''Decarotor''')
+MAV_TYPE_ENUM_END = 36 # 
+enums['MAV_TYPE'][36] = EnumEntry('MAV_TYPE_ENUM_END', '''''')
 
 # MAV_MODE_FLAG
 enums['MAV_MODE_FLAG'] = {}
@@ -471,11 +475,14 @@ enums['MAV_STATE'][9] = EnumEntry('MAV_STATE_ENUM_END', '''''')
 
 # MAV_COMPONENT
 enums['MAV_COMPONENT'] = {}
-MAV_COMP_ID_ALL = 0 # Used to broadcast messages to all components of the receiving system.
+MAV_COMP_ID_ALL = 0 # Target id (target_component) used to broadcast messages to all
+                        # components of the receiving system.
                         # Components should attempt to process
                         # messages with this component ID and forward
-                        # to components on any other interfaces.
-enums['MAV_COMPONENT'][0] = EnumEntry('MAV_COMP_ID_ALL', '''Used to broadcast messages to all components of the receiving system. Components should attempt to process messages with this component ID and forward to components on any other interfaces.''')
+                        # to components on any other interfaces. Note:
+                        # This is not a valid *source* component id
+                        # for a message.
+enums['MAV_COMPONENT'][0] = EnumEntry('MAV_COMP_ID_ALL', '''Target id (target_component) used to broadcast messages to all components of the receiving system. Components should attempt to process messages with this component ID and forward to components on any other interfaces. Note: This is not a valid *source* component id for a message.''')
 MAV_COMP_ID_AUTOPILOT1 = 1 # System flight controller component ("autopilot"). Only one autopilot
                         # is expected in a particular system.
 enums['MAV_COMPONENT'][1] = EnumEntry('MAV_COMP_ID_AUTOPILOT1', '''System flight controller component ("autopilot"). Only one autopilot is expected in a particular system.''')
@@ -651,10 +658,9 @@ MAV_COMP_ID_USER43 = 67 # Id for a component on privately managed MAVLink networ
                         # for any purpose but may not be published by
                         # components outside of the private network.
 enums['MAV_COMPONENT'][67] = EnumEntry('MAV_COMP_ID_USER43', '''Id for a component on privately managed MAVLink network. Can be used for any purpose but may not be published by components outside of the private network.''')
-MAV_COMP_ID_USER44 = 68 # Id for a component on privately managed MAVLink network. Can be used
-                        # for any purpose but may not be published by
-                        # components outside of the private network.
-enums['MAV_COMPONENT'][68] = EnumEntry('MAV_COMP_ID_USER44', '''Id for a component on privately managed MAVLink network. Can be used for any purpose but may not be published by components outside of the private network.''')
+MAV_COMP_ID_TELEMETRY_RADIO = 68 # Telemetry radio (e.g. SiK radio, or other component that emits
+                        # RADIO_STATUS messages).
+enums['MAV_COMPONENT'][68] = EnumEntry('MAV_COMP_ID_TELEMETRY_RADIO', '''Telemetry radio (e.g. SiK radio, or other component that emits RADIO_STATUS messages).''')
 MAV_COMP_ID_USER45 = 69 # Id for a component on privately managed MAVLink network. Can be used
                         # for any purpose but may not be published by
                         # components outside of the private network.
@@ -819,8 +825,8 @@ MAV_COMP_ID_SERVO13 = 152 # Servo #13.
 enums['MAV_COMPONENT'][152] = EnumEntry('MAV_COMP_ID_SERVO13', '''Servo #13.''')
 MAV_COMP_ID_SERVO14 = 153 # Servo #14.
 enums['MAV_COMPONENT'][153] = EnumEntry('MAV_COMP_ID_SERVO14', '''Servo #14.''')
-MAV_COMP_ID_GIMBAL = 154 # Gimbal component.
-enums['MAV_COMPONENT'][154] = EnumEntry('MAV_COMP_ID_GIMBAL', '''Gimbal component.''')
+MAV_COMP_ID_GIMBAL = 154 # Gimbal #1.
+enums['MAV_COMPONENT'][154] = EnumEntry('MAV_COMP_ID_GIMBAL', '''Gimbal #1.''')
 MAV_COMP_ID_LOG = 155 # Logging component.
 enums['MAV_COMPONENT'][155] = EnumEntry('MAV_COMP_ID_LOG', '''Logging component.''')
 MAV_COMP_ID_ADSB = 156 # Automatic Dependent Surveillance-Broadcast (ADS-B) component.
@@ -834,9 +840,25 @@ MAV_COMP_ID_QX1_GIMBAL = 159 # Gimbal ID for QX1.
 enums['MAV_COMPONENT'][159] = EnumEntry('MAV_COMP_ID_QX1_GIMBAL', '''Gimbal ID for QX1.''')
 MAV_COMP_ID_FLARM = 160 # FLARM collision alert component.
 enums['MAV_COMPONENT'][160] = EnumEntry('MAV_COMP_ID_FLARM', '''FLARM collision alert component.''')
+MAV_COMP_ID_GIMBAL2 = 171 # Gimbal #2.
+enums['MAV_COMPONENT'][171] = EnumEntry('MAV_COMP_ID_GIMBAL2', '''Gimbal #2.''')
+MAV_COMP_ID_GIMBAL3 = 172 # Gimbal #3.
+enums['MAV_COMPONENT'][172] = EnumEntry('MAV_COMP_ID_GIMBAL3', '''Gimbal #3.''')
+MAV_COMP_ID_GIMBAL4 = 173 # Gimbal #4
+enums['MAV_COMPONENT'][173] = EnumEntry('MAV_COMP_ID_GIMBAL4', '''Gimbal #4''')
+MAV_COMP_ID_GIMBAL5 = 174 # Gimbal #5.
+enums['MAV_COMPONENT'][174] = EnumEntry('MAV_COMP_ID_GIMBAL5', '''Gimbal #5.''')
+MAV_COMP_ID_GIMBAL6 = 175 # Gimbal #6.
+enums['MAV_COMPONENT'][175] = EnumEntry('MAV_COMP_ID_GIMBAL6', '''Gimbal #6.''')
 MAV_COMP_ID_MISSIONPLANNER = 190 # Component that can generate/supply a mission flight plan (e.g. GCS or
                         # developer API).
 enums['MAV_COMPONENT'][190] = EnumEntry('MAV_COMP_ID_MISSIONPLANNER', '''Component that can generate/supply a mission flight plan (e.g. GCS or developer API).''')
+MAV_COMP_ID_ONBOARD_COMPUTER = 191 # Component that lives on the onboard computer (companion computer) and
+                        # has some generic functionalities, such as
+                        # settings system parameters and monitoring
+                        # the status of some processes that don't
+                        # directly speak mavlink and so on.
+enums['MAV_COMPONENT'][191] = EnumEntry('MAV_COMP_ID_ONBOARD_COMPUTER', '''Component that lives on the onboard computer (companion computer) and has some generic functionalities, such as settings system parameters and monitoring the status of some processes that don't directly speak mavlink and so on.''')
 MAV_COMP_ID_PATHPLANNER = 195 # Component that finds an optimal path between points based on a certain
                         # constraint (e.g. minimum snap, shortest
                         # path, cost, etc.).
@@ -857,44 +879,27 @@ MAV_COMP_ID_GPS = 220 # GPS #1.
 enums['MAV_COMPONENT'][220] = EnumEntry('MAV_COMP_ID_GPS', '''GPS #1.''')
 MAV_COMP_ID_GPS2 = 221 # GPS #2.
 enums['MAV_COMPONENT'][221] = EnumEntry('MAV_COMP_ID_GPS2', '''GPS #2.''')
+MAV_COMP_ID_ODID_TXRX_1 = 236 # Open Drone ID transmitter/receiver (Bluetooth/WiFi/Internet).
+enums['MAV_COMPONENT'][236] = EnumEntry('MAV_COMP_ID_ODID_TXRX_1', '''Open Drone ID transmitter/receiver (Bluetooth/WiFi/Internet).''')
+MAV_COMP_ID_ODID_TXRX_2 = 237 # Open Drone ID transmitter/receiver (Bluetooth/WiFi/Internet).
+enums['MAV_COMPONENT'][237] = EnumEntry('MAV_COMP_ID_ODID_TXRX_2', '''Open Drone ID transmitter/receiver (Bluetooth/WiFi/Internet).''')
+MAV_COMP_ID_ODID_TXRX_3 = 238 # Open Drone ID transmitter/receiver (Bluetooth/WiFi/Internet).
+enums['MAV_COMPONENT'][238] = EnumEntry('MAV_COMP_ID_ODID_TXRX_3', '''Open Drone ID transmitter/receiver (Bluetooth/WiFi/Internet).''')
 MAV_COMP_ID_UDP_BRIDGE = 240 # Component to bridge MAVLink to UDP (i.e. from a UART).
 enums['MAV_COMPONENT'][240] = EnumEntry('MAV_COMP_ID_UDP_BRIDGE', '''Component to bridge MAVLink to UDP (i.e. from a UART).''')
 MAV_COMP_ID_UART_BRIDGE = 241 # Component to bridge to UART (i.e. from UDP).
 enums['MAV_COMPONENT'][241] = EnumEntry('MAV_COMP_ID_UART_BRIDGE', '''Component to bridge to UART (i.e. from UDP).''')
+MAV_COMP_ID_TUNNEL_NODE = 242 # Component handling TUNNEL messages (e.g. vendor specific GUI of a
+                        # component).
+enums['MAV_COMPONENT'][242] = EnumEntry('MAV_COMP_ID_TUNNEL_NODE', '''Component handling TUNNEL messages (e.g. vendor specific GUI of a component).''')
 MAV_COMP_ID_SYSTEM_CONTROL = 250 # Component for handling system messages (e.g. to ARM, takeoff, etc.).
 enums['MAV_COMPONENT'][250] = EnumEntry('MAV_COMP_ID_SYSTEM_CONTROL', '''Component for handling system messages (e.g. to ARM, takeoff, etc.).''')
 MAV_COMPONENT_ENUM_END = 251 # 
 enums['MAV_COMPONENT'][251] = EnumEntry('MAV_COMPONENT_ENUM_END', '''''')
 
-# MAV_CMD
-enums['MAV_CMD'] = {}
-MAV_CMD_REQUEST_MESSAGE = 512 # Request the target system(s) emit a single instance of a specified
-                        # message (i.e. a "one-shot" version of
-                        # MAV_CMD_SET_MESSAGE_INTERVAL).
-enums['MAV_CMD'][512] = EnumEntry('MAV_CMD_REQUEST_MESSAGE', '''Request the target system(s) emit a single instance of a specified message (i.e. a "one-shot" version of MAV_CMD_SET_MESSAGE_INTERVAL).''')
-enums['MAV_CMD'][512].param[1] = '''The MAVLink message ID of the requested message.'''
-enums['MAV_CMD'][512].param[2] = '''Index id (if appropriate). The use of this parameter (if any), must be defined in the requested message.'''
-enums['MAV_CMD'][512].param[3] = '''The use of this parameter (if any), must be defined in the requested message. By default assumed not used (0).'''
-enums['MAV_CMD'][512].param[4] = '''The use of this parameter (if any), must be defined in the requested message. By default assumed not used (0).'''
-enums['MAV_CMD'][512].param[5] = '''The use of this parameter (if any), must be defined in the requested message. By default assumed not used (0).'''
-enums['MAV_CMD'][512].param[6] = '''The use of this parameter (if any), must be defined in the requested message. By default assumed not used (0).'''
-enums['MAV_CMD'][512].param[7] = '''Target address for requested message (if message has target address fields). 0: Flight-stack default, 1: address of requestor, 2: broadcast.'''
-MAV_CMD_REQUEST_PROTOCOL_VERSION = 519 # Request MAVLink protocol version compatibility
-enums['MAV_CMD'][519] = EnumEntry('MAV_CMD_REQUEST_PROTOCOL_VERSION', '''Request MAVLink protocol version compatibility''')
-enums['MAV_CMD'][519].param[1] = '''1: Request supported protocol versions by all nodes on the network'''
-enums['MAV_CMD'][519].param[2] = '''Reserved (all remaining params)'''
-enums['MAV_CMD'][519].param[3] = '''Reserved (default:0)'''
-enums['MAV_CMD'][519].param[4] = '''Reserved (default:0)'''
-enums['MAV_CMD'][519].param[5] = '''Reserved (default:0)'''
-enums['MAV_CMD'][519].param[6] = '''Reserved (default:0)'''
-enums['MAV_CMD'][519].param[7] = '''Reserved (default:0)'''
-MAV_CMD_ENUM_END = 520 # 
-enums['MAV_CMD'][520] = EnumEntry('MAV_CMD_ENUM_END', '''''')
-
 # message IDs
 MAVLINK_MSG_ID_BAD_DATA = -1
 MAVLINK_MSG_ID_HEARTBEAT = 0
-MAVLINK_MSG_ID_PROTOCOL_VERSION = 300
 
 class MAVLink_heartbeat_message(MAVLink_message):
         '''
@@ -939,53 +944,9 @@ class MAVLink_heartbeat_message(MAVLink_message):
         def pack(self, mav, force_mavlink1=False):
                 return MAVLink_message.pack(self, mav, 50, struct.pack('<IBBBBB', self.custom_mode, self.type, self.autopilot, self.base_mode, self.system_status, self.mavlink_version), force_mavlink1=force_mavlink1)
 
-class MAVLink_protocol_version_message(MAVLink_message):
-        '''
-        Version and capability of protocol version. This message is
-        the response to REQUEST_PROTOCOL_VERSION and is used as part
-        of the handshaking to establish which MAVLink version should
-        be used on the network. Every node should respond to
-        REQUEST_PROTOCOL_VERSION to enable the handshaking. Library
-        implementers should consider adding this into the default
-        decoding state machine to allow the protocol core to respond
-        directly.
-        '''
-        id = MAVLINK_MSG_ID_PROTOCOL_VERSION
-        name = 'PROTOCOL_VERSION'
-        fieldnames = ['version', 'min_version', 'max_version', 'spec_version_hash', 'library_version_hash']
-        ordered_fieldnames = ['version', 'min_version', 'max_version', 'spec_version_hash', 'library_version_hash']
-        fieldtypes = ['uint16_t', 'uint16_t', 'uint16_t', 'uint8_t', 'uint8_t']
-        fielddisplays_by_name = {}
-        fieldenums_by_name = {}
-        fieldunits_by_name = {}
-        format = '<HHH8B8B'
-        native_format = bytearray('<HHHBB', 'ascii')
-        orders = [0, 1, 2, 3, 4]
-        lengths = [1, 1, 1, 8, 8]
-        array_lengths = [0, 0, 0, 8, 8]
-        crc_extra = 217
-        unpacker = struct.Struct('<HHH8B8B')
-        instance_field = None
-        instance_offset = -1
-
-        def __init__(self, version, min_version, max_version, spec_version_hash, library_version_hash):
-                MAVLink_message.__init__(self, MAVLink_protocol_version_message.id, MAVLink_protocol_version_message.name)
-                self._fieldnames = MAVLink_protocol_version_message.fieldnames
-                self._instance_field = MAVLink_protocol_version_message.instance_field
-                self._instance_offset = MAVLink_protocol_version_message.instance_offset
-                self.version = version
-                self.min_version = min_version
-                self.max_version = max_version
-                self.spec_version_hash = spec_version_hash
-                self.library_version_hash = library_version_hash
-
-        def pack(self, mav, force_mavlink1=False):
-                return MAVLink_message.pack(self, mav, 217, struct.pack('<HHH8B8B', self.version, self.min_version, self.max_version, self.spec_version_hash[0], self.spec_version_hash[1], self.spec_version_hash[2], self.spec_version_hash[3], self.spec_version_hash[4], self.spec_version_hash[5], self.spec_version_hash[6], self.spec_version_hash[7], self.library_version_hash[0], self.library_version_hash[1], self.library_version_hash[2], self.library_version_hash[3], self.library_version_hash[4], self.library_version_hash[5], self.library_version_hash[6], self.library_version_hash[7]), force_mavlink1=force_mavlink1)
-
 
 mavlink_map = {
         MAVLINK_MSG_ID_HEARTBEAT : MAVLink_heartbeat_message,
-        MAVLINK_MSG_ID_PROTOCOL_VERSION : MAVLink_protocol_version_message,
 }
 
 class MAVError(Exception):
@@ -1402,8 +1363,8 @@ class MAVLink(object):
                 documented at
                 https://mavlink.io/en/services/heartbeat.html
 
-                type                      : Type of the system (quadrotor, helicopter, etc.). Components use the same type as their associated system. (type:uint8_t, values:MAV_TYPE)
-                autopilot                 : Autopilot type / class. (type:uint8_t, values:MAV_AUTOPILOT)
+                type                      : Vehicle or component type. For a flight controller component the vehicle type (quadrotor, helicopter, etc.). For other components the component type (e.g. camera, gimbal, etc.). This should be used in preference to component id for identifying the component type. (type:uint8_t, values:MAV_TYPE)
+                autopilot                 : Autopilot type / class. Use MAV_AUTOPILOT_INVALID for components that are not flight controllers. (type:uint8_t, values:MAV_AUTOPILOT)
                 base_mode                 : System mode bitmap. (type:uint8_t, values:MAV_MODE_FLAG)
                 custom_mode               : A bitfield for use for autopilot-specific flags (type:uint32_t)
                 system_status             : System status flag. (type:uint8_t, values:MAV_STATE)
@@ -1423,8 +1384,8 @@ class MAVLink(object):
                 documented at
                 https://mavlink.io/en/services/heartbeat.html
 
-                type                      : Type of the system (quadrotor, helicopter, etc.). Components use the same type as their associated system. (type:uint8_t, values:MAV_TYPE)
-                autopilot                 : Autopilot type / class. (type:uint8_t, values:MAV_AUTOPILOT)
+                type                      : Vehicle or component type. For a flight controller component the vehicle type (quadrotor, helicopter, etc.). For other components the component type (e.g. camera, gimbal, etc.). This should be used in preference to component id for identifying the component type. (type:uint8_t, values:MAV_TYPE)
+                autopilot                 : Autopilot type / class. Use MAV_AUTOPILOT_INVALID for components that are not flight controllers. (type:uint8_t, values:MAV_AUTOPILOT)
                 base_mode                 : System mode bitmap. (type:uint8_t, values:MAV_MODE_FLAG)
                 custom_mode               : A bitfield for use for autopilot-specific flags (type:uint32_t)
                 system_status             : System status flag. (type:uint8_t, values:MAV_STATE)
@@ -1432,44 +1393,4 @@ class MAVLink(object):
 
                 '''
                 return self.send(self.heartbeat_encode(type, autopilot, base_mode, custom_mode, system_status, mavlink_version), force_mavlink1=force_mavlink1)
-
-        def protocol_version_encode(self, version, min_version, max_version, spec_version_hash, library_version_hash):
-                '''
-                Version and capability of protocol version. This message is the
-                response to REQUEST_PROTOCOL_VERSION and is used as
-                part of the handshaking to establish which MAVLink
-                version should be used on the network. Every node
-                should respond to REQUEST_PROTOCOL_VERSION to enable
-                the handshaking. Library implementers should consider
-                adding this into the default decoding state machine to
-                allow the protocol core to respond directly.
-
-                version                   : Currently active MAVLink version number * 100: v1.0 is 100, v2.0 is 200, etc. (type:uint16_t)
-                min_version               : Minimum MAVLink version supported (type:uint16_t)
-                max_version               : Maximum MAVLink version supported (set to the same value as version by default) (type:uint16_t)
-                spec_version_hash         : The first 8 bytes (not characters printed in hex!) of the git hash. (type:uint8_t)
-                library_version_hash        : The first 8 bytes (not characters printed in hex!) of the git hash. (type:uint8_t)
-
-                '''
-                return MAVLink_protocol_version_message(version, min_version, max_version, spec_version_hash, library_version_hash)
-
-        def protocol_version_send(self, version, min_version, max_version, spec_version_hash, library_version_hash, force_mavlink1=False):
-                '''
-                Version and capability of protocol version. This message is the
-                response to REQUEST_PROTOCOL_VERSION and is used as
-                part of the handshaking to establish which MAVLink
-                version should be used on the network. Every node
-                should respond to REQUEST_PROTOCOL_VERSION to enable
-                the handshaking. Library implementers should consider
-                adding this into the default decoding state machine to
-                allow the protocol core to respond directly.
-
-                version                   : Currently active MAVLink version number * 100: v1.0 is 100, v2.0 is 200, etc. (type:uint16_t)
-                min_version               : Minimum MAVLink version supported (type:uint16_t)
-                max_version               : Maximum MAVLink version supported (set to the same value as version by default) (type:uint16_t)
-                spec_version_hash         : The first 8 bytes (not characters printed in hex!) of the git hash. (type:uint8_t)
-                library_version_hash        : The first 8 bytes (not characters printed in hex!) of the git hash. (type:uint8_t)
-
-                '''
-                return self.send(self.protocol_version_encode(version, min_version, max_version, spec_version_hash, library_version_hash), force_mavlink1=force_mavlink1)
 

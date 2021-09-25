@@ -65,7 +65,7 @@ class Fusion(object):
             "vrc/vio/heading":self.fuse_att_heading,
             "vrc/vio/velocity/ned":self.fuse_vel,
             f"{self.topic_prefix}/pos/ned":self.local_to_geo,
-            # "vrc/apriltag/selected/pos/ned"
+            #"vrc/apriltags/selected/pos": self.on_apriltag_message
         }
 
         self.primary_topic = None
@@ -74,6 +74,14 @@ class Fusion(object):
         self.deriv_norm = None
 
         self.local_copy = {}
+
+        self.vio_init = False
+        self.at_init = False
+
+        #on_apriltag storage
+        self.last_pos = [0,0,0]
+        self.deriv = [0,0,0]
+        self.last_apriltag = time.time()
 
         logger.debug(f"{fore.LIGHT_CYAN_1} FUS: Object created! {style.RESET}") #type: ignore
 
@@ -176,6 +184,8 @@ class Fusion(object):
         
         '''
         try:
+
+            self.vio_init=True
 
             vmc_vel_update = {
                     "Vn": msg["n"],
@@ -316,7 +326,7 @@ class Fusion(object):
                 retain=False,
                 qos=0,
             )
-            self.local_copy["heading"] = dict(heading_update)
+            self.local_copy["heading"] = heading_update["heading"]
 
             if self.local_copy["groundspeed"]["groundspeed"] < self.config["COURSE_THRESHOLD"]:
                 self.local_copy["course"] = dict({"course":msg["degrees"]})
@@ -330,7 +340,8 @@ class Fusion(object):
         '''
 
         time.sleep(10)
-
+        while not self.vio_init:
+            time.sleep(1)
         while True:
             time.sleep(.1)
             try:
@@ -355,7 +366,7 @@ class Fusion(object):
                             "vd": int(self.local_copy["vel"]["Vd"]),
                             "cog": int(self.local_copy["course"]["course"] * 100),
                             "satellites_visible": int(self.config["hil_gps_constants"]["satellites_visible"]),
-                            "heading": int(self.local_copy["heading"]["heading"] * 100)
+                            "heading": int(self.local_copy["heading"] * 100)
                         }
                     }
                     self.mqtt_client.publish(
@@ -368,197 +379,56 @@ class Fusion(object):
 
             except Exception as e:
                 logger.exception(f"{fore.RED}FUS: Error creating hil_gps_message {str(e)}{style.RESET}") #type: ignore
+                time.sleep(1)
                 #raise e
                 continue
 
-    # def status_prints(self, config=None):
-        
-        
-    #     while self.primary_topic is None:
-    #         time.sleep(.5)
-            
-    #     time.sleep(1)
-
-    #     while not INTERRUPTED:
-
-    #         t265_ned = self.topics["vmc.t265"].subtopic("pos").message("ned").data
-    #         t265_heading = self.topics["vmc.t265"].subtopic("att").message("heading").data
-    #         at_ned = self.topics["vrc.aprilTag"].message("ned").data
-    #         at_heading = self.topics["vrc.aprilTag"].message("heading").data
-    #         tags = self.topics["vrc.aprilTag"].message("tags").data
-    #         AT_ts = self.topics["vrc.aprilTag"].message("last_loop").data
-    #         norm = self.norm 
-    #         heading_delta = self.heading_delta
-    #         deriv_norm = self.deriv_norm
-
-
-    #         # os.system('cls' if os.name=='nt' else 'clear -x')
-    #         print(fore.GREY_0 + "========================================================================", style.RESET)
-
-    #         try:
-    #             now = time.time()
-
-    #             if at_ned is not None and at_heading is not None:
-    #                 if (now - self.topics["vrc.aprilTag"].message("ned").timestamp) > self.config["AT_THRESH"]:
-    #                     color = fore.ORANGE_3
-    #                 else:
-    #                     color = fore.GREEN
-    #             else:
-    #                 at_ned["n"] = '-'
-    #                 at_ned["e"] = '-'
-    #                 at_ned["d"] = '-'
-    #                 at_heading = '-'
-
-    #             print(color + "AT:\tN: {:.3f}\tE: {:.3f}\tD: {:.3f}\tHeading: {:.3f}\t".format(
-    #                     at_ned["n"], at_ned["e"], at_ned["d"], at_heading), style.RESET)
-
-    #             if t265_ned is not None and t265_heading is not None:
-    #                 if (now - self.topics["vmc.t265"].timestamp) > self.config["T265_THRESH"]:
-    #                     color = fore.ORANGE_3
-    #                 else:
-    #                     color = fore.GREEN
-                    
-    #             print(color + "T265:\tN: {:.3f}\tE: {:.3f}\tD: {:.3f}\tHeading: {:.3f}\t".format(
-    #                     t265_ned["n"], t265_ned["e"], t265_ned["d"], t265_heading), style.RESET)
-
-    #             if norm is not None and heading_delta is not None and deriv_norm is not None:
-    #                 if norm > self.config["POS_DETLA_THRESHOLD"]:
-    #                     color1 = fore.ORANGE_3
-    #                 else:
-    #                     color1 = fore.GREEN
-                    
-    #                 if heading_delta > self.config["HEADING_DELTA_THRESHOLD"]:
-    #                     color2 = fore.ORANGE_3
-    #                 else:
-    #                     color2 = fore.GREEN
-                    
-    #                 if deriv_norm > self.config["AT_DERIV_THRESH"]:
-    #                     color3 = fore.ORANGE_3
-    #                 else:
-    #                     color3 = fore.GREEN
-
-    #                 norm = "{:.3f}".format(norm)
-    #                 heading_delta = "{:.3f}".format(heading_delta)
-    #                 deriv_norm = "{:.3f}".format(deriv_norm)
+    def on_apriltag_message(self, msg: dict):
+        try:
+            if self.vio_init:
+                now = time.time()
+                t265_ned = self.local_copy["pos"]
+                t265_heading = self.local_copy["heading"]
+                at_ned = msg["pos"]
+                at_heading = msg["heading"]
                 
-    #             else:
-    #                 color1 = fore.RED
-    #                 color2 = fore.RED
-    #                 color3 = fore.RED
-    #                 norm = "-"
-    #                 heading_delta = "-"
-    #                 deriv_norm = "-"
+                n_dist = abs(at_ned["n"] - t265_ned["n"])
+                e_dist = abs(at_ned["e"] - t265_ned["e"])
+                d_dist = abs(at_ned["d"] - t265_ned["d"])
+
+                norm = np.linalg.norm([n_dist, e_dist, d_dist])
+
+                heading_delta = abs(at_heading - t265_heading)
+                if heading_delta > 180:
+                    heading_delta = 360 - heading_delta
+
+                for idx, val in enumerate(at_ned.keys()):
+                    self.deriv[idx] = (at_ned[val] - self.last_pos[idx]) / (now - self.last_apriltag)
+                    self.last_pos[idx] = at_ned[val]
+
+                deriv_norm = np.linalg.norm(self.deriv)
+
+                if (self.norm > self.config["POS_DETLA_THRESHOLD"] or abs(heading_delta) > self.config["HEADING_DELTA_THRESHOLD"]) and deriv_norm < self.config["AT_DERIV_THRESH"]:
+                    logger.debug(fore.YELLOW + "FUS: Resync Triggered! Delta= {}".format(norm), style.RESET) #type: ignore
+                    updates = []
+
+                    if d_dist > self.config["POS_D_THRESHOLD"]:
+                        # don't resync Z if del_d is too great, reject AT readings that are extraineous
+                        at_ned["d"] = t265_ned["d"]
                     
-    #             print(color1 + "Norm: {},".format(norm) + color2 + "\tHeading Delta: {}".format(heading_delta) + color3 + "\tAT Deriv: {}".format(deriv_norm), style.RESET)
+                    resync = {
+                        "n": at_ned["n"],
+                        "e": at_ned["e"],
+                        "d": at_ned["d"],
+                        "heading": at_heading
+                    }
+                    self.mqtt_client.publish("vrc/vio/resync", resync)
 
-    #             if '-1' in tags:
-    #                 color = fore.ORANGE_3
-    #             else:
-    #                 color = fore.GREEN
-    #             print(color + "AT Tags: {}".format(tags), style.RESET)
+                self.then = now
 
-    #             if now - AT_ts < self.config["AT_THRESH"]:
-    #                 print(fore.GREEN + "AT Pipe Good!: {}".format(AT_ts), style.RESET)
-    #             else:
-    #                 print(fore.ORANGE_3 + "AT Pipe Bad!: {}".format(AT_ts), style.RESET)
-
-
-    #             try:
-    #                 time.sleep(1/self.config["PRINT_FREQ"])
-    #             except:
-    #                 time.sleep(1)
-            
-    #         except Exception as e:
-    #             print(fore.RED + "FUS: Error printing: %s" % e, style.RESET)
-    #             raise e
-
-    # def aprilTag_resync_t265(self, config=None):
-    #     '''
-    #     Compares the pos data from april tags and t265, if both are valid and
-    #     t265 drifts outside of a defined threshold, trigger a resync event 
-    #     within t265.
-
-    #     Subscribes
-    #     -------------
-    #     vmc.t265
-    #     vrc.aprilTag
-
-    #     Publishes
-    #     -------------
-    #     vmc.t265.resync
-    #     '''
-    #     try:
-    #         time.sleep(1)
-
-    #         init = "False"
-
-    #         last_pos = [0,0,0]
-    #         deriv = [0,0,0]
-    #         then = time.time()
-
-    #         while not INTERRUPTED:
-    #             if self.topics["vrc.aprilTag"].message("ned").block_until_new:
-    #                 now = time.time()
-
-    #                 t265_ned = self.topics["vmc.t265"].subtopic("pos").message("ned").data
-    #                 t265_heading = self.topics["vmc.t265"].subtopic("att").message("heading").data
-    #                 at_ned = self.topics["vrc.aprilTag"].message("ned").data
-    #                 at_heading = self.topics["vrc.aprilTag"].message("heading").data
-                    
-    #                 del_n = abs(at_ned["n"] - t265_ned["n"])
-    #                 del_e = abs(at_ned["e"] - t265_ned["e"])
-    #                 del_d = abs(at_ned["d"] - t265_ned["d"])
-
-    #                 self.norm = np.linalg.norm([del_n, del_e, del_d])
-    #                 self.heading_delta = abs(self.topics["vrc.aprilTag"].message("heading").data - self.topics["vmc.t265"].subtopic("att").message("heading").data)
-    #                 if self.heading_delta > 180:
-    #                     self.heading_delta = 360 - self.heading_delta
-    #                 # print(fore.CYAN_2 + "FUS: norm: {}".format(self.norm), style.RESET)
-
-    #                 for idx, val in enumerate(at_ned.keys()):
-    #                     deriv[idx] = (at_ned[val] - last_pos[idx]) / (now - then)
-    #                     last_pos[idx] = at_ned[val]
-
-    #                 self.deriv_norm = np.linalg.norm(deriv)
-
-                    
-    #                 if (self.norm > self.config["POS_DETLA_THRESHOLD"] or abs(self.heading_delta) > self.config["HEADING_DELTA_THRESHOLD"]) and self.deriv_norm < self.config["AT_DERIV_THRESH"]:
-    #                     # print(fore.YELLOW + "FUS: Resync Triggered! Delta= {}".format(norm), style.RESET)
-    #                     updates = []
-
-
-
-    #                     if del_d > self.config["POS_D_THRESHOLD"]:
-    #                         # don't resync Z if del_d is too great, reject AT readings that are extraineous
-    #                         at_ned["d"] = t265_ned["d"]
-                        
-    #                     resync_ned_update = {
-    #                         "ned":{
-    #                             "n": at_ned["n"],
-    #                             "e": at_ned["e"],
-    #                             "d": at_ned["d"]
-    #                         }
-    #                     }
-    #                     updates.append(resync_ned_update)
-
-    #                     resync_heading_update = {
-    #                         "heading": self.topics["vrc.aprilTag"].message("heading").data
-    #                     }
-    #                     updates.append(resync_heading_update)
-
-    #                     if init == "False":
-    #                         init_update = {
-    #                             "init": "True"
-    #                         }
-    #                         updates.append(init_update)
-
-    #                     self.topics["vmc.t265.resync"].pub(updates)
-
-    #                 then = now
-
-    #     except Exception as e:
-    #         print(fore.RED + "FUS: Error in t265 resync: %s" % e, style.RESET)
-    #         raise e
+        except Exception as e:
+            logger.debug(fore.RED + "FUS: Error in t265 resync: %s" % e, style.RESET) #type: ignore
+            raise e
 
     def run(self):
         # tells the os what to name this process, for debugging

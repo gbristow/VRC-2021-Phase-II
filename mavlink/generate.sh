@@ -52,10 +52,14 @@ git add .
 git commit -m "Local commit to facilitate build"
 
 echo "--- Copying MAVLink dialect"
+# need to match the dialect used by the FCC and pymavlink, otherwise we'll have a bad time
+python3 -m pip install -r "$basedir/../vmc/flight_control_module/requirements.txt"
+
 mkdir -p "$basedir/target"
-cp "$px4dir/mavlink/include/mavlink/v2.0/message_definitions/common.xml" "$basedir/target/common.xml"
-cp "$px4dir/mavlink/include/mavlink/v2.0/message_definitions/minimal.xml" "$basedir/target/minimal.xml"
-cp "$px4dir/mavlink/include/mavlink/v2.0/message_definitions/bell.xml" "$basedir/target/bell.xml"
+py=$(ls "$basedir/build/.tmpvenv/lib/")
+cp "$basedir/build/.tmpvenv/lib/$py/site-packages/pymavlink/message_definitions/v1.0/common.xml" "$basedir/target/common.xml"
+cp "$basedir/build/.tmpvenv/lib/$py/site-packages/pymavlink/message_definitions/v1.0/minimal.xml" "$basedir/target/minimal.xml"
+cp "$basedir/bell.xml" "$basedir/target/bell.xml"
 
 # generate Python code
 echo "--- Generating Python MAVLink code"
