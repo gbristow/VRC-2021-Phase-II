@@ -37,10 +37,14 @@ RUN git clone https://github.com/nlohmann/json c/libraries/json \
  && cd c/libraries/json \
  && git checkout v3.10.2
 
-RUN git clone https://github.com/NVIDIA-AI-IOT/isaac_ros_apriltag \
- && cd isaac_ros_apriltag \
- && git checkout v0.9.0-ea1 \
- && cp -r ../isaac_ros_apriltag/isaac_ros_apriltag/nvapriltags c/libraries
+# RUN git clone https://github.com/NVIDIA-AI-IOT/isaac_ros_apriltag \
+#  && cd isaac_ros_apriltag \
+#  && git checkout v0.9.0-ea1 \
+#  && cp -r isaac_ros_apriltag/nvapriltags/lib_aarch64_jetpack44 ../c/libraries/lib_aarch64_jetpack44
+
+RUN wget https://developer.nvidia.com/isaac/download/third_party/april_tags_v5_jp44_nano-tar-xz \
+ && tar -xf april_tags_v5_jp44_nano-tar-xz --directory c/libraries \
+ && rm april_tags_v5_jp44_nano-tar-xz
 
 # Build the april tag application
 RUN mkdir -p c/build \

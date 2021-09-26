@@ -18,6 +18,7 @@ https://files.pythonhosted.org
 # used for downloading code
 https://github.com
 https://github-releases.githubusercontent.com
+https://developer.nvidia.com
 # used for Docker containers
 https://nvcr.io
 https://index.docker.io
