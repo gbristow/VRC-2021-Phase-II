@@ -1,6 +1,6 @@
 FROM docker.io/library/python:3.9-buster
 
-ENV OPENBLAS_CORETYPE=ARMV8
+ENV OPENBLAS_CORETYPE=CORTEXA57
 
 WORKDIR /app
 

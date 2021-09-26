@@ -3,7 +3,7 @@ FROM nvcr.io/nvidia/l4t-ml:r32.6.1-py3
 ENV LIBREALSENSE_VERSION=v2.49.0
 ENV DEBIAN_FRONTEND=noninteractive
 # https://stackoverflow.com/a/66057286
-ENV OPENBLAS_CORETYPE=ARMV8
+ENV OPENBLAS_CORETYPE=CORTEXA57
 
 RUN apt update -y
 RUN apt install -y \

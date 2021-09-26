@@ -1,33 +1,25 @@
 import asyncio
-import queue
 import json
-from typing import Any, Callable, Dict
+import queue
+from typing import Any
 
-from loguru import logger
 import paho.mqtt.client as mqtt
-from setproctitle import setproctitle
-
-
+from loguru import logger
 from mavsdk import System
 
 try:
-    from fcc_library import FCC, PyMAVLinkAgent # type: ignore
+    from fcc_library import FCC, PyMAVLinkAgent  # type: ignore
 except ImportError:
     from .fcc_library import FCC, PyMAVLinkAgent
+
 
 class FCCModule(object):
     def __init__(self):
 
-        self.mqtt_host = "localhost"
+        self.mqtt_host = "mqtt"
         self.mqtt_port = 18830
 
-        # self.mqtt_user = "user"
-        # self.mqtt_pass = "password"
-
         self.mqtt_client = mqtt.Client()
-        # self.mqtt_client.username_pw_set(
-        #     username=self.mqtt_user, password=self.mqtt_pass
-        # )
 
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_message = self.on_message
@@ -45,7 +37,7 @@ class FCCModule(object):
 
     def on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
         try:
-            #logger.debug(f"{msg.topic}: {str(msg.payload)}")
+            # logger.debug(f"{msg.topic}: {str(msg.payload)}")
             if msg.topic in self.mqtt_topics.keys():
                 data = json.loads(msg.payload)
                 self.mqtt_topics[msg.topic].put(data)
@@ -59,13 +51,12 @@ class FCCModule(object):
         rc: int,
         properties: mqtt.Properties = None,
     ) -> None:
-        logger.debug(f"Connected with result code {str(rc)}")
+        logger.debug(f"Connected with result code {rc}")
         for topic in self.mqtt_topics.keys():
             logger.debug(f"FCCModule: Subscribed to: {topic}")
             client.subscribe(topic)
 
-
-     # @decorators.async_try_except()
+    # @decorators.async_try_except()
     async def run(self) -> None:
         """
         Main entry point.
@@ -105,9 +96,8 @@ class FCCModule(object):
         while True:
             await asyncio.sleep(3)
 
-if __name__ == "__main__":
-    setproctitle("FlightControlModule")
 
+if __name__ == "__main__":
     fcc = FCCModule()
     loop = asyncio.get_event_loop()
     loop.run_until_complete(fcc.run())

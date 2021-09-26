@@ -1,29 +1,15 @@
-# python standard library
-import time
-import threading
-import os
-from math import pi, cos, sin, atan2, degrees
 import json
-import socket
-import warnings
-
-# pip installed packages
-import numpy as np
-import transforms3d as t3d
-from setproctitle import setproctitle
-from colored import fore, back, style
-from loguru import logger
-
-
 import subprocess
+import threading
+import time
+import warnings
+from math import atan2, degrees, pi
+from typing import Any, Union
 
-
-from typing import Dict, List, Union, Any
-
+import numpy as np
 import paho.mqtt.client as mqtt
-
-# find the file path to this file
-#__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+import transforms3d as t3d
+from loguru import logger
 
 warnings.simplefilter("ignore", np.RankWarning)
 
@@ -54,19 +40,24 @@ warnings.simplefilter("ignore", np.RankWarning)
 #     ]
 # }]
 
+
 class VRCAprilTag(object):
     def __init__(self):
         self.default_config: dict = {
             "cam": {
                 "pos": [13, 0, 8.5],  # cm from FC forward, right, down
-                "rpy": [0, 0, -pi / 2,],  # cam x = body -y; cam y = body x, cam z = body z
+                "rpy": [
+                    0,
+                    0,
+                    -pi / 2,
+                ],  # cam x = body -y; cam y = body x, cam z = body z
             },
             "tag_truth": {"0": {"rpy": [0, 0, 0], "xyz": [0, 0, 0]}},
             "AT_UPDATE_FREQ": 5,
             "AT_HEARTBEAT_THRESH": 0.25,
         }
 
-        self.tm = dict()
+        self.tm = {}
 
         self.setup_transforms()
 
@@ -75,27 +66,19 @@ class VRCAprilTag(object):
         self.mqtt_host = "mqtt"
         self.mqtt_port = 18830
 
-        # self.mqtt_user = "user"
-        # self.mqtt_pass = "password"
-
         self.mqtt_client = mqtt.Client()
-        # self.mqtt_client.username_pw_set(
-        #     username=self.mqtt_user, password=self.mqtt_pass
-        # )
 
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_message = self.on_message
 
         self.topic_prefix = "vrc/apriltags"
-        self.topic_map = {
-            f"{self.topic_prefix}/raw":self.on_apriltag_message
-        }
+        self.topic_map = {f"{self.topic_prefix}/raw": self.on_apriltag_message}
 
     def on_message(
         self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage
     ) -> None:
         try:
-            #logger.debug(f"{msg.topic}: {str(msg.payload)}")
+            # logger.debug(f"{msg.topic}: {str(msg.payload)}")
             if msg.topic in self.topic_map:
                 payload = json.loads(msg.payload)
                 self.topic_map[msg.topic](payload)
@@ -109,7 +92,7 @@ class VRCAprilTag(object):
         rc: int,
         properties: mqtt.Properties = None,
     ) -> None:
-        logger.debug(f"Connected with result code {str(rc)}")
+        logger.debug(f"Connected with result code {rc}")
         for topic in self.topic_map.keys():
             logger.debug(f"Apriltag Module: Subscribed to: {topic}")
             client.subscribe(topic)
@@ -149,66 +132,77 @@ class VRCAprilTag(object):
         closest_tag = None
 
         for index, tag in enumerate(payload):
-            
-            id, horizontal_distance, vertical_distance, angle, pos, heading = self.handle_tag(tag)
-            
-            #weird special case (this shouldn't really happen though?)
+
+            (
+                id,
+                horizontal_distance,
+                vertical_distance,
+                angle,
+                pos,
+                heading,
+            ) = self.handle_tag(tag)
+
+            # weird special case (this shouldn't really happen though?)
             if id is None:
                 continue
-            
+
             tag = {
                 "id": id,
                 "horizontal_dist": horizontal_distance,
-                "vertical_dist": vertical_distance
+                "vertical_dist": vertical_distance,
             }
 
             # add some more info if we had the truth data for the tag
-            if pos is not None:
-                if pos.any():
-                    tag["angle_to_tag"] = angle
-                    tag["pos"] = {
-                        "x": pos[0],  #type: ignore
-                        "y": pos[1],  #type: ignore
-                        "z": pos[2]   #type: ignore
-                    }
-                    tag["heading"] = heading
-                    if horizontal_distance < min_dist:
-                        min_dist = horizontal_distance
-                        closest_tag = index
-            
-            tag_list.append(tag) 
+            if pos is not None and pos.any():
+                tag["angle_to_tag"] = angle
+                tag["pos"] = {
+                    "x": pos[0],  # type: ignore
+                    "y": pos[1],  # type: ignore
+                    "z": pos[2],  # type: ignore
+                }
+                tag["heading"] = heading
+                if horizontal_distance < min_dist:
+                    min_dist = horizontal_distance
+                    closest_tag = index
 
-        self.mqtt_client.publish(f"{self.topic_prefix}/visible_tags", json.dumps(tag_list))
+            tag_list.append(tag)
+
+        self.mqtt_client.publish(
+            f"{self.topic_prefix}/visible_tags", json.dumps(tag_list)
+        )
 
         if closest_tag is not None:
             apriltag_position = {
-                "tag_id": tag_list[closest_tag]["id"], #type: ignore
+                "tag_id": tag_list[closest_tag]["id"],  # type: ignore
                 "pos": {
-                    "n": tag_list[closest_tag]["pos"]["x"], #type: ignore
-                    "e": tag_list[closest_tag]["pos"]["y"], #type: ignore
-                    "d": tag_list[closest_tag]["pos"]["z"], #type: ignore
+                    "n": tag_list[closest_tag]["pos"]["x"],  # type: ignore
+                    "e": tag_list[closest_tag]["pos"]["y"],  # type: ignore
+                    "d": tag_list[closest_tag]["pos"]["z"],  # type: ignore
                 },
-                "heading": tag_list[closest_tag]["heading"] #type: ignore
+                "heading": tag_list[closest_tag]["heading"],  # type: ignore
             }
 
-            self.mqtt_client.publish(f"{self.topic_prefix}/selected", json.dumps(apriltag_position))
+            self.mqtt_client.publish(
+                f"{self.topic_prefix}/selected", json.dumps(apriltag_position)
+            )
 
-
-    def world_angle_to_tag(self, pos, tag_id) -> Union[float,None] :
-        '''
+    def world_angle_to_tag(self, pos, tag_id) -> Union[float, None]:
+        """
         returns the angle with respect to "north" in the "world frame"
-        '''
+        """
         if str(tag_id) in self.default_config["tag_truth"].keys():
             del_x = self.default_config["tag_truth"][str(tag_id)]["xyz"][0] - pos[0]
             del_y = self.default_config["tag_truth"][str(tag_id)]["xyz"][1] - pos[1]
-            deg = degrees(atan2(del_y, del_x)) # TODO - i think plus pi/2 bc this is respect to +x
+            deg = degrees(
+                atan2(del_y, del_x)
+            )  # TODO - i think plus pi/2 bc this is respect to +x
 
-            if deg < 0.0: 
+            if deg < 0.0:
                 deg += 360.0
 
             return deg
 
-    def horizontal_dist_to_tag(self, tag: dict)->float:
+    def horizontal_dist_to_tag(self, tag: dict) -> float:
         """
         returns the scalar distance in the x-y plane to a tag in centimeters
         """
@@ -226,12 +220,18 @@ class VRCAprilTag(object):
         T, R, Z, S = t3d.affines.decompose44(H)
 
         R_t = np.transpose(R)
-        H_rot = t3d.affines.compose([0,0,0], R_t, [1, 1, 1],)
-        H_tran = t3d.affines.compose([-1*T[0], -1*T[1], -1*T[2]], np.eye(3), [1, 1, 1],)
+        H_rot = t3d.affines.compose(
+            [0, 0, 0],
+            R_t,
+            [1, 1, 1],
+        )
+        H_tran = t3d.affines.compose(
+            [-1 * T[0], -1 * T[1], -1 * T[2]],
+            np.eye(3),
+            [1, 1, 1],
+        )
 
         return H_rot.dot(H_tran)
-
-
 
     def handle_tag(self, tag):
         """
@@ -243,51 +243,44 @@ class VRCAprilTag(object):
         tag_id = tag["id"]
 
         # if we have a location definition for the visible tag
-        if str(tag["id"]) in self.default_config["tag_truth"].keys():
-            tag_rot = np.asarray(tag["rotation"])
-            rpy = t3d.euler.mat2euler(tag_rot)
-            R = t3d.euler.euler2mat(0, 0, rpy[2], axes="rxyz")
-            H_tag_cam = t3d.affines.compose(
-                [
-                    tag["pos"]["x"] * 100,
-                    tag["pos"]["y"] * 100,
-                    tag["pos"]["z"] * 100
-                ],
-                R,
-                [1, 1, 1],
-            )
-            T, R, Z, S = t3d.affines.decompose44(H_tag_cam)
-
-            name = "tag_" + str(tag_id)
-            H_to_from = "H_" + name + "_cam"
-            self.tm[H_to_from] = H_tag_cam
-
-            #H_cam_tag = np.linalg.inv(H_tag_cam)
-            H_cam_tag = self.H_inv(H_tag_cam)
-
-            H_cam_aeroRef = self.tm["H_" + name + "_aeroRef"].dot(H_cam_tag)
-
-            H_aeroBody_aeroRef = H_cam_aeroRef.dot(self.tm["H_aeroBody_cam"])
-
-            pos, R, Z, S = t3d.affines.decompose44(H_aeroBody_aeroRef)
-            rpy = t3d.euler.mat2euler(R)
-            heading = rpy[2]
-            if heading < 0:
-                heading += 2 * pi
-
-            heading = np.rad2deg(heading)
-
-            angle = self.world_angle_to_tag(pos, tag["id"])
-
-            return tag_id, horizontal_distance, vertical_distance, angle, pos, heading
-        else:
+        if str(tag["id"]) not in self.default_config["tag_truth"].keys():
             return tag_id, horizontal_distance, vertical_distance, None, None, None
 
-    def main(self):
-        # tells the os what to name this process, for debugging
-        setproctitle("AprilTagVPS_main")
+        tag_rot = np.asarray(tag["rotation"])
+        rpy = t3d.euler.mat2euler(tag_rot)
+        R = t3d.euler.euler2mat(0, 0, rpy[2], axes="rxyz")
+        H_tag_cam = t3d.affines.compose(
+            [tag["pos"]["x"] * 100, tag["pos"]["y"] * 100, tag["pos"]["z"] * 100],
+            R,
+            [1, 1, 1],
+        )
+        T, R, Z, S = t3d.affines.decompose44(H_tag_cam)
 
-        subprocess.Popen("./vrcapriltags", cwd="./c/build",shell=True)
+        name = "tag_" + str(tag_id)
+        H_to_from = "H_" + name + "_cam"
+        self.tm[H_to_from] = H_tag_cam
+
+        # H_cam_tag = np.linalg.inv(H_tag_cam)
+        H_cam_tag = self.H_inv(H_tag_cam)
+
+        H_cam_aeroRef = self.tm["H_" + name + "_aeroRef"].dot(H_cam_tag)
+
+        H_aeroBody_aeroRef = H_cam_aeroRef.dot(self.tm["H_aeroBody_cam"])
+
+        pos, R, Z, S = t3d.affines.decompose44(H_aeroBody_aeroRef)
+        rpy = t3d.euler.mat2euler(R)
+        heading = rpy[2]
+        if heading < 0:
+            heading += 2 * pi
+
+        heading = np.rad2deg(heading)
+
+        angle = self.world_angle_to_tag(pos, tag["id"])
+
+        return tag_id, horizontal_distance, vertical_distance, angle, pos, heading
+
+    def main(self):
+        subprocess.Popen("./vrcapriltags", cwd="./c/build", shell=True)
 
         threads = []
         mqtt_thread = threading.Thread(
@@ -297,7 +290,7 @@ class VRCAprilTag(object):
 
         for thread in threads:
             thread.start()
-            logger.debug(f"{fore.GREEN}AT: starting thread: {thread.name}{style.RESET}")  # type: ignore
+            logger.success(f"AT: starting thread: {thread.name}")
 
         while True:
             time.sleep(0.1)
