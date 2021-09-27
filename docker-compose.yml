@@ -39,7 +39,7 @@ services:
   vio:
     depends_on:
       - mqtt
-    # build: vmc/vio_control_module
+    # build: vmc/vio_module
     image: ghcr.io/bellflight/vrc_vio_module:latest
     # privileged needed to connect to T265
     privileged: true

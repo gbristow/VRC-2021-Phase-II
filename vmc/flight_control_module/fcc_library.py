@@ -165,7 +165,7 @@ class FCC(MAVMQTTBase):
         """
         Connect the Drone object.
         """
-        await self.drone.connect(system_address="udp://mavp2p:14541")
+        await self.drone.connect(system_address="udp://0.0.0.0:14541")
 
     # region ###################  T E L E M E T R Y ###########################
 
@@ -1000,7 +1000,7 @@ class PyMAVLinkAgent(MAVMQTTBase):
 
         # create a mavlink udp instance
         self.master = mavutil.mavlink_connection(
-            "udpin:mavp2p:14542", source_system=254, dialect="bell"
+            "udpin:0.0.0.0:14542", source_system=254, dialect="bell"
         )
 
         await loop.run_in_executor(None, self.wait_for_heartbeat)
