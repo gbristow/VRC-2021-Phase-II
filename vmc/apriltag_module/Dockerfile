@@ -4,55 +4,52 @@ ENV OPENBLAS_CORETYPE=CORTEXA57
 
 RUN apt-get update -y
 RUN apt-get install -y \
-    python3-pip -y \
+    python3-pip \
     libssl-dev
 
 WORKDIR /app
 
 COPY . .
 
-COPY python/requirements.txt requirements.txt
+RUN python3 -m pip install pip wheel --upgrade \
+ && python3 -m pip install -r python/requirements.txt
 
-RUN python3 -m pip install pip wheel --upgrade && \
-    python3 -m pip install -r requirements.txt
+# Install paho C library
+RUN git clone https://github.com/eclipse/paho.mqtt.c \
+ && cd paho.mqtt.c \
+ && git checkout v1.3.8 \
+ && cmake -Bbuild -H. -DPAHO_ENABLE_TESTING=OFF -DPAHO_BUILD_STATIC=ON -DPAHO_WITH_SSL=ON -DPAHO_HIGH_PERFORMANCE=ON \
+ && cmake --build build/ --target install \
+ && ldconfig
 
-#INSTALL PAHO
-RUN git clone https://github.com/eclipse/paho.mqtt.c.git
-WORKDIR /app/paho.mqtt.c
-RUN git checkout v1.3.8
+# Install paho C++ library
+RUN git clone https://github.com/eclipse/paho.mqtt.cpp \
+ && cd paho.mqtt.cpp \
+ && git checkout v1.2.0 \
+ && cmake -Bbuild -H. -DPAHO_BUILD_STATIC=ON -DPAHO_BUILD_DOCUMENTATION=FALSE -DPAHO_BUILD_SAMPLES=FALSE \
+ && cmake --build build/ --target install \
+ && ldconfig
 
-RUN cmake -Bbuild -H. -DPAHO_ENABLE_TESTING=OFF -DPAHO_BUILD_STATIC=ON \
-    -DPAHO_WITH_SSL=ON -DPAHO_HIGH_PERFORMANCE=ON
-RUN cmake --build build/ --target install
-RUN ldconfig
+# Clone dependencies
+RUN mkdir -p c/libraries
 
-WORKDIR /app
+RUN git clone https://github.com/nlohmann/json c/libraries/json \
+ && cd c/libraries/json \
+ && git checkout v3.10.2
 
-RUN git clone https://github.com/eclipse/paho.mqtt.cpp
-WORKDIR /app/paho.mqtt.cpp
+# RUN git clone https://github.com/NVIDIA-AI-IOT/isaac_ros_apriltag \
+#  && cd isaac_ros_apriltag \
+#  && git checkout v0.9.0-ea1 \
+#  && cp -r isaac_ros_apriltag/nvapriltags/lib_aarch64_jetpack44 ../c/libraries/lib_aarch64_jetpack44
 
-RUN cmake -Bbuild -H. -DPAHO_BUILD_STATIC=ON \
-    -DPAHO_BUILD_DOCUMENTATION=FALSE -DPAHO_BUILD_SAMPLES=FALSE
-RUN cmake --build build/ --target install
-RUN ldconfig
+RUN wget https://developer.nvidia.com/isaac/download/third_party/april_tags_v5_jp44_nano-tar-xz \
+ && tar -xf april_tags_v5_jp44_nano-tar-xz --directory c/libraries \
+ && rm april_tags_v5_jp44_nano-tar-xz
 
-
-# BUILD THE APRILTAG APPLICATION
-WORKDIR /app/c
-
-WORKDIR /app/c/build
-
-RUN cmake ..
-
-RUN make -j4
-
-#RUN g++ -std=c++11 -I/usr/include/opencv4/ -I/usr/local/cuda-10.2/include -I/opt/nvidia/vpi1/include/ -I./libraries/json/inlcude  -L./libraries/lib_aarch64_jetpack44 -L/usr/local/cuda-10.2/lib64  -L/opt/nvidia/vpi1/lib64 -L/opt/nvidia/vpi/lib vrcapriltags.cpp  -lapril_tagging -lcudart -lcuda -lcublas -lopencv_core -lopencv_videoio -lopencv_imgproc -lopencv_highgui -lnvvpi
-
-#for some reason this has to be done at runtime...
-#RUN ldconfig /opt/nvidia/vpi1/lib64 
-
-WORKDIR /app
-
-#CMD ["python3", "vrcapriltag.py"]
+# Build the april tag application
+RUN mkdir -p c/build \
+ && cd c/build \ 
+ && cmake .. \
+ && make -j4
 
 CMD ["/bin/bash", "./start_module.sh"]

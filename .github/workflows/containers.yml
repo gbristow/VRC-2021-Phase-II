@@ -15,7 +15,8 @@ jobs:
 
     strategy:
       matrix:
-        image: [apriltag_module, flight_control_module, mavp2p, peripheral_control_module, vio_module, fusion_module]
+        # april tag module needs to be built on-device
+        image: [flight_control_module, fusion_module, mavp2p, peripheral_control_module, vio_module]
 
     steps:
     - name: Checkout Code

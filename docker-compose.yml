@@ -1,11 +1,10 @@
-version: '3'
+version: "3"
 
 services:
   mavp2p:
     image: ghcr.io/bellflight/vrc_mavp2p:latest
     command: serial:/dev/ttyTHS1:500000 tcps:0.0.0.0:5760 udpc:127.0.0.1:14541 udpc:127.0.0.1:14542 --print-errors
     restart: unless-stopped
-
     devices:
       - "/dev/ttyTHS1:/dev/ttyTHS1"
     network_mode: "host"
@@ -32,7 +31,7 @@ services:
     image: ghcr.io/bellflight/vrc_peripheral_control_module:latest
     restart: on-failure
     devices:
-    - "/dev/ttyACM0:/dev/ttyACM0"
+      - "/dev/ttyACM0:/dev/ttyACM0"
 
   vio:
     depends_on:
