@@ -223,15 +223,6 @@ class VRCAprilTag(object):
 
             return deg
 
-    def horizontal_dist_to_tag(self, tag: dict)->float:
-        """
-        returns the scalar distance in the x-y plane to a tag in centimeters
-        """
-        return float(np.linalg.norm([tag["pos"]["x"] * 100, tag["pos"]["y"] * 100]))
-
-    def vertical_dist_to_tag(self, tag: dict) -> float:
-        return tag["pos"]["z"] * 100
-
     def H_inv(self, H: t3d.affines) -> t3d.affines:
         """
         a method to efficiently compute the inverse of a homogeneous transformation matrix
@@ -253,8 +244,6 @@ class VRCAprilTag(object):
         Calculates the distance, position, and heading of the drone in NED frame
         based on the tag detections.
         """
-        horizontal_distance = self.horizontal_dist_to_tag(tag)
-        vertical_distance = self.vertical_dist_to_tag(tag)
         tag_id = tag["id"]
 
         tag_rot = np.asarray(tag["rotation"])
@@ -278,12 +267,15 @@ class VRCAprilTag(object):
         #H_cam_tag = np.linalg.inv(H_tag_cam)
         H_cam_tag = self.H_inv(H_tag_cam)
 
-
-        H_aerobody_tag = H_cam_tag.dot(self.tm["H_aeroBody_cam"])
+        H_aerobody_tag = H_cam_tag.dot(self.tm["H_aeroBody_cam"]) #type: ignore
 
         T2, R2, Z2, S2 = t3d.affines.decompose44(H_aerobody_tag)
         rpy = t3d.euler.mat2euler(R2)
         pos_rel = T2
+        
+        horizontal_distance = np.linalg.norm(pos_rel[0], pos_rel[1])
+        vertical_distance = abs(pos_rel[2])
+
         heading = rpy[2]
         if heading < 0:
             heading += 2 * pi
@@ -294,24 +286,12 @@ class VRCAprilTag(object):
 
         # if we have a location definition for the visible tag
         if str(tag["id"]) in self.default_config["tag_truth"].keys():
-            
-
-            name = "tag_" + str(tag_id)
-            H_to_from = "H_" + name + "_cam"
-            self.tm[H_to_from] = H_tag_cam
-
-            #H_cam_tag = np.linalg.inv(H_tag_cam)
-            H_cam_tag = self.H_inv(H_tag_cam)
 
             H_cam_aeroRef = self.tm["H_" + name + "_aeroRef"].dot(H_cam_tag)
 
             H_aeroBody_aeroRef = H_cam_aeroRef.dot(self.tm["H_aeroBody_cam"])
 
             pos_world, R, Z, S = t3d.affines.decompose44(H_aeroBody_aeroRef)
-            rpy = t3d.euler.mat2euler(R)
-            
-
-            
 
             return tag_id, horizontal_distance, vertical_distance, angle, pos_world, pos_rel, heading,
         else:
