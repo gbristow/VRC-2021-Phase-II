@@ -273,7 +273,7 @@ class VRCAprilTag(object):
         rpy = t3d.euler.mat2euler(R2)
         pos_rel = T2
         
-        horizontal_distance = np.linalg.norm(pos_rel[0], pos_rel[1])
+        horizontal_distance = np.linalg.norm([pos_rel[0], pos_rel[1]])
         vertical_distance = abs(pos_rel[2])
 
         heading = rpy[2]
