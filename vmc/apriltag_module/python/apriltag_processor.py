@@ -271,7 +271,19 @@ class VRCAprilTag(object):
         )
         T, R, Z, S = t3d.affines.decompose44(H_tag_cam)
 
-        pos_rel = T
+        name = "tag_" + str(tag_id)
+        H_to_from = "H_" + name + "_cam"
+        self.tm[H_to_from] = H_tag_cam
+
+        #H_cam_tag = np.linalg.inv(H_tag_cam)
+        H_cam_tag = self.H_inv(H_tag_cam)
+
+
+        H_aerobody_tag = self.tm["H_aeroBody_cam"].dot(H_cam_tag)
+
+        T2, R2, Z2, S2 = t3d.affines.decompose44(H_tag_cam)
+        rpy = t3d.euler.mat2euler(R2)
+        pos_rel = T2
         heading = rpy[2]
         if heading < 0:
             heading += 2 * pi
