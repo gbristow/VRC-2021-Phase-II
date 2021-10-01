@@ -67,7 +67,7 @@ This module subscribes to the **"vrc/apriltags/raw"** topic
   
   - `vertical_dist` - the vertical scalar distance from vehicle to tag, **in cm**
   
-  - `angle_to_tag` - the angle formed by the vector pointing from the vehicles body to the tag in world frame
+  - `angle_to_tag` - the angle formed by the vector pointing from the vehicles body to the tag in world frame relative to world-north
   
   - `heading` -  the heading of the vehicle in world frame
   
