@@ -132,52 +132,50 @@ class VRCAprilTag(object):
         closest_tag = None
 
         for index, tag in enumerate(payload):
+            
+            id, horizontal_distance, vertical_distance, angle, pos_world, pos_rel, heading = self.handle_tag(tag)
 
-            (
-                id,
-                horizontal_distance,
-                vertical_distance,
-                angle,
-                pos,
-                heading,
-            ) = self.handle_tag(tag)
-
-            # weird special case (this shouldn't really happen though?)
+            #weird special case (this shouldn't really happen though?)
             if id is None:
                 continue
 
             tag = {
                 "id": id,
-                "horizontal_dist": horizontal_distance,
-                "vertical_dist": vertical_distance,
+                "horizontal_dist" : horizontal_distance,
+                "vertical_dist" : vertical_distance,
+                "angle_to_tag" : angle,
+                "heading" : heading,
+                "pos_rel" : {
+                    "x" : pos_rel[0],
+                    "y" : pos_rel[1],
+                    "z" : pos_rel[2],
+                }
             }
 
             # add some more info if we had the truth data for the tag
-            if pos is not None and pos.any():
-                tag["angle_to_tag"] = angle
-                tag["pos"] = {
-                    "x": pos[0],  # type: ignore
-                    "y": pos[1],  # type: ignore
-                    "z": pos[2],  # type: ignore
-                }
-                tag["heading"] = heading
-                if horizontal_distance < min_dist:
-                    min_dist = horizontal_distance
-                    closest_tag = index
+            if pos_world is not None:
+                if pos_world.any():
 
-            tag_list.append(tag)
+                    tag["pos_world"] = {
+                        "x": pos_world[0],  #type: ignore
+                        "y": pos_world[1],  #type: ignore
+                        "z": pos_world[2]   #type: ignore
+                    }
+                    if horizontal_distance < min_dist:
+                        min_dist = horizontal_distance
+                        closest_tag = index
+            
+            tag_list.append(tag) 
 
-        self.mqtt_client.publish(
-            f"{self.topic_prefix}/visible_tags", json.dumps(tag_list)
-        )
+        self.mqtt_client.publish(f"{self.topic_prefix}/visible_tags", json.dumps(tag_list))
 
         if closest_tag is not None:
             apriltag_position = {
                 "tag_id": tag_list[closest_tag]["id"],  # type: ignore
                 "pos": {
-                    "n": tag_list[closest_tag]["pos"]["x"],  # type: ignore
-                    "e": tag_list[closest_tag]["pos"]["y"],  # type: ignore
-                    "d": tag_list[closest_tag]["pos"]["z"],  # type: ignore
+                    "n": tag_list[closest_tag]["pos_world"]["x"], #type: ignore
+                    "e": tag_list[closest_tag]["pos_world"]["y"], #type: ignore
+                    "d": tag_list[closest_tag]["pos_world"]["z"], #type: ignore
                 },
                 "heading": tag_list[closest_tag]["heading"],  # type: ignore
             }
@@ -186,8 +184,17 @@ class VRCAprilTag(object):
                 f"{self.topic_prefix}/selected", json.dumps(apriltag_position)
             )
 
-    def world_angle_to_tag(self, pos, tag_id) -> Union[float, None]:
-        """
+    def angle_to_tag(self, pos):
+        deg = degrees(atan2(pos[1], pos[0])) # TODO - i think plus pi/2 bc this is respect to +x
+
+        if deg < 0.0: 
+            deg += 360.0
+
+        return deg
+
+
+    def world_angle_to_tag(self, pos, tag_id) -> Union[float,None] :
+        '''
         returns the angle with respect to "north" in the "world frame"
         """
         if str(tag_id) in self.default_config["tag_truth"].keys():
@@ -201,15 +208,6 @@ class VRCAprilTag(object):
                 deg += 360.0
 
             return deg
-
-    def horizontal_dist_to_tag(self, tag: dict) -> float:
-        """
-        returns the scalar distance in the x-y plane to a tag in centimeters
-        """
-        return float(np.linalg.norm([tag["pos"]["x"] * 100, tag["pos"]["y"] * 100]))
-
-    def vertical_dist_to_tag(self, tag: dict) -> float:
-        return tag["pos"]["z"] * 100
 
     def H_inv(self, H: t3d.affines) -> t3d.affines:
         """
@@ -238,19 +236,17 @@ class VRCAprilTag(object):
         Calculates the distance, position, and heading of the drone in NED frame
         based on the tag detections.
         """
-        horizontal_distance = self.horizontal_dist_to_tag(tag)
-        vertical_distance = self.vertical_dist_to_tag(tag)
         tag_id = tag["id"]
-
-        # if we have a location definition for the visible tag
-        if str(tag["id"]) not in self.default_config["tag_truth"].keys():
-            return tag_id, horizontal_distance, vertical_distance, None, None, None
 
         tag_rot = np.asarray(tag["rotation"])
         rpy = t3d.euler.mat2euler(tag_rot)
         R = t3d.euler.euler2mat(0, 0, rpy[2], axes="rxyz")
         H_tag_cam = t3d.affines.compose(
-            [tag["pos"]["x"] * 100, tag["pos"]["y"] * 100, tag["pos"]["z"] * 100],
+            [
+                tag["pos"]["x"] * 100,
+                tag["pos"]["y"] * 100,
+                tag["pos"]["z"] * 100
+            ],
             R,
             [1, 1, 1],
         )
@@ -260,22 +256,39 @@ class VRCAprilTag(object):
         H_to_from = "H_" + name + "_cam"
         self.tm[H_to_from] = H_tag_cam
 
-        # H_cam_tag = np.linalg.inv(H_tag_cam)
+        #H_cam_tag = np.linalg.inv(H_tag_cam)
         H_cam_tag = self.H_inv(H_tag_cam)
 
-        H_cam_aeroRef = self.tm["H_" + name + "_aeroRef"].dot(H_cam_tag)
+        H_aerobody_tag = H_cam_tag.dot(self.tm["H_aeroBody_cam"]) #type: ignore
 
-        H_aeroBody_aeroRef = H_cam_aeroRef.dot(self.tm["H_aeroBody_cam"])
+        T2, R2, Z2, S2 = t3d.affines.decompose44(H_aerobody_tag)
+        rpy = t3d.euler.mat2euler(R2)
+        pos_rel = T2
+        
+        horizontal_distance = np.linalg.norm([pos_rel[0], pos_rel[1]])
+        vertical_distance = abs(pos_rel[2])
 
-        pos, R, Z, S = t3d.affines.decompose44(H_aeroBody_aeroRef)
-        rpy = t3d.euler.mat2euler(R)
         heading = rpy[2]
         if heading < 0:
             heading += 2 * pi
 
         heading = np.rad2deg(heading)
 
-        angle = self.world_angle_to_tag(pos, tag["id"])
+        angle = self.angle_to_tag(pos_rel)
+
+        # if we have a location definition for the visible tag
+        if str(tag["id"]) in self.default_config["tag_truth"].keys():
+
+        # H_cam_tag = np.linalg.inv(H_tag_cam)
+        H_cam_tag = self.H_inv(H_tag_cam)
+
+        H_cam_aeroRef = self.tm["H_" + name + "_aeroRef"].dot(H_cam_tag)
+
+            pos_world, R, Z, S = t3d.affines.decompose44(H_aeroBody_aeroRef)
+
+            return tag_id, horizontal_distance, vertical_distance, angle, pos_world, pos_rel, heading,
+        else:
+            return tag_id, horizontal_distance, vertical_distance, angle, None, pos_rel, heading
 
         return tag_id, horizontal_distance, vertical_distance, angle, pos, heading
 

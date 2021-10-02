@@ -4,7 +4,7 @@ services:
   mavp2p:
     image: ghcr.io/bellflight/vrc_mavp2p:latest
     # build: vmc/mavp2p
-    command: serial:/dev/ttyTHS1:500000 tcps:0.0.0.0:5790 udpc:127.0.0.1:14541 udpc:127.0.0.1:14542 --print-errors
+    command: serial:/dev/ttyTHS1:500000 tcps:0.0.0.0:5760 udpc:127.0.0.1:14541 udpc:127.0.0.1:14542 --print-errors
     ports:
       - "5790:5790/tcp"
     restart: unless-stopped
