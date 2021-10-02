@@ -151,3 +151,44 @@ This is a list of topics you can send data to, to make things happen on the dron
   - "percent": A `float` between 0 and 100.
 - vrc/pcc/reset
   - There is no payload required for this topic. This will reset all of the peripheals.
+
+This is a list of topics that are populated by the apriltag module:
+
+- vrc/apriltags/raw
+
+  - `id` - the id of the tag
+
+  - `pos`
+
+  - `x` - the position **in meters** of the camera relative to the **tag's x** frame
+
+  - `y` - the position **in meters** of the camera relative to the **tag's y** frame
+
+  - `z` - the position **in meters** of the camera relative to the **tag's z** frame
+
+  - `rotation` - the 3x3 rotation matrix 
+
+- vrc/apriltags/visible_tags
+
+  - `id` - the id of the tag
+    - `horizontal_dist` - the horizontal scalar distance from vehicle to tag, **in cm**
+    - `vertical_dist` - the vertical scalar distance from vehicle to tag, **in cm**
+    - `angle_to_tag` - the angle formed by the vector pointing from the vehicles body to the tag in world frame relative to world-north
+    - `heading` -  the heading of the vehicle in world frame
+    - `pos_rel` - the relative position of the vehicle to the tag in world frame **in cm** 
+    
+      - `x` -  the x (+north/-south) position of the vehicle relative to the tag in world frame (for reference the mountain is **north** of the beach)
+      - `y` - the y (+east/-west) position of the vehicle relative to the tag in world frame
+      - `x` - the z (+down/-up) position of the vehicle relative to the tag in world frame (no, this is not a typo, up is really - )
+    - `pos_world` - the position of the vehicle in world frame **in cm** (if the tag has no truth data, this will not be present in the output)
+    
+      - `x` - the x position of the vehicle relative to the world origin (this is the ship) in world frame (for reference the mountain is **north** of the beach)
+      - `y` - the y position of the vehicle relative to the world origin in world frame
+      - `z` - the z position of the vehicle relative to the world origin in world frame
+  - vrc/apriltags/selected
+    - `tag_id` - the id of the tag
+    - `pos` - the position of the vehicle in world frame **in cm**
+      - `n` - the +north position of the vehicle relative to the world origin in world frame
+      - `e` - the +east position of the vehicle relative to the world origin in world frame
+      - `d` - the +down position of the vehicle relative to the world origin in world frame
+    - `heading` - the heading of the vehicle in world frame
