@@ -2,6 +2,9 @@ FROM nvcr.io/nvidia/l4t-ml:r32.6.1-py3
 
 ENV OPENBLAS_CORETYPE=CORTEXA57
 
+# Needed as some repo certs are expired in the base image
+RUN apt-get update -y || true \
+ && apt-get install -y ca-certificates && update-ca-certificates
 RUN apt-get update -y
 RUN apt-get install -y \
     python3-pip \
@@ -48,7 +51,7 @@ RUN wget https://developer.nvidia.com/isaac/download/third_party/april_tags_v5_j
 
 # Build the april tag application
 RUN mkdir -p c/build \
- && cd c/build \ 
+ && cd c/build \
  && cmake .. \
  && make -j4
 
