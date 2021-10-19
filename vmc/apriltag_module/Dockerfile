@@ -12,11 +12,6 @@ RUN apt-get install -y \
 
 WORKDIR /app
 
-COPY . .
-
-RUN python3 -m pip install pip wheel --upgrade \
- && python3 -m pip install -r python/requirements.txt
-
 # Install paho C library
 RUN git clone https://github.com/eclipse/paho.mqtt.c \
  && cd paho.mqtt.c \
@@ -50,9 +45,16 @@ RUN wget https://developer.nvidia.com/isaac/download/third_party/april_tags_v5_j
  && rm april_tags_v5_jp44_nano-tar-xz
 
 # Build the april tag application
+COPY c c
 RUN mkdir -p c/build \
  && cd c/build \
  && cmake .. \
  && make -j4
+
+COPY python/requirements.txt python/requirements.txt
+RUN python3 -m pip install pip wheel --upgrade \
+ && python3 -m pip install -r python/requirements.txt
+
+COPY . .
 
 CMD ["/bin/bash", "./start_module.sh"]
