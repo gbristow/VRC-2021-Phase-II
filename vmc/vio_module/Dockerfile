@@ -5,6 +5,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 # https://stackoverflow.com/a/66057286
 ENV OPENBLAS_CORETYPE=CORTEXA57
 
+# Needed as some repo certs are expired in the base image
+RUN apt-get update -y || true \
+ && apt-get install -y ca-certificates && update-ca-certificates
 RUN apt update -y
 RUN apt install -y \
     git \
@@ -19,14 +22,14 @@ RUN apt install -y \
     libglfw3-dev \
     libgl1-mesa-dev \
     libglu1-mesa-dev \
-    software-properties-common 
+    software-properties-common
 RUN add-apt-repository -y ppa:deadsnakes/ppa
 RUN apt update
 RUN apt install -y \
     python3.8 \
     python3.8-dev \
     python3-setuptools \
-    python3-pip 
+    python3-pip
 
 WORKDIR /
 
