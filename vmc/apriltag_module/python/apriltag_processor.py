@@ -281,6 +281,7 @@ class VRCAprilTag(object):
             heading += 2 * pi
 
         heading = np.rad2deg(heading)
+        print(heading) #test print
 
         angle = self.angle_to_tag(pos_rel)
 
