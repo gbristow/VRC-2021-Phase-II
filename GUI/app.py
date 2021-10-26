@@ -443,6 +443,26 @@ class ControlWidget(QtWidgets.QWidget):
                 self.topic_timer[status_prefix] = timer
 
 
+class ExpandAllQTreeWidget(QtWidgets.QTreeWidget):
+    # This widget is a subclass of QTreeWidget with a right-click menu
+    # to expand/collapse all.
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+    def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
+        menu = QtWidgets.QMenu(self)
+
+        expand_all_action = QtGui.QAction("Expand All", self)
+        expand_all_action.triggered.connect(self.expandAll)  # type: ignore
+        menu.addAction(expand_all_action)
+
+        collapse_all_action = QtGui.QAction("Collapse All", self)
+        collapse_all_action.triggered.connect(self.collapseAll)  # type: ignore
+        menu.addAction(collapse_all_action)
+
+        menu.popup(QtGui.QCursor.pos())
+
+
 class MQTTViewWidget(QtWidgets.QWidget):
     # This widget is an effective clone of MQTT Explorer for diagnostic purposes.
     # Displays the latest MQTT message for every topic in a tree view.
@@ -470,7 +490,7 @@ class MQTTViewWidget(QtWidgets.QWidget):
         layout = QtWidgets.QHBoxLayout()
         self.setLayout(layout)
 
-        self.tree_widget = QtWidgets.QTreeWidget()
+        self.tree_widget = ExpandAllQTreeWidget()
         self.tree_widget.setHeaderLabels(["Topic", "# Messages"])
         self.tree_widget.setSortingEnabled(True)
         self.tree_widget.sortByColumn(0, QtCore.Qt.AscendingOrder)
