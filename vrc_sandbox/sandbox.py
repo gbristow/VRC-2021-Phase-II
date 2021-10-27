@@ -148,3 +148,8 @@ class Sandbox():
         # Finally, we publish the payload to the topic, once again using f-strings to
         # re-use our common prefix.
         self.mqtt_client.publish(topic=f"{self.topic_prefix}/pcc/set_servo_open_close", payload=payload)
+
+    
+if __name__=="__main__":
+    box = Sandbox()
+    box.run()
