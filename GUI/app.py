@@ -443,13 +443,15 @@ class ControlWidget(QtWidgets.QWidget):
                 self.topic_timer[status_prefix] = timer
 
 
-class ExpandAllQTreeWidget(QtWidgets.QTreeWidget):
+class ExpandCollapseQTreeWidget(QtWidgets.QTreeWidget):
     # This widget is a subclass of QTreeWidget with a right-click menu
-    # to expand/collapse all.
+    # to expand/collapse all/children.
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
     def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
+        # override the normal right click event. This only works on the TreeWidget
+        # itself and not TreeWidgetItems
         menu = QtWidgets.QMenu(self)
 
         expand_all_action = QtGui.QAction("Expand All", self)
@@ -460,7 +462,37 @@ class ExpandAllQTreeWidget(QtWidgets.QTreeWidget):
         collapse_all_action.triggered.connect(self.collapseAll)  # type: ignore
         menu.addAction(collapse_all_action)
 
+        menu.addSeparator()
+
+        # needs to be done before the menu is poped up, otherwise the QEvent will expire
+        selected_item = self.itemAt(event.pos())
+
+        expand_children_action = QtGui.QAction("Expand Children", self)
+        expand_children_action.triggered.connect(lambda: self.expand_children(selected_item, True))  # type: ignore
+        menu.addAction(expand_children_action)
+
+        collapse_children_action = QtGui.QAction("Collapse Children", self)
+        collapse_children_action.triggered.connect(lambda: self.expand_children(selected_item, False))  # type: ignore
+        menu.addAction(collapse_children_action)
+
         menu.popup(QtGui.QCursor.pos())
+
+    def expand_children(self, item: QtWidgets.QTreeWidgetItem, expand: bool) -> None:
+        """
+        Expand/collapse children of a given QTreeWidgetItem
+        """
+        # https://doc.qt.io/qt-5/qtreeview.html#expandRecursively
+        # expandRecursively exists, but not collapseRecursively, so reimplement
+        # it ourselves
+        
+        # set root item
+        item.setExpanded(expand)
+
+        # expand child items
+        for i in range(item.childCount()):
+            child = item.child(i)
+            child.setExpanded(expand)
+            self.expand_children(child, expand)
 
 
 class MQTTViewWidget(QtWidgets.QWidget):
@@ -490,7 +522,7 @@ class MQTTViewWidget(QtWidgets.QWidget):
         layout = QtWidgets.QHBoxLayout()
         self.setLayout(layout)
 
-        self.tree_widget = ExpandAllQTreeWidget()
+        self.tree_widget = ExpandCollapseQTreeWidget()
         self.tree_widget.setHeaderLabels(["Topic", "# Messages"])
         self.tree_widget.setSortingEnabled(True)
         self.tree_widget.sortByColumn(0, QtCore.Qt.AscendingOrder)
@@ -638,7 +670,7 @@ class MQTTViewWidget(QtWidgets.QWidget):
         self.topic_timer[topic] = timer
 
 
-def main():
+def main() -> None:
     # create Qt Application instance
     app = QtWidgets.QApplication()
 
