@@ -57,8 +57,10 @@ services:
     image: ghcr.io/bellflight/vrc_fusion_module:latest
     restart: on-failure
 
-  # sandbox:
-  #   depends_on:
-  #     - mqtt
-  #   build: vrc_sandbox
-  #   restart: on-failure
+  sandbox:
+    depends_on:
+      - mqtt
+    build: vrc_sandbox
+    restart: on-failure
+    volumes:
+      - ./vrc_sandbox:/app/

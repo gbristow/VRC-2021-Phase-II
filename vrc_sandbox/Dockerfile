@@ -25,8 +25,8 @@ COPY requirements.txt requirements.txt
 RUN python -m pip install pip wheel --upgrade && \
     python -m pip install -r requirements.txt
 
-# Now, copy everything else in this folder into the container.
-COPY . .
+# Now, copy the launch script into the container.
+COPY docker-entrypoint.sh docker-entrypoint.sh
 
 # Finally, start the container running our code.
-CMD ["python", "sandbox.py"]
+CMD ["docker-entrypoint.sh"]
