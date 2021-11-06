@@ -160,7 +160,7 @@ bar
 #        nvidia-container-toolkit:arm64=1.4.2-1
 
 # upgrade compose
-$s apt install docker.io=20.10.7-0ubuntu1~18.04.2
+$s apt install -y docker.io=20.10.7-0ubuntu1~18.04.2
 $s -H python3 -m pip install docker-compose --upgrade
 
 # set the nvidia runtime to be default
