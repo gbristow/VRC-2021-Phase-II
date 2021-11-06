@@ -127,6 +127,9 @@ bar
 echo -e "${CYAN}Installing and configuring Docker${NC}"
 bar
 
+# downgrade docker to specific version
+$s DEBIAN_FRONTEND=noninteractive apt install -y --allow-downgrades docker.io=20.10.7-0ubuntu1~18.04.2
+
 # # replacing the installed system Docker with the latest version breaks stuff
 # # remove old docker installation
 # $s apt remove -y docker || true
