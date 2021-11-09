@@ -125,8 +125,8 @@ bar
 # downgrade docker to specific version
 # this got pulled from apt sources for some reason
 wget https://github.com/bellflight/VRC-2021-Phase-II/releases/download/v0.0.2/docker.io_20.10.7-0ubuntu1_18.04.2_arm64.deb
-$s DEBIAN_FRONTEND=noninteractive apt install -y --allow-downgrades ./docker.io_20.10.7-0ubuntu1~18.04.2_arm64.deb
-rm docker.io_20.10.7-0ubuntu1~18.04.2_arm64.deb
+$s DEBIAN_FRONTEND=noninteractive apt install -y --allow-downgrades ./docker.io_20.10.7-0ubuntu1_18.04.2_arm64.deb
+rm docker.io_20.10.7-0ubuntu1_18.04.2_arm64.deb
 
 # # replacing the installed system Docker with the latest version breaks stuff
 # # remove old docker installation
